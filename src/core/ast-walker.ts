@@ -9,9 +9,9 @@ const rootPath = (args: string) => {
 
 export class AstWalker {
 
-    public parseImports(filePath: string): ImportElement[] {
+    public parseImports(filePath: string, _sourceText?: string): ImportElement[] {
         const fullPath = rootPath(filePath);
-        const sourceText = fs.readFileSync(fullPath).toString();
+        const sourceText = _sourceText || fs.readFileSync(fullPath).toString();
         const sourceFile = this.createSourceFile(fullPath, sourceText);
         const imports = this.delintImports(sourceFile);
         return imports.map(x => this.parseImport(x, sourceFile)).filter(x => x !== null);
