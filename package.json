@@ -15,10 +15,12 @@
     ],
     "main": "./out/src/extension",
     "contributes": {
-        "commands": [{
-            "command": "extension.sortImports",
-            "title": "Sort Imports"
-        }]
+        "commands": [
+            {
+                "command": "extension.sortImports",
+                "title": "Sort Imports"
+            }
+        ]
     },
     "scripts": {
         "vscode:prepublish": "tsc -p ./",
@@ -26,13 +28,16 @@
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test": "node ./node_modules/vscode/bin/test"
     },
+    "dependencies": {
+        "typescript": "2.0.3",
+        "lodash": "4.17.2"
+    },
     "devDependencies": {
         "typescript": "^2.0.3",
         "vscode": "^1.0.0",
         "mocha": "^2.3.3",
         "@types/node": "^6.0.40",
         "@types/mocha": "^2.2.32",
-        "codelyzer": "^2.0.0-beta.4",
         "tslint": "^4.3.1"
     }
 }
