@@ -1,0 +1,27 @@
+//type 1
+   import {
+    n,  a     as bbb
+    T   ,      c
+            }
+            from
+            'doo.js' //kind: 234 - ImportSpecifier and NamedImports
+//type 2
+import * as t2 from 'bar.js';   //"kind": 232, NamespaceImport
+
+//type 3
+import 'module-without-export.js'; //does not have importClause
+
+//type 4
+import DefaultEmport from 'foo.js'; //"kind": 231, ImportClause
+
+//type 5 named imports NamedImports = 233
+
+import { SomeClass } from
+         'some-file.ts';
+
+//complex type
+import DefaultEmport,  { b , c ,d as dd, a as aa} from 'boo.js';
+
+import DefaultEmport,  { A } from 'boo.js';
+
+import {   A   }    from 'boo.js';
