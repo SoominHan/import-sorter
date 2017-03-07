@@ -18,7 +18,7 @@ export class AstWalker {
     }
 
     private createSourceFile(fullFilePath: string, sourceText: string) {
-        return ts.createSourceFile(fullFilePath, sourceText, ts.ScriptTarget.ES6, false);
+        return ts.createSourceFile(fullFilePath, sourceText, ts.ScriptTarget.ES2016, false);
     }
 
     private delintImports(sourceFile: ts.SourceFile) {

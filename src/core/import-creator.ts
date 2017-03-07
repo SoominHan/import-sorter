@@ -3,6 +3,10 @@ import { ImportElement, ImportStringConfiguration } from './models';
 export class ImportCreator {
     constructor(private importStringConfig: ImportStringConfiguration) { }
 
+    public createImportText(element: ImportElement[]): string {
+        return this.createImportStrings(element).join('\n');
+    }
+
     public createImportStrings(element: ImportElement[]): string[] {
         return element.map(x => this.createSingleImportString(x));
     }

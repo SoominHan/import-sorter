@@ -1,23 +1,33 @@
 import { SortConfiguration, ImportElement, ImportSortOrder } from './models';
 import { chain, cloneDeep, isNil, LoDashExplicitArrayWrapper } from 'lodash';
+import { ImportElementSortResult } from './models/import-element-sort-result';
 import * as path from 'path';
+
 export class ImportSorter {
     constructor(private sortConfig: SortConfiguration) { }
 
-    public sortImportElements(imports: ImportElement[]): ImportElement[] {
+    public sortImportElements(imports: ImportElement[]): ImportElementSortResult {
         const clonedElements = cloneDeep(imports);
-        const joinedImportsExpr = this.joinNamedImports(clonedElements);
-        const sortedImportsExpr = this.sortNamedBindings(joinedImportsExpr);
+        const joinedImportsResult = this.joinNamedImports(clonedElements);
+        const duplicates = joinedImportsResult.duplicates;
+        const sortedImportsExpr = this.sortNamedBindings(joinedImportsResult.joinedExpr);
         const sortedByModule = this.sortModuleSpecifiers(sortedImportsExpr);
         const sortedElements = this.applyCustomSortingRules(sortedByModule);
-        return sortedElements;
+        return {
+            sorted: sortedElements,
+            duplicates: duplicates
+        };
     }
 
     private normalizePaths(imports: ImportElement[]) {
         return chain(imports).map(x => {
+            const isRelativePath = x.moduleSpecifierName.startsWith('./');
             x.moduleSpecifierName = path
                 .normalize(x.moduleSpecifierName)
                 .replace(new RegExp('\\' + path.sep, 'g'), '/');
+            if (isRelativePath) {
+                x.moduleSpecifierName = `./${x.moduleSpecifierName}`;
+            }
             return x;
         });
     }
@@ -36,12 +46,16 @@ export class ImportSorter {
         });
     }
 
-    private joinNamedImports(imports: ImportElement[]): LoDashExplicitArrayWrapper<ImportElement> {
+    private joinNamedImports(imports: ImportElement[]): { joinedExpr: LoDashExplicitArrayWrapper<ImportElement>, duplicates: ImportElement[] } {
         const normalizedPathsExpr = this.normalizePaths(imports);
         if (!this.sortConfig.joinNamedImports) {
-            return normalizedPathsExpr;
+            return {
+                joinedExpr: normalizedPathsExpr,
+                duplicates: []
+            };
         }
-        return normalizedPathsExpr
+        const duplicates = [];
+        const joined = normalizedPathsExpr
             .groupBy(x => x.moduleSpecifierName)
             .map((x: ImportElement[]) => {
                 if (x.length > 1) {
@@ -50,10 +64,16 @@ export class ImportSorter {
                     const defaultImportName = defaultImportElement ? defaultImportElement.defaultImportName : null;
                     x[0].defaultImportName = defaultImportName;
                     x[0].namedBindings = nameBindings;
+                    duplicates.push(...x.slice(1));
                     return x[0];
                 }
                 return x[0];
-            });
+            })
+            .value();
+        return {
+            joinedExpr: chain(joined),
+            duplicates: duplicates
+        };
     }
 
     private sortModuleSpecifiers(importsExpr: LoDashExplicitArrayWrapper<ImportElement>): ImportElement[] {

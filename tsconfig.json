@@ -9,10 +9,11 @@
             "es6"
         ],
         "sourceMap": true,
-        "rootDir": "src",
+        "rootDir": ".",
         "types": [
             "node",
-            "lodash"
+            "lodash",
+            "mocha"
         ]
     },
     "exclude": [

@@ -1,47 +1,67 @@
-import { window, commands, Disposable, ExtensionContext, StatusBarAlignment, StatusBarItem, TextDocument } from 'vscode';
-import { AstWalker, ImportCreator, ImportSorter, defaultSortConfiguration, defaultImportStringConfiguration } from "./core";
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export const activate = (context: ExtensionContext) => {
+import { window, commands, Disposable, ExtensionContext, StatusBarAlignment, StatusBarItem, TextDocument, TextEditorEdit, Range, Position } from 'vscode';
+import { AstWalker, ImportCreator, ImportSorter, defaultSortConfiguration, defaultImportStringConfiguration } from './core';
 
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with  registerCommand
-    // The commandId parameter must match the command field in package.json
-    const disposable: Disposable = commands.registerCommand('extension.sortImports', () => {
-        const importSorterExtension = new ImportSorterExtension();
+export const activate = (context: ExtensionContext) => {
+    const importSorterExtension = new ImportSorterExtension();
+    importSorterExtension.initialise();
+    const sortImportsCommand: Disposable = commands.registerCommand('extension.sortImports', () => {
         importSorterExtension.sortActiveDocumentImports();
     });
-
-    context.subscriptions.push(disposable);
-}
+    context.subscriptions.push(sortImportsCommand);
+    context.subscriptions.push(importSorterExtension);
+};
 
 // this method is called when your extension is deactivated
-export const deactivate = () => {
-}
+export const deactivate = () => {/* */ };
 
 class ImportSorterExtension {
     private statusBarItem: StatusBarItem;
+    private walker: AstWalker;
+    private sorter: ImportSorter;
+    private importCreator: ImportCreator;
+
+    public initialise() {
+        this.walker = new AstWalker();
+        this.sorter = new ImportSorter(defaultSortConfiguration);
+        this.importCreator = new ImportCreator(defaultImportStringConfiguration);
+        if (!this.statusBarItem) {
+            //todo: consider using for stats
+            this.statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
+        }
+    }
 
     public sortActiveDocumentImports() {
+        if (!this.walker) {
+            console.error('ImportSorterExtension: has not been initialised');
+        }
         if (!this.isSortAllowed()) {
             return;
         }
         const doc: TextDocument = window.activeTextEditor.document;
         const text = doc.getText();
-        const walker = new AstWalker();
-        const imports = walker.parseImports(doc.uri.fsPath, text);
-        const sorter = new ImportSorter(defaultSortConfiguration);
-        const sortedImports = sorter.sortImportElements(imports);
-        const importCreator = new ImportCreator(defaultImportStringConfiguration);
-        const importStrings = importCreator.createImportStrings(sortedImports);
-        console.log(JSON.stringify(importStrings, null, 2));
-    }
+        const imports = this.walker.parseImports(doc.uri.fsPath, text);
+        const sortedImports = this.sorter.sortImportElements(imports);
+        const importText = this.importCreator.createImportText(sortedImports.sorted);
 
+        const rangesToDelete =
+            [...sortedImports.sorted, ...sortedImports.duplicates]
+                .map(x => {
+                    const lastTextLine = window.activeTextEditor.document.lineAt(x.endPosition.line);
+                    const endRange = lastTextLine.rangeIncludingLineBreak;
+                    return new Range(x.startPosition.line, x.startPosition.character, endRange.end.line, endRange.end.character);
+                });
+
+        window.activeTextEditor.edit((editBuilder: TextEditorEdit) => {
+            rangesToDelete.forEach(x => {
+                editBuilder.delete(x);
+            });
+            editBuilder.insert(new Position(0, 0), importText);
+        });
+    }
+    public dispose() {
+        this.statusBarItem.dispose();
+    }
     private isSortAllowed(): boolean {
-        if (!this.statusBarItem) {
-            //todo: consider using.
-            this.statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
-        }
         const editor = window.activeTextEditor;
         if (!editor) {
             return false;
@@ -53,9 +73,5 @@ class ImportSorterExtension {
         }
 
         return true;
-    }
-
-    public dispose() {
-        this.statusBarItem.dispose();
     }
 }
