@@ -4,7 +4,7 @@ export class ImportCreator {
     constructor(private importStringConfig: ImportStringConfiguration) { }
 
     public createImportText(element: ImportElement[]): string {
-        return this.createImportStrings(element).join('\n');
+        return this.createImportStrings(element).join('\n') + '\n';
     }
 
     public createImportStrings(element: ImportElement[]): string[] {
