@@ -1,8 +1,11 @@
 export interface ImportStringConfiguration {
-    maximumNumberOfCharactersPerLine: number;
-    maximumNumberOfImportExpressionsPerLine: number;
+    maximumNumberOfImportExpressionsPerLine: {
+        count: number;
+        type: 'words' | 'chars'
+    }
     quoteMark: 'single' | 'double';
     tabSize: number;
+    numberOfEmptyLinesAfterAllImports: number;
     spacingPerImportExpression: {
         afterStartingBracket: number;
         beforeEndingBracket: number;
@@ -12,10 +15,13 @@ export interface ImportStringConfiguration {
 }
 
 export const defaultImportStringConfiguration: ImportStringConfiguration = {
-    maximumNumberOfCharactersPerLine: 180,
-    maximumNumberOfImportExpressionsPerLine: 3,
     tabSize: 4,
+    numberOfEmptyLinesAfterAllImports: 2,
     quoteMark: 'single',
+    maximumNumberOfImportExpressionsPerLine: {
+        count: 2,
+        type: 'words'
+    },
     spacingPerImportExpression: {
         afterStartingBracket: 1,
         beforeEndingBracket: 1,
