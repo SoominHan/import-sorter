@@ -1,7 +1,7 @@
 export interface ImportStringConfiguration {
     maximumNumberOfImportExpressionsPerLine: {
         count: number;
-        type: 'words' | 'chars'
+        type: 'words' | 'maxLineLength'
     }
     quoteMark: 'single' | 'double';
     tabSize: number;
@@ -19,8 +19,8 @@ export const defaultImportStringConfiguration: ImportStringConfiguration = {
     numberOfEmptyLinesAfterAllImports: 2,
     quoteMark: 'single',
     maximumNumberOfImportExpressionsPerLine: {
-        count: 2,
-        type: 'words'
+        count: 26,
+        type: 'maxLineLength'
     },
     spacingPerImportExpression: {
         afterStartingBracket: 1,

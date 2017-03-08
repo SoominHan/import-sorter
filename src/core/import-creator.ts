@@ -37,44 +37,68 @@ export class ImportCreator {
         const spaceConfig = this.getSpaceConfig();
         const nameBindingStringsExpr = chain(element.namedBindings)
             .map(x => x.aliasName ? `${x.name} as ${x.aliasName}` : x.name);
-        const chunkedExpr = this.createNameBindingChunks(nameBindingStringsExpr);
-        const resultingImportStrings = chunkedExpr
-            .map(y => y.join(`${spaceConfig.beforeComma},${spaceConfig.afterComma}`))
-            .value();
-        return resultingImportStrings.length === 1
-            ? { line: `${resultingImportStrings[0]}`, isSingleLine: true }
-            : { line: `${spaceConfig.tabSpace}${resultingImportStrings.join(`,\n${spaceConfig.tabSpace}`)}`, isSingleLine: false };
+        const resultingChunks = this.createNameBindingChunks(nameBindingStringsExpr, element);
+        return resultingChunks.isSingleLine
+            ? { line: `${resultingChunks.nameBindings[0]}`, isSingleLine: true }
+            : { line: `${spaceConfig.tabSpace}${resultingChunks.nameBindings.join(`,\n${spaceConfig.tabSpace}`)}`, isSingleLine: false };
     }
 
-    private createNameBindingChunks(nameBindingStringsExpr: LoDashExplicitArrayWrapper<string>): LoDashExplicitArrayWrapper<string[]> {
+    private createNameBindingChunks(nameBindingStringsExpr: LoDashExplicitArrayWrapper<string>, element: ImportElement): {
+        nameBindings: string[],
+        isSingleLine: boolean
+    } {
+        const max = this.importStringConfig.maximumNumberOfImportExpressionsPerLine.count;
+        const spaceConfig = this.getSpaceConfig();
+        const nameBindings = nameBindingStringsExpr.value();
         if (this.importStringConfig.maximumNumberOfImportExpressionsPerLine.type === 'words') {
-            return nameBindingStringsExpr.chunk(this.importStringConfig.maximumNumberOfImportExpressionsPerLine.count);
+            const nameBindingsResult = chain(nameBindings)
+                .chunk(max)
+                .map(x => x.join(`${spaceConfig.beforeComma},${spaceConfig.afterComma}`))
+                .value();
+            return {
+                nameBindings: nameBindingsResult,
+                isSingleLine: nameBindings.length <= max
+            };
+        }
+
+        const insideCurlyString = nameBindings.join(`${spaceConfig.beforeComma},${spaceConfig.afterComma}`);
+        const isSingleLine = this.createImportWithCurlyBracket(element, insideCurlyString, true).length <= max;
+        if (isSingleLine) {
+            return {
+                nameBindings: [insideCurlyString],
+                isSingleLine: true
+            };
         }
         const result: string[][] = [];
         let resultIndex = 0;
         let currentTotalLength = 0;
-        const max = this.importStringConfig.maximumNumberOfImportExpressionsPerLine.count;
-        nameBindingStringsExpr.value().forEach(x => {
-            currentTotalLength = currentTotalLength + x.length;
-            if (currentTotalLength <= max) {
-                result[resultIndex] ? result[resultIndex].push(x) : result[resultIndex] = [x];
-                return;
-            }
-            if (currentTotalLength > max && x.length < max) {
-                currentTotalLength = x.length;
-                result[resultIndex + 1] = [x];
-                resultIndex++;
-                return;
-            }
-            if (currentTotalLength > max) {
-                (result[resultIndex])
-                    ? result[resultIndex + 1] = [x] : result[resultIndex] = [x];
-                currentTotalLength = 0;
-                result[resultIndex + 1] ? resultIndex = resultIndex + 2 : resultIndex++;
-                return;
-            }
-        });
-        return chain(result);
+        const maxLineLength = max - this.importStringConfig.tabSize;
+        const commaShift =
+            this.importStringConfig.spacingPerImportExpression.afterComma
+            + this.importStringConfig.spacingPerImportExpression.beforeComma + 1;// 1 for comma
+        nameBindings
+            .forEach((x, ind) => {
+                const xLength = ind !== nameBindings.length - 1
+                    ? x.length + commaShift
+                    : x.length;//last element, so we remove comma
+                currentTotalLength += xLength;
+                if (currentTotalLength <= maxLineLength) {
+                    result[resultIndex] ? result[resultIndex].push(x) : result[resultIndex] = [x];
+                    return;
+                } else {
+                    resultIndex++;
+                    result[resultIndex] = [x];
+                    if (xLength < maxLineLength) {
+                        currentTotalLength = xLength;
+                        return;
+                    }
+                    currentTotalLength = 0;
+                }
+            });
+        return {
+            nameBindings: result.map(x => x.join(`${spaceConfig.beforeComma},${spaceConfig.afterComma}`)),
+            isSingleLine: false
+        };
     }
 
     private createImportWithCurlyBracket(element: ImportElement, namedBindingString: string, isSingleLine: boolean) {
