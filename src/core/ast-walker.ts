@@ -53,7 +53,6 @@ export class AstWalker {
             moduleSpecifierName: moduleSpecifierName,
             startPosition: importNode.start,
             endPosition: importNode.end,
-            hasBraket: false,
             hasFromKeyWord: false,
             namedBindings: []
         };
@@ -78,7 +77,6 @@ export class AstWalker {
         }
 
         if (importClause.namedBindings.kind === ts.SyntaxKind.NamedImports) {
-            result.hasBraket = true;
             const nImport = importClause.namedBindings as ts.NamedImports;
             nImport.elements.forEach(y => {
                 const properyName = y.propertyName ? y.propertyName.text : y.name.text;
