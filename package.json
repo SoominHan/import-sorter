@@ -1,46 +1,154 @@
 {
-  "name": "import-sorter",
-  "displayName": "Import Sorter",
-  "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
-  "version": "0.0.1",
-  "publisher": "soominhan",
-  "engines": {
-    "vscode": "^1.10.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "onCommand:extension.sortImports"
-  ],
-  "main": "./out/src/extension",
-  "contributes": {
-    "commands": [
-      {
-        "command": "extension.sortImports",
-        "title": "Sort Imports"
-      }
-    ]
-  },
-  "scripts": {
-    "vscode:prepublish": "tsc -p ./",
-    "compile": "tsc -watch -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "node ./node_modules/vscode/bin/test",
-    "clean": "rimraf -- node_modules coverage out",
-    "lint": "tslint src/**/*.ts"
-  },
-  "dependencies": {
-    "typescript": "^2.1.5",
-    "lodash": "4.17.2"
-  },
-  "devDependencies": {
-    "@types/mocha": "^2.2.32",
-    "@types/node": "^6.0.40",
-    "@types/lodash": "4.14.54",
-    "mocha": "^2.3.3",
-    "tslint": "^4.3.1",
-    "typescript": "^2.1.5",
-    "vscode": "^1.0.0"
-  }
+    "name": "import-sorter",
+    "displayName": "Import Sorter",
+    "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
+    "version": "0.0.1",
+    "publisher": "soominhan",
+    "engines": {
+        "vscode": "^1.10.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:extension.sortImports"
+    ],
+    "main": "./out/src/extension",
+    "scripts": {
+        "vscode:prepublish": "tsc -p ./",
+        "compile": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test",
+        "clean": "rimraf -- node_modules coverage out",
+        "lint": "tslint src/**/*.ts"
+    },
+    "dependencies": {
+        "typescript": "^2.1.5",
+        "lodash": "4.17.2"
+    },
+    "devDependencies": {
+        "@types/mocha": "^2.2.32",
+        "@types/node": "^6.0.40",
+        "@types/lodash": "4.14.54",
+        "mocha": "^2.3.3",
+        "tslint": "^4.3.1",
+        "typescript": "^2.1.5",
+        "vscode": "^1.0.0"
+    },
+    "contributes": {
+        "commands": [
+            {
+                "command": "extension.sortImports",
+                "title": "Sort Imports"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Import Sorter configuration",
+            "properties": {
+                "importSorter.sortConfiguration.importSources.order": {
+                    "enum": [
+                        "caseInsensitive",
+                        "lowercaseFirst",
+                        "lowercaseLast",
+                        "unsorted"
+                    ],
+                    "default": "caseInsensitive",
+                    "description": "Sort Order of names in curly brackets"
+                },
+                "importSorter.sortConfiguration.importSources.direction": {
+                    "enum": [
+                        "asc",
+                        "desc"
+                    ],
+                    "default": "asc",
+                    "description": "Sort Direction of names in curly brackets"
+                },
+                "importSorter.sortConfiguration.namedImports.order": {
+                    "enum": [
+                        "caseInsensitive",
+                        "lowercaseFirst",
+                        "lowercaseLast",
+                        "unsorted"
+                    ],
+                    "default": "caseInsensitive",
+                    "description": "Sort Order of paths"
+                },
+                "importSorter.sortConfiguration.namedImports.direction": {
+                    "enum": [
+                        "asc",
+                        "desc"
+                    ],
+                    "default": "asc",
+                    "description": "Sort Direction of paths"
+                },
+                "importSorter.sortConfiguration.joinNamedImports": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Combine imports with the same path"
+                },
+                "importSorter.sortConfiguration.customOrderingRules.defaultOrderLevel": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "The default order level of everything which is not include into rules"
+                },
+                "importSorter.sortConfiguration.customOrderingRules.rules": {
+                    "type": "array",
+                    "default": null,
+                    "description": "The default order level of everything which is not include into rules"
+                },
+                "importSorter.importStringConfiguration.tabSize": {
+                    "type": "number",
+                    "default": 4,
+                    "description": "Left number of spaces for the new lined imports"
+                },
+                "importSorter.importStringConfiguration.numberOfEmptyLinesAfterAllImports": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "The number of new lines after the last sorted import"
+                },
+                "importSorter.importStringConfiguration.quoteMark": {
+                    "enum": [
+                        "single",
+                        "double"
+                    ],
+                    "default": "single",
+                    "description": "The path quotes"
+                },
+                "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.type": {
+                    "enum": [
+                        "maxLineLength",
+                        "words"
+                    ],
+                    "default": "maxLineLength",
+                    "description": "The type of length restriction, before import is moved to a new line"
+                },
+                "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": {
+                    "type": "number",
+                    "default": 80,
+                    "description": "The count of units before import is newlined"
+                },
+                "importSorter.importStringConfiguration.spacingPerImportExpression.afterStartingBracket": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Number of spaces after {"
+                },
+                "importSorter.importStringConfiguration.spacingPerImportExpression.beforeEndingBracket": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Number of spaces before }"
+                },
+                "importSorter.importStringConfiguration.spacingPerImportExpression.beforeComma": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "Number of spaces before comma"
+                },
+                "importSorter.importStringConfiguration.spacingPerImportExpression.afterComma": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Number of spaces after comma"
+                }
+            }
+        }
+    }
 }

@@ -4,9 +4,14 @@ import { ImportElementSortResult } from './models/import-element-sort-result';
 import * as path from 'path';
 
 export class ImportSorter {
-    constructor(private sortConfig: SortConfiguration) { }
+    private sortConfig: SortConfiguration;
+
+    public initialise(sortConfig: SortConfiguration) {
+        this.sortConfig = sortConfig;
+    }
 
     public sortImportElements(imports: ImportElement[]): ImportElementSortResult {
+        this.assertIsinitialised();
         const clonedElements = cloneDeep(imports);
         const joinedImportsResult = this.joinNamedImports(clonedElements);
         const duplicates = joinedImportsResult.duplicates;
@@ -17,6 +22,12 @@ export class ImportSorter {
             sorted: sortedElements,
             duplicates: duplicates
         };
+    }
+
+    private assertIsinitialised() {
+        if (!this.sortConfig) {
+            throw new Error('SortConfiguration: has not been initialised');
+        }
     }
 
     private normalizePaths(imports: ImportElement[]) {

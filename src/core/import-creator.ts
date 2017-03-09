@@ -2,14 +2,26 @@ import { ImportElement, ImportStringConfiguration } from './models';
 import { chain, LoDashExplicitArrayWrapper } from 'lodash';
 
 export class ImportCreator {
-    constructor(private importStringConfig: ImportStringConfiguration) { }
+    private importStringConfig: ImportStringConfiguration;
+
+    public initialise(importStringConfig: ImportStringConfiguration) {
+        this.importStringConfig = importStringConfig;
+    }
 
     public createImportText(element: ImportElement[]): string {
+        this.assertIsinitialised();
         return this.createImportStrings(element).join('\n') + this.repeatString('\n', this.importStringConfig.numberOfEmptyLinesAfterAllImports);
     }
 
     public createImportStrings(element: ImportElement[]): string[] {
+        this.assertIsinitialised();
         return element.map(x => this.createSingleImportString(x));
+    }
+
+    private assertIsinitialised() {
+        if (!this.importStringConfig) {
+            throw new Error('ImportStringConfiguration: has not been initialised');
+        }
     }
 
     private createSingleImportString(element: ImportElement) {
