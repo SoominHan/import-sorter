@@ -30,29 +30,30 @@ export class ImportSorterExtension {
         if (!this.isSortAllowed()) {
             return;
         }
-        this.setConfig();
-
-        const doc: TextDocument = window.activeTextEditor.document;
-        const text = doc.getText();
-        const imports = this.walker.parseImports(doc.uri.fsPath, text);
-        const sortedImports = this.sorter.sortImportElements(imports);
-        const importText = this.importCreator.createImportText(sortedImports.sorted);
-        const rangesToDelete = this.getRangesToDelete(sortedImports.sorted, sortedImports.duplicates);
-
-        this.getConfiguration();
-
-        window.activeTextEditor
-            .edit((editBuilder: TextEditorEdit) => {
-                rangesToDelete.forEach(x => {
-                    editBuilder.delete(x);
+        try {
+            this.setConfig();
+            const doc: TextDocument = window.activeTextEditor.document;
+            const text = doc.getText();
+            const imports = this.walker.parseImports(doc.uri.fsPath, text);
+            const sortedImports = this.sorter.sortImportElements(imports);
+            const importText = this.importCreator.createImportText(sortedImports.groups);
+            const rangesToDelete = this.getRangesToDelete(chain(sortedImports.groups).flatMap(x => x.elements).value(), sortedImports.duplicates);
+            this.getConfiguration();
+            window.activeTextEditor
+                .edit((editBuilder: TextEditorEdit) => {
+                    rangesToDelete.forEach(x => {
+                        editBuilder.delete(x);
+                    });
+                    editBuilder.insert(new Position(0, 0), importText);
+                })
+                .then(x => {
+                    if (!x) {
+                        console.error('Sort Imports was unsuccessful', x);
+                    }
                 });
-                editBuilder.insert(new Position(0, 0), importText);
-            })
-            .then(x => {
-                if (!x) {
-                    console.error('Sort Imports was unsuccessful', x);
-                }
-            });
+        } catch (error) {
+            window.showErrorMessage(error.message);
+        }
     }
 
     public dispose() {

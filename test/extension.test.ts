@@ -22,7 +22,7 @@ suite('Extension Tests', () => {
         const imports = walker.parseImports('../../../test/test-file1.txt');
 
         const sortedImports = sorter.sortImportElements(imports);
-        const text = importCreator.createImportText(sortedImports.sorted);
+        const text = importCreator.createImportText(sortedImports.groups);
         console.log(text);
         //console.log(JSON.stringify(importStrings, null, 2));
 

@@ -1,8 +1,9 @@
-import { SortConfiguration, ImportElement, ImportSortOrder } from './models';
+import { SortConfiguration, ImportElement, ImportSortOrder, ImportElementGroup } from './models';
 import { chain, cloneDeep, isNil, LoDashExplicitArrayWrapper } from 'lodash';
 import { ImportElementSortResult } from './models/import-element-sort-result';
 import * as path from 'path';
 
+const NEW_PERIOD_CHAR = String.fromCharCode(128);
 export class ImportSorter {
     private sortConfig: SortConfiguration;
 
@@ -13,13 +14,13 @@ export class ImportSorter {
     public sortImportElements(imports: ImportElement[]): ImportElementSortResult {
         this.assertIsinitialised();
         const clonedElements = cloneDeep(imports);
-        const joinedImportsResult = this.joinNamedImports(clonedElements);
+        const joinedImportsResult = this.joinImportPaths(clonedElements);
         const duplicates = joinedImportsResult.duplicates;
         const sortedImportsExpr = this.sortNamedBindings(joinedImportsResult.joinedExpr);
-        const sortedByModule = this.sortModuleSpecifiers(sortedImportsExpr);
-        const sortedElements = this.applyCustomSortingRules(sortedByModule);
+        const sortedByModuleExpr = this.sortModuleSpecifiers(sortedImportsExpr);
+        const sortedElementGroups = this.applyCustomSortingRules(sortedByModuleExpr);
         return {
-            sorted: sortedElements,
+            groups: sortedElementGroups,
             duplicates: duplicates
         };
     }
@@ -36,7 +37,7 @@ export class ImportSorter {
             x.moduleSpecifierName = path
                 .normalize(x.moduleSpecifierName)
                 .replace(new RegExp('\\' + path.sep, 'g'), '/');
-            if (isRelativePath) {
+            if (isRelativePath && x.moduleSpecifierName !== './') {
                 x.moduleSpecifierName = `./${x.moduleSpecifierName}`;
             }
             return x;
@@ -44,12 +45,12 @@ export class ImportSorter {
     }
 
     private sortNamedBindings(importsExpr: LoDashExplicitArrayWrapper<ImportElement>): LoDashExplicitArrayWrapper<ImportElement> {
-        const sortOrder = this.getSortOrderFunc(this.sortConfig.importSources.order);
+        const sortOrder = this.getSortOrderFunc(this.sortConfig.importMembers.order);
         return importsExpr.map(x => {
             if (x.namedBindings && x.namedBindings.length) {
                 x.namedBindings =
                     chain(x.namedBindings)
-                        .orderBy((y: { name: string }) => sortOrder(y.name), [this.sortConfig.importSources.direction])
+                        .orderBy((y: { name: string }) => sortOrder(y.name), [this.sortConfig.importMembers.direction])
                         .value();
                 return x;
             }
@@ -57,9 +58,14 @@ export class ImportSorter {
         });
     }
 
-    private joinNamedImports(imports: ImportElement[]): { joinedExpr: LoDashExplicitArrayWrapper<ImportElement>, duplicates: ImportElement[] } {
+    private sortModuleSpecifiers(importsExpr: LoDashExplicitArrayWrapper<ImportElement>): LoDashExplicitArrayWrapper<ImportElement> {
+        const sortOrder = this.getSortOrderFunc(this.sortConfig.importPaths.order, true);
+        return importsExpr.orderBy((y: ImportElement) => sortOrder(y.moduleSpecifierName), [this.sortConfig.importPaths.direction]);
+    }
+
+    private joinImportPaths(imports: ImportElement[]): { joinedExpr: LoDashExplicitArrayWrapper<ImportElement>, duplicates: ImportElement[] } {
         const normalizedPathsExpr = this.normalizePaths(imports);
-        if (!this.sortConfig.joinNamedImports) {
+        if (!this.sortConfig.joinImportPaths) {
             return {
                 joinedExpr: normalizedPathsExpr,
                 duplicates: []
@@ -87,70 +93,93 @@ export class ImportSorter {
         };
     }
 
-    private sortModuleSpecifiers(importsExpr: LoDashExplicitArrayWrapper<ImportElement>): ImportElement[] {
-
-        const groups = importsExpr.groupBy(x => x.moduleSpecifierName.startsWith('.') || x.moduleSpecifierName.startsWith('/')).toPairs();
-        const sortOrder = this.getSortOrderFunc(this.sortConfig.namedImports.order);
-        const sortedGroups = groups.filter(x => x[1]).map(x => {
-            if (x[0] === 'true') {
-                //path sorting
-                return chain(x[1]).orderBy((y: ImportElement) => sortOrder(y.moduleSpecifierName), [this.sortConfig.namedImports.direction]).value();
-            } else {
-                //non path sorting
-                return chain(x[1]).orderBy((y: ImportElement) => sortOrder(y.moduleSpecifierName), [this.sortConfig.namedImports.direction]).value();
-            }
-        });
-        const flattenedValuesFunc = sortedGroups.flatMap().value() as ImportElement[];
-        return flattenedValuesFunc;
+    private getDefaultLineNumber() {
+        if (this.sortConfig.customOrderingRules
+            && this.sortConfig.customOrderingRules.defaultNumberOfEmtyLinesAfterGroup) {
+            return this.sortConfig.customOrderingRules.defaultNumberOfEmtyLinesAfterGroup;
+        }
+        return 0;
     }
 
-    private applyCustomSortingRules(sortedImports: ImportElement[]): ImportElement[] {
-        if (!this.sortConfig.customOrderingRules) {
-            return sortedImports;
+    private applyCustomSortingRules(sortedImports: LoDashExplicitArrayWrapper<ImportElement>): ImportElementGroup[] {
+        if (!this.sortConfig.customOrderingRules
+            || !this.sortConfig.customOrderingRules.rules
+            || this.sortConfig.customOrderingRules.rules.length === 0) {
+            return [{
+                elements: sortedImports.value(),
+                numberOfEmptyLinesAfterGroup: this.getDefaultLineNumber()
+            }];
         }
         const rules = this.sortConfig
             .customOrderingRules
             .rules
             .map(x => ({
                 pos: x.orderLevel,
-                expr: this.escapeRegExp(x.regex)
+                expr: x.regex,
+                type: x.type,
+                numberOfLines: isNil(x.numberOfEmptyLinesAfterGroup) ? this.getDefaultLineNumber() : x.numberOfEmptyLinesAfterGroup
             }));
 
-        const result: { [key: number]: ImportElement[] } = {};
-        sortedImports.forEach(x => {
-            const rule = rules.find(e => x.moduleSpecifierName.match(e.expr) !== null);
-            if (!rule) {
-                this.addElement(result, this.sortConfig.customOrderingRules.defaultOrderLevel, x);
-                return;
-            }
-            this.addElement(result, rule.pos, x);
-        });
-        const customSortedImports = chain(Object.keys(result)).orderBy(x => x).map(x => result[x]).flatMap(x => x).value();
-
+        const result: { [key: number]: ImportElementGroup } = {};
+        sortedImports
+            .forEach(x => {
+                const rule = rules.find(e => !e.type || e.type === 'path' ? x.moduleSpecifierName.match(e.expr) !== null : this.matchNameBindings(x, e.expr));
+                if (!rule) {
+                    this.addElement(
+                        result,
+                        this.sortConfig.customOrderingRules.defaultOrderLevel,
+                        x,
+                        this.getDefaultLineNumber());
+                    return;
+                }
+                this.addElement(result, rule.pos, x, rule.numberOfLines);
+            })
+            .value();
+        const customSortedImports =
+            chain(Object.keys(result))
+                .orderBy(x => +x)
+                .map(x => result[x])
+                .value();
         return customSortedImports;
     }
 
-    private addElement(dictionary: { [key: number]: ImportElement[] }, key: number, value: ImportElement) {
+    private matchNameBindings(importElement: ImportElement, regex: string) {
+        //match an empty string here
+        if (!importElement.hasFromKeyWord) {
+            return ''.match(regex) !== null;
+        }
+        if (importElement.defaultImportName && importElement.defaultImportName.trim() !== '') {
+            return importElement.defaultImportName.match(regex) !== null;
+        }
+        return importElement.namedBindings.some(x => x.name.match(regex) !== null);
+    }
+
+    private addElement(dictionary: { [key: number]: ImportElementGroup }, key: number, value: ImportElement, numberOfLines: number) {
         if (isNil(dictionary[key])) {
-            dictionary[key] = [value];
+            dictionary[key] = { elements: [], numberOfEmptyLinesAfterGroup: numberOfLines };
+            dictionary[key].elements = [value];
         } else {
-            dictionary[key].push(value);
+            dictionary[key].elements.push(value);
         }
     }
 
-    private getSortOrderFunc(sortOrder: ImportSortOrder): ((value: string) => string) {
+    private getSortOrderFunc(sortOrder: ImportSortOrder, changePeriodOrder = false): ((value: string) => string) {
         if (sortOrder === 'caseInsensitive') {
-            return (x) => x.toLowerCase();
+            return (x) => changePeriodOrder ? this.parseStringWithPeriod(x.toLowerCase()) : x.toLowerCase();
         }
         if (sortOrder === 'lowercaseLast') {
-            return (x) => x;
+            return (x) => changePeriodOrder ? this.parseStringWithPeriod(x) : x;
         }
         if (sortOrder === 'unsorted') {
             return (_x) => '';
         }
         if (sortOrder === 'lowercaseFirst') {
-            return (x) => this.swapStringCase(x);
+            return (x) => changePeriodOrder ? this.parseStringWithPeriod(this.swapStringCase(x)) : this.swapStringCase(x);
         }
+    }
+
+    private parseStringWithPeriod(value: string) {
+        return value && value.startsWith('.') ? value.replace('.', NEW_PERIOD_CHAR) : value;
     }
 
     private swapStringCase(str: string) {
@@ -165,9 +194,4 @@ export class ImportSorter {
         }
         return result;
     }
-
-    private escapeRegExp(str) {
-        return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
-    }
-
 }

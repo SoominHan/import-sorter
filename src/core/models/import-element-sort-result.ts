@@ -1,6 +1,7 @@
 import { ImportElement } from './import-element';
+import { ImportElementGroup } from './import-element-group';
 
 export interface ImportElementSortResult {
-    sorted: ImportElement[];
+    groups: ImportElementGroup[];
     duplicates: ImportElement[];
 }

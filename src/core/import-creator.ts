@@ -1,4 +1,4 @@
-import { ImportElement, ImportStringConfiguration } from './models';
+import { ImportElement, ImportStringConfiguration, ImportElementGroup } from './models';
 import { chain, LoDashExplicitArrayWrapper } from 'lodash';
 
 export class ImportCreator {
@@ -8,9 +8,15 @@ export class ImportCreator {
         this.importStringConfig = importStringConfig;
     }
 
-    public createImportText(element: ImportElement[]): string {
+    public createImportText(groups: ImportElementGroup[]): string {
         this.assertIsinitialised();
-        return this.createImportStrings(element).join('\n') + this.repeatString('\n', this.importStringConfig.numberOfEmptyLinesAfterAllImports);
+        return groups
+            .map((x, i, data) => {
+                return this.createImportStrings(x.elements).join('\n')
+                    + this.repeatString('\n', i !== (data.length - 1) ? x.numberOfEmptyLinesAfterGroup : 0);
+            })
+            .join('\n')
+            + this.repeatString('\n', this.importStringConfig.numberOfEmptyLinesAfterAllImports);
     }
 
     public createImportStrings(element: ImportElement[]): string[] {

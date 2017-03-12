@@ -1,18 +1,22 @@
 export type ImportSortOrder = 'caseInsensitive' | 'lowercaseFirst' | 'lowercaseLast' | 'unsorted';
 export type ImportSortOrderDirection = 'asc' | 'desc';
+export type CustomOrderRuleType = 'path' | 'importMember';
 export interface SortConfiguration {
-    importSources: {
+    importMembers: {
         order: ImportSortOrder,
         direction: ImportSortOrderDirection;
     };
-    namedImports: {
+    importPaths: {
         order: ImportSortOrder,
         direction: ImportSortOrderDirection;
     };
-    joinNamedImports?: boolean;
+    joinImportPaths?: boolean;
     customOrderingRules?: {
         defaultOrderLevel: number;
+        defaultNumberOfEmtyLinesAfterGroup?: number;
         rules: {
+            type?: CustomOrderRuleType
+            numberOfEmptyLinesAfterGroup?: number;
             regex: string;
             orderLevel: number
         }[]
@@ -20,17 +24,18 @@ export interface SortConfiguration {
 }
 
 export const defaultSortConfiguration: SortConfiguration = {
-    importSources: {
+    importMembers: {
         order: 'caseInsensitive',
         direction: 'asc'
     },
-    namedImports: {
+    importPaths: {
         order: 'caseInsensitive',
         direction: 'asc'
     },
-    joinNamedImports: true,
+    joinImportPaths: true,
     customOrderingRules: {
-        defaultOrderLevel: 10,
-        rules: [{ regex: '@angular', orderLevel: 0 }, { regex: '@ngrx', orderLevel: 1 }]
+        defaultOrderLevel: 20,
+        defaultNumberOfEmtyLinesAfterGroup: 1,
+        rules: [{ regex: '^@angular', orderLevel: 0, numberOfEmptyLinesAfterGroup: 0 }, { regex: '^[@]', orderLevel: 10 }, { regex: '^[.]', orderLevel: 30 }]
     }
 };

@@ -46,7 +46,7 @@
             "type": "object",
             "title": "Import Sorter configuration",
             "properties": {
-                "importSorter.sortConfiguration.importSources.order": {
+                "importSorter.sortConfiguration.importMembers.order": {
                     "enum": [
                         "caseInsensitive",
                         "lowercaseFirst",
@@ -56,7 +56,7 @@
                     "default": "caseInsensitive",
                     "description": "Sort Order of names in curly brackets"
                 },
-                "importSorter.sortConfiguration.importSources.direction": {
+                "importSorter.sortConfiguration.importMembers.direction": {
                     "enum": [
                         "asc",
                         "desc"
@@ -64,7 +64,7 @@
                     "default": "asc",
                     "description": "Sort Direction of names in curly brackets"
                 },
-                "importSorter.sortConfiguration.namedImports.order": {
+                "importSorter.sortConfiguration.importPaths.order": {
                     "enum": [
                         "caseInsensitive",
                         "lowercaseFirst",
@@ -74,7 +74,7 @@
                     "default": "caseInsensitive",
                     "description": "Sort Order of paths"
                 },
-                "importSorter.sortConfiguration.namedImports.direction": {
+                "importSorter.sortConfiguration.importPaths.direction": {
                     "enum": [
                         "asc",
                         "desc"
@@ -82,19 +82,38 @@
                     "default": "asc",
                     "description": "Sort Direction of paths"
                 },
-                "importSorter.sortConfiguration.joinNamedImports": {
+                "importSorter.sortConfiguration.joinImportPaths": {
                     "type": "boolean",
                     "default": true,
                     "description": "Combine imports with the same path"
                 },
                 "importSorter.sortConfiguration.customOrderingRules.defaultOrderLevel": {
                     "type": "number",
-                    "default": 10,
+                    "default": 20,
                     "description": "The default order level of everything which is not include into rules"
+                },
+                "importSorter.sortConfiguration.customOrderingRules.defaultNumberOfEmtyLinesAfterGroup": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "The default number of empty lines after any group. This has lesser priority then empty lines in rules"
                 },
                 "importSorter.sortConfiguration.customOrderingRules.rules": {
                     "type": "array",
-                    "default": null,
+                    "default": [
+                        {
+                            "regex": "^@angular",
+                            "orderLevel": 0,
+                            "numberOfEmptyLinesAfterGroup": 0
+                        },
+                        {
+                            "regex": "^[@]",
+                            "orderLevel": 10
+                        },
+                        {
+                            "regex": "^[.]",
+                            "orderLevel": 30
+                        }
+                    ],
                     "description": "The default order level of everything which is not include into rules"
                 },
                 "importSorter.importStringConfiguration.tabSize": {
