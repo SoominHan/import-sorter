@@ -15,8 +15,10 @@ import { AstWalker, ImportCreator, ImportSorter, defaultSortConfiguration, defau
 suite('Extension Tests', () => {
     test('just a main method', () => {
         const walker = new AstWalker();
-        const sorter = new ImportSorter(defaultSortConfiguration);
-        const importCreator = new ImportCreator(defaultImportStringConfiguration);
+        const sorter = new ImportSorter();
+        sorter.initialise(defaultSortConfiguration);
+        const importCreator = new ImportCreator();
+        importCreator.initialise(defaultImportStringConfiguration);
         const imports = walker.parseImports('../../../test/test-file1.txt');
 
         const sortedImports = sorter.sortImportElements(imports);

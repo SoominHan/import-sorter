@@ -1,6 +1,11 @@
-import { window, StatusBarAlignment, StatusBarItem, TextDocument, TextEditorEdit, Range, Position } from 'vscode';
-import { AstWalker, ImportCreator, ImportSorter, defaultSortConfiguration, defaultImportStringConfiguration } from './core';
+import { window, StatusBarAlignment, StatusBarItem, TextDocument, TextEditorEdit, Range, Position, workspace } from 'vscode';
+import {
+    AstWalker, ImportCreator, ImportElement,
+    ImportSorter, ImportStringConfiguration, SortConfiguration, ImportSorterConfiguration
+} from './core';
 import { chain } from 'lodash';
+
+const EXTENSION_CONFIGURATION_NAME = 'importSorter';
 
 export class ImportSorterExtension {
     private statusBarItem: StatusBarItem;
@@ -10,8 +15,8 @@ export class ImportSorterExtension {
 
     public initialise() {
         this.walker = new AstWalker();
-        this.sorter = new ImportSorter(defaultSortConfiguration);
-        this.importCreator = new ImportCreator(defaultImportStringConfiguration);
+        this.sorter = new ImportSorter();
+        this.importCreator = new ImportCreator();
         if (!this.statusBarItem) {
             //todo: consider using for stats
             this.statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
@@ -25,15 +30,45 @@ export class ImportSorterExtension {
         if (!this.isSortAllowed()) {
             return;
         }
+        this.setConfig();
+
         const doc: TextDocument = window.activeTextEditor.document;
         const text = doc.getText();
         const imports = this.walker.parseImports(doc.uri.fsPath, text);
         const sortedImports = this.sorter.sortImportElements(imports);
         const importText = this.importCreator.createImportText(sortedImports.sorted);
+        const rangesToDelete = this.getRangesToDelete(sortedImports.sorted, sortedImports.duplicates);
 
+        this.getConfiguration();
+
+        window.activeTextEditor
+            .edit((editBuilder: TextEditorEdit) => {
+                rangesToDelete.forEach(x => {
+                    editBuilder.delete(x);
+                });
+                editBuilder.insert(new Position(0, 0), importText);
+            })
+            .then(x => {
+                if (!x) {
+                    console.error('Sort Imports was unsuccessful', x);
+                }
+            });
+    }
+
+    public dispose() {
+        this.statusBarItem.dispose();
+    }
+
+    private setConfig() {
+        const configuration = this.getConfiguration();
+        this.sorter.initialise(configuration.sortConfiguration);
+        this.importCreator.initialise(configuration.importStringConfiguration);
+    }
+
+    private getRangesToDelete(sortedImports: ImportElement[], duplicates: ImportElement[]) {
         const rangesToDelete: Range[] = [];
-        chain(sortedImports.sorted)
-            .concat(sortedImports.duplicates)
+        chain(sortedImports)
+            .concat(duplicates)
             .sortBy(x => x.startPosition.line)
             .forEach(x => {
                 const previousRange = rangesToDelete[rangesToDelete.length - 1];
@@ -50,23 +85,18 @@ export class ImportSorterExtension {
                 rangesToDelete.push(currentRange);
             })
             .value();
+        return rangesToDelete;
+    }
 
-        window.activeTextEditor
-            .edit((editBuilder: TextEditorEdit) => {
-                rangesToDelete.forEach(x => {
-                    editBuilder.delete(x);
-                });
-                editBuilder.insert(new Position(0, 0), importText);
-            })
-            .then(x => {
-                if (!x) {
-                    console.error('Sort Imports was unsuccessful', x);
-                }
-            });
+    private getConfiguration(): ImportSorterConfiguration {
+        const sortConfiguration = workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<SortConfiguration>('sortConfiguration');
+        const importStringConfiguration = workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<ImportStringConfiguration>('importStringConfiguration');
+        return {
+            sortConfiguration,
+            importStringConfiguration
+        };
     }
-    public dispose() {
-        this.statusBarItem.dispose();
-    }
+
     private isSortAllowed(): boolean {
         const editor = window.activeTextEditor;
         if (!editor) {
