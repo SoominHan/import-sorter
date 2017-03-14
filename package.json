@@ -145,7 +145,7 @@
                 },
                 "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": {
                     "type": "number",
-                    "default": 80,
+                    "default": 100,
                     "description": "The count of units before import is newlined"
                 },
                 "importSorter.importStringConfiguration.spacingPerImportExpression.afterStartingBracket": {
