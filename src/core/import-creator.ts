@@ -19,7 +19,7 @@ export class ImportCreator {
             + this.repeatString('\n', this.importStringConfig.numberOfEmptyLinesAfterAllImports);
     }
 
-    public createImportStrings(element: ImportElement[]): string[] {
+    private createImportStrings(element: ImportElement[]): string[] {
         this.assertIsinitialised();
         return element.map(x => this.createSingleImportString(x));
     }
