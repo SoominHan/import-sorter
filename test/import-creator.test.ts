@@ -15,7 +15,7 @@ suite('Import Creator Tests', () => {
         numberOfEmptyLinesAfterAllImports: 2,
         quoteMark: 'single',
         maximumNumberOfImportExpressionsPerLine: {
-            count: 100,
+            count: 23,
             type: 'maxLineLength'
         },
         spacingPerImportExpression: {
@@ -47,11 +47,7 @@ suite('Import Creator Tests', () => {
                     numberOfEmptyLinesAfterGroup: 3
                 }
             ],
-            expected: `import t, {
-                B, a as cc, ac
-            } from 'createString.ts';
-
-            `
+            expected: "import t, {\n    B, a as cc, ac\n} from \'createString.ts\';\n\n"
         }
     ];
 
