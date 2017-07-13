@@ -3,7 +3,7 @@
     "displayName": "Import Sorter",
     "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
     "version": "0.0.1",
-    "publisher": "soominhan",
+    "publisher": "mike-co",
     "engines": {
         "vscode": "^1.9.0"
     },
