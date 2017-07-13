@@ -1,12 +1,17 @@
 {
     "name": "import-sorter",
-    "displayName": "Import Sorter",
+    "displayName": "TypeScript Import Sorter",
     "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
     "version": "0.0.1",
     "publisher": "mike-co",
     "engines": {
         "vscode": "^1.9.0"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/SoominHan/import-sorter.git"
+    },
+    "license" : "SEE LICENSE IN LICENSE",
     "categories": [
         "Formatters"
     ],
@@ -14,9 +19,7 @@
         "Typescript",
         "imports",
         "sort",
-        "import statements",
-        "import clauses",
-        "import sorter",
+        "order",
         "sort imports"
     ],
     "activationEvents": [
