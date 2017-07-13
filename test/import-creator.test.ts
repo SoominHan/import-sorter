@@ -12,7 +12,7 @@ suite('Import Creator Tests', () => {
 
     const stringConfiguration: ImportStringConfiguration = {
         tabSize: 4,
-        numberOfEmptyLinesAfterAllImports: 2,
+        numberOfEmptyLinesAfterAllImports: 0,
         quoteMark: 'single',
         maximumNumberOfImportExpressionsPerLine: {
             count: 23,
@@ -47,7 +47,7 @@ suite('Import Creator Tests', () => {
                     numberOfEmptyLinesAfterGroup: 3
                 }
             ],
-            expected: "import t, {\n    B, a as cc, ac\n} from \'createString.ts\';\n\n"
+            expected: "import t, {\n    B, a as cc, ac\n} from \'createString.ts\';"
         }
     ];
 

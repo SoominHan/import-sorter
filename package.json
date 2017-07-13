@@ -3,12 +3,21 @@
     "displayName": "Import Sorter",
     "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
     "version": "0.0.1",
-    "publisher": "soominhan",
+    "publisher": "mike-co",
     "engines": {
         "vscode": "^1.9.0"
     },
     "categories": [
-        "Other"
+        "Formatters"
+    ],
+    "keywords": [
+        "Typescript",
+        "imports",
+        "sort",
+        "import statements",
+        "import clauses",
+        "import sorter",
+        "sort imports"
     ],
     "activationEvents": [
         "onCommand:extension.sortImports"
@@ -91,7 +100,7 @@
                 "importSorter.sortConfiguration.customOrderingRules.defaultOrderLevel": {
                     "type": "number",
                     "default": 20,
-                    "description": "The default order level of everything which is not include into rules"
+                    "description": "The default order level of everything which is not included into rules"
                 },
                 "importSorter.sortConfiguration.customOrderingRules.defaultNumberOfEmptyLinesAfterGroup": {
                     "type": "number",
@@ -115,7 +124,7 @@
                             "orderLevel": 30
                         }
                     ],
-                    "description": "The default order level of everything which is not include into rules"
+                    "description": "The default order level of everything which is not included into rules"
                 },
                 "importSorter.importStringConfiguration.tabSize": {
                     "type": "number",
@@ -146,7 +155,7 @@
                 "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": {
                     "type": "number",
                     "default": 100,
-                    "description": "The count of units before import is newlined"
+                    "description": "The count of units before import is new-lined"
                 },
                 "importSorter.importStringConfiguration.spacingPerImportExpression.afterStartingBracket": {
                     "type": "number",
