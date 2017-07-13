@@ -5,7 +5,7 @@
     "version": "0.0.1",
     "publisher": "soominhan",
     "engines": {
-        "vscode": "^1.10.0"
+        "vscode": "^1.9.0"
     },
     "categories": [
         "Other"
@@ -27,9 +27,10 @@
         "lodash": "4.17.2"
     },
     "devDependencies": {
+        "@types/lodash": "4.14.54",
         "@types/mocha": "^2.2.32",
         "@types/node": "^6.0.40",
-        "@types/lodash": "4.14.54",
+        "expect.js": "^0.3.1",
         "mocha": "^2.3.3",
         "tslint": "^4.3.1",
         "typescript": "^2.1.5",
@@ -92,7 +93,7 @@
                     "default": 20,
                     "description": "The default order level of everything which is not include into rules"
                 },
-                "importSorter.sortConfiguration.customOrderingRules.defaultNumberOfEmtyLinesAfterGroup": {
+                "importSorter.sortConfiguration.customOrderingRules.defaultNumberOfEmptyLinesAfterGroup": {
                     "type": "number",
                     "default": 1,
                     "description": "The default number of empty lines after any group. This has lesser priority then empty lines in rules"
@@ -144,7 +145,7 @@
                 },
                 "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": {
                     "type": "number",
-                    "default": 80,
+                    "default": 100,
                     "description": "The count of units before import is newlined"
                 },
                 "importSorter.importStringConfiguration.spacingPerImportExpression.afterStartingBracket": {

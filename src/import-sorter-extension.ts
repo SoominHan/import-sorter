@@ -1,9 +1,9 @@
-import { window, StatusBarAlignment, StatusBarItem, TextDocument, TextEditorEdit, Range, Position, workspace } from 'vscode';
+import { window, StatusBarAlignment, StatusBarItem, TextDocument, TextEditorEdit, Range, Position, workspace, TextLine } from 'vscode';
 import {
     AstWalker, ImportCreator, ImportElement,
     ImportSorter, ImportStringConfiguration, SortConfiguration, ImportSorterConfiguration
 } from './core';
-import { chain } from 'lodash';
+import { chain, range } from 'lodash';
 
 const EXTENSION_CONFIGURATION_NAME = 'importSorter';
 
@@ -25,18 +25,19 @@ export class ImportSorterExtension {
 
     public sortActiveDocumentImports() {
         if (!this.walker) {
-            console.error('ImportSorterExtension: has not been initialised');
+            console.error('ImportSorterExtension: has not been initialized');
         }
         if (!this.isSortAllowed()) {
             return;
         }
         try {
-            this.setConfig();
+            const configuration = this.setConfig();
             const doc: TextDocument = window.activeTextEditor.document;
             const text = doc.getText();
             const imports = this.walker.parseImports(doc.uri.fsPath, text);
             const sortedImports = this.sorter.sortImportElements(imports);
             const importText = this.importCreator.createImportText(sortedImports.groups);
+
             const rangesToDelete = this.getRangesToDelete(chain(sortedImports.groups).flatMap(x => x.elements).value(), sortedImports.duplicates);
             this.getConfiguration();
             window.activeTextEditor
@@ -49,7 +50,17 @@ export class ImportSorterExtension {
                 .then(x => {
                     if (!x) {
                         console.error('Sort Imports was unsuccessful', x);
+                        return;
                     }
+                    window.activeTextEditor
+                        .edit((editBuilder: TextEditorEdit) =>
+                            this.addEmptyLinesAfterAllImports(editBuilder, importText, configuration.importStringConfiguration.numberOfEmptyLinesAfterAllImports)
+                        )
+                        .then(y => {
+                            if (!y) {
+                                console.error('Sort Imports was unsuccessful', x);
+                            }
+                        });
                 });
         } catch (error) {
             window.showErrorMessage(error.message);
@@ -64,6 +75,31 @@ export class ImportSorterExtension {
         const configuration = this.getConfiguration();
         this.sorter.initialise(configuration.sortConfiguration);
         this.importCreator.initialise(configuration.importStringConfiguration);
+        return configuration;
+    }
+
+    private addEmptyLinesAfterAllImports(textEditorEdit: TextEditorEdit, importText: string, numberOfEmptyLinesAfterAllImports: number) {
+        const numberOfImportTextLines = importText.split('\n').length;
+        const firstLine = this.getFirstNonEmptyLineAfterImport(numberOfImportTextLines);
+        const lineDifference = firstLine ? firstLine.lineNumber - numberOfImportTextLines : 0;
+        const lineNumbersToAdd = numberOfEmptyLinesAfterAllImports - lineDifference;
+        if (lineNumbersToAdd > 0) {
+            const stringToInsert = '\n'.repeat(lineNumbersToAdd);
+            textEditorEdit.insert(new Position(numberOfImportTextLines, 0), stringToInsert);
+        }
+        if (lineNumbersToAdd < 0) {
+            const rangeToDelete = new Range(numberOfImportTextLines, 0, numberOfImportTextLines + Math.abs(lineNumbersToAdd), 0);
+            textEditorEdit.delete(rangeToDelete);
+        }
+    }
+
+    private getFirstNonEmptyLineAfterImport(numberOfImportTextLines: number): TextLine {
+        const doc: TextDocument = window.activeTextEditor.document;
+        const firstNonEmptyLineAfterImports = range(numberOfImportTextLines, doc.lineCount).find(x => !doc.lineAt(x).isEmptyOrWhitespace);
+        if (firstNonEmptyLineAfterImports) {
+            return doc.lineAt(firstNonEmptyLineAfterImports);
+        }
+        return null;
     }
 
     private getRangesToDelete(sortedImports: ImportElement[], duplicates: ImportElement[]) {

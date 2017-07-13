@@ -15,11 +15,10 @@ export class ImportCreator {
                 return this.createImportStrings(x.elements).join('\n')
                     + this.repeatString('\n', i !== (data.length - 1) ? x.numberOfEmptyLinesAfterGroup : 0);
             })
-            .join('\n')
-            + this.repeatString('\n', this.importStringConfig.numberOfEmptyLinesAfterAllImports);
+            .join('\n');
     }
 
-    public createImportStrings(element: ImportElement[]): string[] {
+    private createImportStrings(element: ImportElement[]): string[] {
         this.assertIsinitialised();
         return element.map(x => this.createSingleImportString(x));
     }
