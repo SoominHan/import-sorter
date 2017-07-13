@@ -1,6 +1,6 @@
 {
     "name": "import-sorter",
-    "displayName": "Import Sorter",
+    "displayName": "TypeScript Import Sorter",
     "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
     "version": "0.0.1",
     "publisher": "mike-co",
@@ -19,9 +19,7 @@
         "Typescript",
         "imports",
         "sort",
-        "import statements",
-        "import clauses",
-        "import sorter",
+        "order",
         "sort imports"
     ],
     "activationEvents": [
