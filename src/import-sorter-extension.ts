@@ -45,6 +45,8 @@ export class ImportSorterExtension {
                         editBuilder.delete(x);
                     });
                     editBuilder.insert(new Position(0, 0), importText);
+                    const test = doc.getWordRangeAtPosition(new Position(10, 0));
+                    console.log(test);
                 })
                 .then(x => {
                     if (!x) {

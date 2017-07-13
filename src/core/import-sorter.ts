@@ -95,8 +95,8 @@ export class ImportSorter {
 
     private getDefaultLineNumber() {
         if (this.sortConfig.customOrderingRules
-            && this.sortConfig.customOrderingRules.defaultNumberOfEmtyLinesAfterGroup) {
-            return this.sortConfig.customOrderingRules.defaultNumberOfEmtyLinesAfterGroup;
+            && this.sortConfig.customOrderingRules.defaultNumberOfEmptyLinesAfterGroup) {
+            return this.sortConfig.customOrderingRules.defaultNumberOfEmptyLinesAfterGroup;
         }
         return 0;
     }

@@ -13,7 +13,7 @@ export interface SortConfiguration {
     joinImportPaths?: boolean;
     customOrderingRules?: {
         defaultOrderLevel: number;
-        defaultNumberOfEmtyLinesAfterGroup?: number;
+        defaultNumberOfEmptyLinesAfterGroup?: number;
         rules: {
             type?: CustomOrderRuleType
             numberOfEmptyLinesAfterGroup?: number;
@@ -35,7 +35,7 @@ export const defaultSortConfiguration: SortConfiguration = {
     joinImportPaths: true,
     customOrderingRules: {
         defaultOrderLevel: 20,
-        defaultNumberOfEmtyLinesAfterGroup: 1,
+        defaultNumberOfEmptyLinesAfterGroup: 1,
         rules: [{ regex: '^@angular', orderLevel: 0, numberOfEmptyLinesAfterGroup: 0 }, { regex: '^[@]', orderLevel: 10 }, { regex: '^[.]', orderLevel: 30 }]
     }
 };

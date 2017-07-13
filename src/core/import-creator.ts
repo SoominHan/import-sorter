@@ -15,8 +15,8 @@ export class ImportCreator {
                 return this.createImportStrings(x.elements).join('\n')
                     + this.repeatString('\n', i !== (data.length - 1) ? x.numberOfEmptyLinesAfterGroup : 0);
             })
-            .join('\n')
-            + this.repeatString('\n', this.importStringConfig.numberOfEmptyLinesAfterAllImports);
+            .join('\n') + '\n';
+            //+ this.repeatString('\n', this.importStringConfig.numberOfEmptyLinesAfterAllImports);
     }
 
     private createImportStrings(element: ImportElement[]): string[] {

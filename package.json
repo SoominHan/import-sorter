@@ -93,7 +93,7 @@
                     "default": 20,
                     "description": "The default order level of everything which is not include into rules"
                 },
-                "importSorter.sortConfiguration.customOrderingRules.defaultNumberOfEmtyLinesAfterGroup": {
+                "importSorter.sortConfiguration.customOrderingRules.defaultNumberOfEmptyLinesAfterGroup": {
                     "type": "number",
                     "default": 1,
                     "description": "The default number of empty lines after any group. This has lesser priority then empty lines in rules"
