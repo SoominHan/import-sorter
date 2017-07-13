@@ -1,5 +1,2 @@
-# Change Log
-All notable changes to the "import-sorter" extension will be documented in this file.
-
-## [Unreleased]
-- Initial release
+# Initial version 0.0.1
+First prototype is released
