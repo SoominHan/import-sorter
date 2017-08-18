@@ -1,5 +1,6 @@
-import { ImportElement, ImportStringConfiguration, ImportElementGroup } from './models';
 import { chain, LoDashExplicitArrayWrapper } from 'lodash';
+
+import { ImportElement, ImportElementGroup, ImportStringConfiguration } from './models';
 
 export class ImportCreator {
     private importStringConfig: ImportStringConfiguration;
@@ -9,7 +10,7 @@ export class ImportCreator {
     }
 
     public createImportText(groups: ImportElementGroup[]): string {
-        this.assertIsinitialised();
+        this.assertIsInitialised();
         return groups
             .map((x, i, data) => {
                 return this.createImportStrings(x.elements).join('\n')
@@ -19,11 +20,11 @@ export class ImportCreator {
     }
 
     private createImportStrings(element: ImportElement[]): string[] {
-        this.assertIsinitialised();
+        this.assertIsInitialised();
         return element.map(x => this.createSingleImportString(x));
     }
 
-    private assertIsinitialised() {
+    private assertIsInitialised() {
         if (!this.importStringConfig) {
             throw new Error('ImportStringConfiguration: has not been initialised');
         }
@@ -67,18 +68,27 @@ export class ImportCreator {
         const max = this.importStringConfig.maximumNumberOfImportExpressionsPerLine.count;
         const spaceConfig = this.getSpaceConfig();
         const nameBindings = nameBindingStringsExpr.value();
+        const commaJoinPart = `${spaceConfig.beforeComma},${spaceConfig.afterComma}`;
         if (this.importStringConfig.maximumNumberOfImportExpressionsPerLine.type === 'words') {
             const nameBindingsResult = chain(nameBindings)
                 .chunk(max)
-                .map(x => x.join(`${spaceConfig.beforeComma},${spaceConfig.afterComma}`))
+                .map(x => x.join(commaJoinPart))
                 .value();
+            //todo: here
+            const isSingleLine = nameBindings.length <= max;
+            const hasTrailingComma =
+                (isSingleLine && this.importStringConfig.trailingComma === 'always')
+                || (!isSingleLine && this.importStringConfig.trailingComma !== 'none');
+            if (hasTrailingComma) {
+                nameBindingsResult[nameBindingsResult.length - 1] = nameBindingsResult[nameBindingsResult.length - 1] + `${spaceConfig.beforeComma},`;
+            }
             return {
                 nameBindings: nameBindingsResult,
-                isSingleLine: nameBindings.length <= max
+                isSingleLine
             };
         }
 
-        const insideCurlyString = nameBindings.join(`${spaceConfig.beforeComma},${spaceConfig.afterComma}`);
+        const insideCurlyString = nameBindings.join(commaJoinPart);
         const isSingleLine = this.createImportWithCurlyBracket(element, insideCurlyString, true).length <= max;
         if (isSingleLine) {
             return {
@@ -115,7 +125,7 @@ export class ImportCreator {
                 }
             });
         return {
-            nameBindings: result.map(x => x.join(`${spaceConfig.beforeComma},${spaceConfig.afterComma}`)),
+            nameBindings: result.map(x => x.join(commaJoinPart)),
             isSingleLine: false
         };
     }

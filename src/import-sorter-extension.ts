@@ -45,7 +45,7 @@ export class ImportSorterExtension {
                     rangesToDelete.forEach(x => {
                         editBuilder.delete(x);
                     });
-                    editBuilder.insert(new Position(0, 0), importText);
+                    editBuilder.insert(new Position(0, 0), importText + '\n');
                 })
                 .then(x => {
                     if (!x) {

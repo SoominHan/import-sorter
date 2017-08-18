@@ -14,6 +14,7 @@ suite('Import Creator Tests', () => {
         tabSize: 4,
         numberOfEmptyLinesAfterAllImports: 0,
         quoteMark: 'single',
+        trailingComma: 'none',
         maximumNumberOfImportExpressionsPerLine: {
             count: 23,
             type: 'maxLineLength'

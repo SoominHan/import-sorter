@@ -179,6 +179,15 @@
                     "type": "number",
                     "default": 1,
                     "description": "Number of spaces after comma"
+                },
+                "importSorter.importStringConfiguration.trailingComma": {
+                    "enum": [
+                        "none",
+                        "always",
+                        "multiLine"
+                    ],
+                    "default": "none",
+                    "description": "If always/multiLine then adds a trailing comma at the end of the imports for 'single and multi' and 'multi-line' imports respectively. Default is none therefore no trailing comma"
                 }
             }
         }
