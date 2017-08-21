@@ -79,8 +79,12 @@ an example of default configuration is provided bellow. For available options ha
 
 ## Future roadmap
 - Better readme
-- Handle comments within import blocks
+
 - Read settings from the file so it can be shared with the project.
+
+- Handle external dependencies based on the most external at the top and group based on this. Sorting will be done within those groups.
+
+- Handle comments within import blocks
 
 ## Release Notes
 
