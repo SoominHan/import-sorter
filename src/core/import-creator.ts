@@ -104,7 +104,8 @@ export class ImportCreator {
         const spaceConfig = this.getSpaceConfig();
         const beforeCommaAndAfterPart = `${spaceConfig.beforeComma},${spaceConfig.afterComma}`;
         const insideCurlyString = nameBindings.join(beforeCommaAndAfterPart);
-        const isSingleLine = this.createImportWithCurlyBracket(element, insideCurlyString, true).length <= max;
+        const singleLineImport = this.createImportWithCurlyBracket(element, insideCurlyString, true);
+        const isSingleLine = this.importStringConfig.trailingComma === 'always' ? singleLineImport.length < max : singleLineImport.length <= max;
         if (isSingleLine) {
             const nameBindingsResult = [insideCurlyString];
             this.appendTrailingComma(nameBindingsResult, true);

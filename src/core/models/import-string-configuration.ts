@@ -6,7 +6,7 @@ export interface ImportStringConfiguration {
     quoteMark: 'single' | 'double';
     tabSize: number;
     numberOfEmptyLinesAfterAllImports: number;
-    trailingComma: 'none' | 'always' | 'multiline';
+    trailingComma: 'none' | 'always' | 'multiLine';
     spacingPerImportExpression: {
         afterStartingBracket: number;
         beforeEndingBracket: number;
