@@ -6,6 +6,7 @@ export interface ImportStringConfiguration {
     quoteMark: 'single' | 'double';
     tabSize: number;
     numberOfEmptyLinesAfterAllImports: number;
+    trailingComma: 'none' | 'always' | 'multiLine';
     spacingPerImportExpression: {
         afterStartingBracket: number;
         beforeEndingBracket: number;
@@ -17,6 +18,7 @@ export interface ImportStringConfiguration {
 export const defaultImportStringConfiguration: ImportStringConfiguration = {
     tabSize: 4,
     numberOfEmptyLinesAfterAllImports: 2,
+    trailingComma: 'none',
     quoteMark: 'single',
     maximumNumberOfImportExpressionsPerLine: {
         count: 26,

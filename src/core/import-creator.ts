@@ -1,5 +1,6 @@
-import { ImportElement, ImportStringConfiguration, ImportElementGroup } from './models';
 import { chain, LoDashExplicitArrayWrapper } from 'lodash';
+
+import { ImportElement, ImportElementGroup, ImportStringConfiguration } from './models';
 
 export class ImportCreator {
     private importStringConfig: ImportStringConfiguration;
@@ -9,7 +10,7 @@ export class ImportCreator {
     }
 
     public createImportText(groups: ImportElementGroup[]): string {
-        this.assertIsinitialised();
+        this.assertIsInitialised();
         return groups
             .map((x, i, data) => {
                 return this.createImportStrings(x.elements).join('\n')
@@ -19,11 +20,11 @@ export class ImportCreator {
     }
 
     private createImportStrings(element: ImportElement[]): string[] {
-        this.assertIsinitialised();
+        this.assertIsInitialised();
         return element.map(x => this.createSingleImportString(x));
     }
 
-    private assertIsinitialised() {
+    private assertIsInitialised() {
         if (!this.importStringConfig) {
             throw new Error('ImportStringConfiguration: has not been initialised');
         }
@@ -64,28 +65,56 @@ export class ImportCreator {
         nameBindings: string[],
         isSingleLine: boolean
     } {
-        const max = this.importStringConfig.maximumNumberOfImportExpressionsPerLine.count;
-        const spaceConfig = this.getSpaceConfig();
+
         const nameBindings = nameBindingStringsExpr.value();
+
         if (this.importStringConfig.maximumNumberOfImportExpressionsPerLine.type === 'words') {
-            const nameBindingsResult = chain(nameBindings)
-                .chunk(max)
-                .map(x => x.join(`${spaceConfig.beforeComma},${spaceConfig.afterComma}`))
-                .value();
-            return {
-                nameBindings: nameBindingsResult,
-                isSingleLine: nameBindings.length <= max
-            };
+            return this.createNameBindingChunksByWords(nameBindings);
         }
 
-        const insideCurlyString = nameBindings.join(`${spaceConfig.beforeComma},${spaceConfig.afterComma}`);
-        const isSingleLine = this.createImportWithCurlyBracket(element, insideCurlyString, true).length <= max;
+        return this.createNameBindingChunksByLength(nameBindings, element);
+    }
+
+    private createNameBindingChunksByWords(nameBindings: string[]): {
+        nameBindings: string[],
+        isSingleLine: boolean
+    } {
+        const max = this.importStringConfig.maximumNumberOfImportExpressionsPerLine.count;
+        const spaceConfig = this.getSpaceConfig();
+        const beforeCommaAndAfterPart = `${spaceConfig.beforeComma},${spaceConfig.afterComma}`;
+        const nameBindingsResult = chain(nameBindings)
+            .chunk(max)
+            .map(x => x.join(beforeCommaAndAfterPart))
+            .value();
+
+        const isSingleLine = nameBindings.length <= max;
+        this.appendTrailingComma(nameBindingsResult, isSingleLine);
+
+        return {
+            nameBindings: nameBindingsResult,
+            isSingleLine
+        };
+    }
+
+    private createNameBindingChunksByLength(nameBindings: string[], element: ImportElement): {
+        nameBindings: string[],
+        isSingleLine: boolean
+    } {
+        const max = this.importStringConfig.maximumNumberOfImportExpressionsPerLine.count;
+        const spaceConfig = this.getSpaceConfig();
+        const beforeCommaAndAfterPart = `${spaceConfig.beforeComma},${spaceConfig.afterComma}`;
+        const insideCurlyString = nameBindings.join(beforeCommaAndAfterPart);
+        const singleLineImport = this.createImportWithCurlyBracket(element, insideCurlyString, true);
+        const isSingleLine = this.importStringConfig.trailingComma === 'always' ? singleLineImport.length < max : singleLineImport.length <= max;
         if (isSingleLine) {
+            const nameBindingsResult = [insideCurlyString];
+            this.appendTrailingComma(nameBindingsResult, true);
             return {
-                nameBindings: [insideCurlyString],
+                nameBindings: nameBindingsResult,
                 isSingleLine: true
             };
         }
+
         const result: string[][] = [];
         let resultIndex = 0;
         let currentTotalLength = 0;
@@ -93,6 +122,7 @@ export class ImportCreator {
         const commaShift =
             this.importStringConfig.spacingPerImportExpression.afterComma
             + this.importStringConfig.spacingPerImportExpression.beforeComma + 1; // 1 for comma
+        this.appendTrailingComma(nameBindings, false);
         nameBindings
             .forEach((x, ind) => {
                 const xLength = ind !== nameBindings.length - 1
@@ -115,9 +145,18 @@ export class ImportCreator {
                 }
             });
         return {
-            nameBindings: result.map(x => x.join(`${spaceConfig.beforeComma},${spaceConfig.afterComma}`)),
+            nameBindings: result.map(x => x.join(beforeCommaAndAfterPart)),
             isSingleLine: false
         };
+    }
+
+    private appendTrailingComma(nameBindings: string[], isSingleLine: boolean) {
+        const hasTrailingComma =
+            (isSingleLine && this.importStringConfig.trailingComma === 'always')
+            || (!isSingleLine && this.importStringConfig.trailingComma !== 'none');
+        if (hasTrailingComma) {
+            nameBindings[nameBindings.length - 1] = nameBindings[nameBindings.length - 1] + `${this.getSpaceConfig().beforeComma},`;
+        }
     }
 
     private createImportWithCurlyBracket(element: ImportElement, namedBindingString: string, isSingleLine: boolean) {
