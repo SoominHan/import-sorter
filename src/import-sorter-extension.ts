@@ -1,10 +1,11 @@
 import { window, StatusBarAlignment, StatusBarItem, TextDocument, TextEditorEdit, Range, Position, workspace, TextLine } from 'vscode';
 import {
     AstWalker, ImportCreator, ImportElement,
-    ImportSorter, ImportStringConfiguration, SortConfiguration, ImportSorterConfiguration
+    ImportSorter, ImportStringConfiguration, SortConfiguration, ImportSorterConfiguration, GeneralConfiguration, defaultGeneralConfiguration
 } from './core';
-import { chain, range } from 'lodash';
-
+import { chain, range, merge } from 'lodash';
+import * as fs from 'fs';
+import { sep } from 'path';
 const EXTENSION_CONFIGURATION_NAME = 'importSorter';
 
 export class ImportSorterExtension {
@@ -126,8 +127,21 @@ export class ImportSorterExtension {
     }
 
     private getConfiguration(): ImportSorterConfiguration {
-        const sortConfiguration = workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<SortConfiguration>('sortConfiguration');
-        const importStringConfiguration = workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<ImportStringConfiguration>('importStringConfiguration');
+        const generalConfig = workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<GeneralConfiguration>('generalConfiguration');
+        const configPath = `${workspace.rootPath}${sep}${generalConfig.configurationFilePath}`;
+        const isConfigExist = fs.existsSync(configPath);
+
+        if (!isConfigExist && generalConfig.configurationFilePath !== defaultGeneralConfiguration.configurationFilePath) {
+            console.error('configurationFilePath is not found by the following path, import sorter will proceed with defaults from settings', configPath);
+            window.showErrorMessage('configurationFilePath is not found by the following path, import sorter will proceed with defaults from settings', configPath);
+        }
+
+        const fileConfigurationString = isConfigExist ? fs.readFileSync(configPath, 'utf8') : '{}';
+        const fileConfig = JSON.parse(fileConfigurationString);
+        const sortConfig = workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<SortConfiguration>('sortConfiguration');
+        const importStringConfig = workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<ImportStringConfiguration>('importStringConfiguration');
+        const sortConfiguration = merge(sortConfig, fileConfig.sortConfiguration || {});
+        const importStringConfiguration = merge(importStringConfig, fileConfig.importStringConfiguration || {});
         return {
             sortConfiguration,
             importStringConfiguration

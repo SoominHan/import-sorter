@@ -59,6 +59,11 @@
             "type": "object",
             "title": "Import Sorter configuration",
             "properties": {
+                "importSorter.generalConfiguration.configurationFilePath": {
+                    "type": "string",
+                    "default": "./import-sorter.json",
+                    "description": "Default file configuration name"
+                },
                 "importSorter.sortConfiguration.importMembers.order": {
                     "enum": [
                         "caseInsensitive",

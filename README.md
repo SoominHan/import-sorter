@@ -9,8 +9,11 @@ For now sorting supports only typescript language.
 To run the sorter use `Sort Imports` command from the `Command Palette` (Ctrl+Shift+P)
 
 ## Extension Settings
-an example of default configuration is provided bellow. For available options have a look at vs code settings
+an example of default configuration is provided bellow. For available options have a look at vs code settings(it should show available settings when you search for importSorter)
 ```json
+  // Default file configuration name
+  "importSorter.generalConfiguration.configurationFilePath": "./import-sorter.json",
+
   // Sort Order of names in curly brackets
   "importSorter.sortConfiguration.importMembers.order": "caseInsensitive",
 
@@ -75,18 +78,48 @@ an example of default configuration is provided bellow. For available options ha
 
   // Number of spaces after comma
   "importSorter.importStringConfiguration.spacingPerImportExpression.afterComma": 1,
+
+  // If always/multiLine then adds a trailing comma at the end of the imports for 'single and multi' and 'multi-line' imports respectively. Default is none therefore no trailing comma
+  "importSorter.importStringConfiguration.trailingComma": "none"
 ```
+## Some settings in more details:
+- `importSorter.generalConfiguration.configurationFilePath` adds an option to read configuration from file. The setting represents a relative path to the root of the open vscode workspace.
+The default value is `./import-sorter.json`. Bellow is a example of the configuration:
+```json
+    {
+      "importStringConfiguration": {
+        "trailingComma": "multiLine",
+        "tabSize": 4,
+        "maximumNumberOfImportExpressionsPerLine": {
+          "count": 50
+        }
+      },
+      "sortConfiguration": {
+        "customOrderingRules": {
+          "defaultNumberOfEmptyLinesAfterGroup": 2
+        }
+      }
+    }
+```
+The priority of settings is given to configuration file. If the setting does not exist in the configuration file then the value of the vscode setting will be taken. If file does not exist, then all settings will be taken from vscode.
+
+- `importSorter.importStringConfiguration.trailingComma` is an enum which can be `always`, `multiLine`, or `none`.
+  - `always` - will always append trailing comma.
+  - `multiLine` - will append comma if import line is broken to multiple lines.
+  - `none` - will not append comma(`This one is a default setting`)
 
 ## Future roadmap
 - Better readme
 
-- Read settings from the file so it can be shared with the project.
-
-- Handle external dependencies based on the most external at the top and group based on this. Sorting will be done within those groups.
+- Handle external dependencies based on the most external dependencies being at the top and group based on those. Sorting will be done within those groups.
 
 - Handle comments within import blocks
 
 ## Release Notes
+
+### 0.0.2
+- Added configuration file support
+- Added `importSorter.importStringConfiguration.trailingComma`.
 
 ### 0.0.1
 

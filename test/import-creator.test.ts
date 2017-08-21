@@ -265,7 +265,7 @@ suite('Import Creator Tests', () => {
                 }
             ],
             expected: "import {\n    ChangeDetectionStrategy, DebugElement,\n} from \'@angular/core\';"
-        },
+        }
     ];
 
     const getImportText = (groups: ImportElementGroup[], config: ImportStringConfiguration) => {
