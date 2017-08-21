@@ -2,7 +2,7 @@
     "name": "import-sorter",
     "displayName": "TypeScript Import Sorter",
     "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "publisher": "mike-co",
     "engines": {
         "vscode": "^1.9.0"
@@ -59,6 +59,11 @@
             "type": "object",
             "title": "Import Sorter configuration",
             "properties": {
+                "importSorter.generalConfiguration.configurationFilePath": {
+                    "type": "string",
+                    "default": "./import-sorter.json",
+                    "description": "Default file configuration name"
+                },
                 "importSorter.sortConfiguration.importMembers.order": {
                     "enum": [
                         "caseInsensitive",
@@ -179,6 +184,15 @@
                     "type": "number",
                     "default": 1,
                     "description": "Number of spaces after comma"
+                },
+                "importSorter.importStringConfiguration.trailingComma": {
+                    "enum": [
+                        "none",
+                        "always",
+                        "multiLine"
+                    ],
+                    "default": "none",
+                    "description": "If always/multiLine then adds a trailing comma at the end of the imports for 'single and multi' and 'multi-line' imports respectively. Default is none therefore no trailing comma"
                 }
             }
         }

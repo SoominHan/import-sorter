@@ -33,11 +33,11 @@ export class ImportSorter {
 
     private normalizePaths(imports: ImportElement[]) {
         return chain(imports).map(x => {
-            const isRelativePath = x.moduleSpecifierName.startsWith('./');
+            const isRelativePath = x.moduleSpecifierName.startsWith(`./`) || x.moduleSpecifierName.startsWith(`../`);
             x.moduleSpecifierName = path
                 .normalize(x.moduleSpecifierName)
                 .replace(new RegExp('\\' + path.sep, 'g'), '/');
-            if (isRelativePath && x.moduleSpecifierName !== './') {
+            if (isRelativePath && !x.moduleSpecifierName.startsWith(`./`) && !x.moduleSpecifierName.startsWith(`../`)) {
                 x.moduleSpecifierName = `./${x.moduleSpecifierName}`;
             }
             return x;
