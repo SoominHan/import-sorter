@@ -80,7 +80,10 @@ an example of default configuration is provided bellow. For available options ha
   "importSorter.importStringConfiguration.spacingPerImportExpression.afterComma": 1,
 
   // If always/multiLine then adds a trailing comma at the end of the imports for 'single and multi' and 'multi-line' imports respectively. Default is none therefore no trailing comma
-  "importSorter.importStringConfiguration.trailingComma": "none"
+  "importSorter.importStringConfiguration.trailingComma": "none",
+
+  // If true then the import string has a semicolon at the end, otherwise it will not be appended. Default is true
+  "importSorter.importStringConfiguration.hasSemicolon": true
 ```
 ## Some settings in more details:
 - `importSorter.generalConfiguration.configurationFilePath` adds an option to read configuration from file. The setting represents a relative path to the root of the open vscode workspace.

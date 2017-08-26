@@ -1,3 +1,7 @@
+# [0.0.3]
+### New features
+* added support for optional semicolons which is toggled through `importSorter.importStringConfiguration.hasSemicolon`;
+
 # [0.0.2]
 ### New features
 * added support for trailing commas. `importSorter.importStringConfiguration.trailingComma` is an enum which can be `always`, `multiLine`, or `none`.
