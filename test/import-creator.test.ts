@@ -1,6 +1,9 @@
-import 'mocha';
 import * as expect from 'expect.js';
-import { ImportCreator, ImportElementGroup, ImportStringConfiguration } from '../src/core';
+import 'mocha';
+
+import {
+    defaultImportStringConfiguration, ImportCreator, ImportElementGroup, ImportStringConfiguration
+} from '../src/core';
 
 interface ImportCreatorTest {
     testName: string;
@@ -9,27 +12,20 @@ interface ImportCreatorTest {
     expected: string;
 }
 
+const createConfiguration = (partialConfig: ImportStringConfiguration) => Object.assign({}, defaultImportStringConfiguration, partialConfig);
+
 suite('Import Creator Tests', () => {
 
     const testCases: ImportCreatorTest[] = [
         {
             testName: 'test0',
-            config: {
-                tabSize: 4,
+            config: createConfiguration({
                 numberOfEmptyLinesAfterAllImports: 0,
-                quoteMark: 'single',
-                trailingComma: 'none',
                 maximumNumberOfImportExpressionsPerLine: {
                     count: 23,
                     type: 'maxLineLength'
-                },
-                spacingPerImportExpression: {
-                    afterStartingBracket: 1,
-                    beforeEndingBracket: 1,
-                    beforeComma: 0,
-                    afterComma: 1
                 }
-            },
+            } as ImportStringConfiguration),
             elementGroups: [
                 {
                     elements: [
@@ -52,22 +48,13 @@ suite('Import Creator Tests', () => {
         },
         {
             testName: 'test1 - trailing comma',
-            config: {
-                tabSize: 4,
+            config: createConfiguration({
                 numberOfEmptyLinesAfterAllImports: 0,
-                quoteMark: 'single',
-                trailingComma: 'none',
                 maximumNumberOfImportExpressionsPerLine: {
                     count: 70,
                     type: 'maxLineLength'
-                },
-                spacingPerImportExpression: {
-                    afterStartingBracket: 1,
-                    beforeEndingBracket: 1,
-                    beforeComma: 0,
-                    afterComma: 1
                 }
-            },
+            } as ImportStringConfiguration),
             elementGroups: [
                 {
                     elements: [
@@ -88,22 +75,13 @@ suite('Import Creator Tests', () => {
         },
         {
             testName: 'test2 - trailing comma',
-            config: {
-                tabSize: 4,
+            config: createConfiguration({
                 numberOfEmptyLinesAfterAllImports: 0,
-                quoteMark: 'single',
-                trailingComma: 'none',
                 maximumNumberOfImportExpressionsPerLine: {
                     count: 69,
                     type: 'maxLineLength'
-                },
-                spacingPerImportExpression: {
-                    afterStartingBracket: 1,
-                    beforeEndingBracket: 1,
-                    beforeComma: 0,
-                    afterComma: 1
                 }
-            },
+            } as ImportStringConfiguration),
             elementGroups: [
                 {
                     elements: [
@@ -124,22 +102,13 @@ suite('Import Creator Tests', () => {
         },
         {
             testName: 'test3 - trailing comma',
-            config: {
-                tabSize: 4,
-                numberOfEmptyLinesAfterAllImports: 0,
-                quoteMark: 'single',
+            config: createConfiguration({
                 trailingComma: 'always',
                 maximumNumberOfImportExpressionsPerLine: {
                     count: 71,
                     type: 'maxLineLength'
-                },
-                spacingPerImportExpression: {
-                    afterStartingBracket: 1,
-                    beforeEndingBracket: 1,
-                    beforeComma: 0,
-                    afterComma: 1
                 }
-            },
+            } as ImportStringConfiguration),
             elementGroups: [
                 {
                     elements: [
@@ -160,22 +129,13 @@ suite('Import Creator Tests', () => {
         },
         {
             testName: 'test4 - trailing comma',
-            config: {
-                tabSize: 4,
-                numberOfEmptyLinesAfterAllImports: 0,
-                quoteMark: 'single',
+            config: createConfiguration({
                 trailingComma: 'always',
                 maximumNumberOfImportExpressionsPerLine: {
                     count: 70,
                     type: 'maxLineLength'
-                },
-                spacingPerImportExpression: {
-                    afterStartingBracket: 1,
-                    beforeEndingBracket: 1,
-                    beforeComma: 0,
-                    afterComma: 1
                 }
-            },
+            } as ImportStringConfiguration),
             elementGroups: [
                 {
                     elements: [
@@ -196,22 +156,13 @@ suite('Import Creator Tests', () => {
         },
         {
             testName: 'test5 - trailing comma',
-            config: {
-                tabSize: 4,
-                numberOfEmptyLinesAfterAllImports: 0,
-                quoteMark: 'single',
+            config: createConfiguration({
                 trailingComma: 'multiLine',
                 maximumNumberOfImportExpressionsPerLine: {
                     count: 70,
                     type: 'maxLineLength'
-                },
-                spacingPerImportExpression: {
-                    afterStartingBracket: 1,
-                    beforeEndingBracket: 1,
-                    beforeComma: 0,
-                    afterComma: 1
                 }
-            },
+            } as ImportStringConfiguration),
             elementGroups: [
                 {
                     elements: [
@@ -232,22 +183,13 @@ suite('Import Creator Tests', () => {
         },
         {
             testName: 'test6 - trailing comma',
-            config: {
-                tabSize: 4,
-                numberOfEmptyLinesAfterAllImports: 0,
-                quoteMark: 'single',
+            config: createConfiguration({
                 trailingComma: 'multiLine',
                 maximumNumberOfImportExpressionsPerLine: {
                     count: 69,
                     type: 'maxLineLength'
-                },
-                spacingPerImportExpression: {
-                    afterStartingBracket: 1,
-                    beforeEndingBracket: 1,
-                    beforeComma: 0,
-                    afterComma: 1
                 }
-            },
+            } as ImportStringConfiguration),
             elementGroups: [
                 {
                     elements: [
@@ -265,6 +207,60 @@ suite('Import Creator Tests', () => {
                 }
             ],
             expected: "import {\n    ChangeDetectionStrategy, DebugElement,\n} from \'@angular/core\';"
+        },
+        {
+            testName: 'test7 - optional semi-colon',
+            config: createConfiguration({
+                hasSemicolon: false,
+                maximumNumberOfImportExpressionsPerLine: {
+                    count: 69,
+                    type: 'maxLineLength'
+                }
+            } as ImportStringConfiguration),
+            elementGroups: [
+                {
+                    elements: [
+                        {
+                            moduleSpecifierName: '@angular/core',
+                            startPosition: { line: 0, character: 0 },
+                            endPosition: { line: 0, character: 70 },
+                            hasFromKeyWord: true,
+                            namedBindings: [
+                                { name: 'ChangeDetectionStrategy', aliasName: null },
+                                { name: 'DebugElement', aliasName: null }
+                            ]
+                        }],
+                    numberOfEmptyLinesAfterGroup: 0
+                }
+            ],
+            expected: "import { ChangeDetectionStrategy, DebugElement } from '@angular/core'"
+        },
+        {
+            testName: 'test8 - optional semi-colon',
+            config: createConfiguration({
+                hasSemicolon: false,
+                maximumNumberOfImportExpressionsPerLine: {
+                    count: 68,
+                    type: 'maxLineLength'
+                }
+            } as ImportStringConfiguration),
+            elementGroups: [
+                {
+                    elements: [
+                        {
+                            moduleSpecifierName: '@angular/core',
+                            startPosition: { line: 0, character: 0 },
+                            endPosition: { line: 0, character: 69 },
+                            hasFromKeyWord: true,
+                            namedBindings: [
+                                { name: 'ChangeDetectionStrategy', aliasName: null },
+                                { name: 'DebugElement', aliasName: null }
+                            ]
+                        }],
+                    numberOfEmptyLinesAfterGroup: 0
+                }
+            ],
+            expected: "import {\n    ChangeDetectionStrategy, DebugElement\n} from \'@angular/core\'"
         }
     ];
 
