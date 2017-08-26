@@ -2,7 +2,7 @@
     "name": "import-sorter",
     "displayName": "TypeScript Import Sorter",
     "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "publisher": "mike-co",
     "engines": {
         "vscode": "^1.9.0"
@@ -193,6 +193,11 @@
                     ],
                     "default": "none",
                     "description": "If always/multiLine then adds a trailing comma at the end of the imports for 'single and multi' and 'multi-line' imports respectively. Default is none therefore no trailing comma"
+                },
+                "importSorter.importStringConfiguration.hasSemicolon": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "If true then the import string has a semicolon at the end, otherwise it will not be appended. Default is true"
                 }
             }
         }

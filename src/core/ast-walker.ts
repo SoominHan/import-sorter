@@ -1,18 +1,12 @@
 import { ImportElement, ImportNode } from './models';
-import * as path from 'path';
 import * as ts from 'typescript';
 import * as fs from 'fs';
 
-const rootPath = (args: string) => {
-    return path.join(...[__dirname].concat(args));
-};
-
 export class AstWalker {
 
-    public parseImports(filePath: string, _sourceText?: string): ImportElement[] {
-        const fullPath = rootPath(filePath);
-        const sourceText = _sourceText || fs.readFileSync(fullPath).toString();
-        const sourceFile = this.createSourceFile(fullPath, sourceText);
+    public parseImports(fullFilePath: string, _sourceText?: string): ImportElement[] {
+        const sourceText = _sourceText || fs.readFileSync(fullFilePath).toString();
+        const sourceFile = this.createSourceFile(fullFilePath, sourceText);
         const imports = this.delintImports(sourceFile);
         return imports.map(x => this.parseImport(x, sourceFile)).filter(x => x !== null);
     }
@@ -79,9 +73,9 @@ export class AstWalker {
         if (importClause.namedBindings.kind === ts.SyntaxKind.NamedImports) {
             const nImport = importClause.namedBindings as ts.NamedImports;
             nImport.elements.forEach(y => {
-                const properyName = y.propertyName ? y.propertyName.text : y.name.text;
+                const propertyName = y.propertyName ? y.propertyName.text : y.name.text;
                 const aliasName = !y.propertyName ? null : y.name.text;
-                result.namedBindings.push({ aliasName: aliasName, name: properyName });
+                result.namedBindings.push({ aliasName: aliasName, name: propertyName });
             });
             return result;
         }

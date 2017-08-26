@@ -33,19 +33,19 @@ export class ImportCreator {
     private createSingleImportString(element: ImportElement) {
         const qMark = this.getQuoteMark();
         if (!element.hasFromKeyWord) {
-            return `import ${qMark}${element.moduleSpecifierName}${qMark};`;
+            return `import ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
         }
 
         if (element.namedBindings && element.namedBindings.length > 0) {
             const isStarImport = element.namedBindings.some(x => x.name === '*');
             if (isStarImport) {
-                return `import ${element.namedBindings[0].name} as ${element.namedBindings[0].aliasName} from ${qMark}${element.moduleSpecifierName}${qMark};`;
+                return `import ${element.namedBindings[0].name} as ${element.namedBindings[0].aliasName} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
             }
             const curlyBracketElement = this.createCurlyBracketElement(element);
             return this.createImportWithCurlyBracket(element, curlyBracketElement.line, curlyBracketElement.isSingleLine);
         }
         if (element.defaultImportName) {
-            return `import ${element.defaultImportName} from ${qMark}${element.moduleSpecifierName}${qMark};`;
+            return `import ${element.defaultImportName} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
         }
         console.warn('unknown string import', element);
         return null;
@@ -165,13 +165,14 @@ export class ImportCreator {
         if (element.defaultImportName) {
             return isSingleLine
                 // tslint:disable-next-line:max-line-length
-                ? `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}{${spaceConfig.afterStartingBracket}${namedBindingString}${spaceConfig.beforeEndingBracket}} from ${qMark}${element.moduleSpecifierName}${qMark};`
-                : `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}{\n${namedBindingString}\n} from ${qMark}${element.moduleSpecifierName}${qMark};`;
+                ? `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}{${spaceConfig.afterStartingBracket}${namedBindingString}${spaceConfig.beforeEndingBracket}} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`
+                : `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}{\n${namedBindingString}\n} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
 
         }
         return isSingleLine
-            ? `import {${spaceConfig.afterStartingBracket}${namedBindingString}${spaceConfig.beforeEndingBracket}} from ${qMark}${element.moduleSpecifierName}${qMark};`
-            : `import {\n${namedBindingString}\n} from ${qMark}${element.moduleSpecifierName}${qMark};`;
+            // tslint:disable-next-line:max-line-length
+            ? `import {${spaceConfig.afterStartingBracket}${namedBindingString}${spaceConfig.beforeEndingBracket}} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`
+            : `import {\n${namedBindingString}\n} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
     }
 
     private getSpaceConfig() {
@@ -186,6 +187,10 @@ export class ImportCreator {
 
     private getQuoteMark() {
         return this.importStringConfig.quoteMark === 'single' ? '\'' : '"';
+    }
+
+    private get semicolonChar() {
+        return this.importStringConfig.hasSemicolon === true ? ';' : '';
     }
 
     private repeatString(str: string, numberOfTimes: number) {
