@@ -2,6 +2,10 @@
 Extension which sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rules.
 Configuration supports regex functions to set sorting priority and rules
 
+## Examples
+Inline-style:
+![alt text](./assets/import-sorter-example-1.gif "Import Sorter")
+
 ## Features
 For now sorting supports only typescript language.
 
