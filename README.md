@@ -3,7 +3,6 @@ Extension which sorts TypeScript imports according to the configuration provided
 Configuration supports regex functions to set sorting priority and rules
 
 ## Examples
-Inline-style:
 ![alt text](./assets/import-sorter-example-1.gif "Import Sorter")
 
 ## Features
