@@ -1,3 +1,6 @@
+# [0.0.5]
+* added gif example
+
 # [0.0.4]
 ### New features
 * added support for .tsx;
