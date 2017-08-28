@@ -1,3 +1,7 @@
+# [0.0.4]
+### New features
+* added support for .tsx;
+
 # [0.0.3]
 ### New features
 * added support for optional semicolons which is toggled through `importSorter.importStringConfiguration.hasSemicolon`;

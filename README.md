@@ -105,6 +105,31 @@ The default value is `./import-sorter.json`. Bellow is a example of the configur
     }
 ```
 The priority of settings is given to configuration file. If the setting does not exist in the configuration file then the value of the vscode setting will be taken. If file does not exist, then all settings will be taken from vscode.
+******
+-  `importSorter.sortConfiguration.customOrderingRules.rules` is a json array of regex expressions which sets the sort group order.
+As of now the default(might change later on) setting is
+```json
+[
+    {
+      "regex": "^@angular",
+      "orderLevel": 0,
+      "numberOfEmptyLinesAfterGroup": 0,
+      "type": "path"
+    },
+    {
+      "regex": "^[@]",
+      "orderLevel": 10
+    },
+    {
+      "regex": "^[.]",
+      "orderLevel": 30
+    }
+]
+```
+The `type` is an optional and defaults to `path`(another value is `importMember`). That setting says that we make any import which starts from `@angular` in the path to have the highest order priority `0`. The highest priority given to the lowest number. Then anything which starts from `@` in the path gets next priority with order `10`. The default priority for everything else is denoted by `importSorter.sortConfiguration.customOrderingRules.defaultOrderLevel` and default to `20`. The least priority is given to anything which starts from `.` in the path.
+
+As a result we get `4` sort `groups`. Those groups are `individually` sorted by the rules applied in the settings.
+******
 
 - `importSorter.importStringConfiguration.trailingComma` is an enum which can be `always`, `multiLine`, or `none`.
   - `always` - will always append trailing comma.
@@ -120,10 +145,4 @@ The priority of settings is given to configuration file. If the setting does not
 
 ## Release Notes
 
-### 0.0.2
-- Added configuration file support
-- Added `importSorter.importStringConfiguration.trailingComma`.
-
-### 0.0.1
-
-Initial prototype
+Refer to change log
