@@ -154,11 +154,11 @@ export class ImportSorterExtension {
             return false;
         }
 
-        if (editor.document.languageId !== 'typescript') {
-            window.showErrorMessage('Import Sorter currently only supports typescript language files');
-            return false;
+        if ((editor.document.languageId === 'typescript') || (editor.document.languageId === 'typescriptreact')) {
+            return true;
         }
 
-        return true;
+        window.showErrorMessage('Import Sorter currently only supports typescript (.ts) or typescriptreact (.tsx) language files');
+        return false;
     }
 }
