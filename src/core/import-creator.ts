@@ -119,18 +119,16 @@ export class ImportCreator {
         let resultIndex = 0;
         let currentTotalLength = 0;
         const maxLineLength = max - this.importStringConfig.tabSize;
-        const commaShift =
-            this.importStringConfig.spacingPerImportExpression.afterComma
-            + this.importStringConfig.spacingPerImportExpression.beforeComma + 1; // 1 for comma
         this.appendTrailingComma(nameBindings, false);
         nameBindings
             .forEach((x, ind) => {
                 const xLength = ind !== nameBindings.length - 1
-                    ? x.length + commaShift
-                    : x.length; //last element, so we remove comma
+                    ? x.length + this.importStringConfig.spacingPerImportExpression.beforeComma + 1 // 1 for comma
+                    : x.length; //last element, so we remove comma and space before comma
                 currentTotalLength += xLength;
-                if (currentTotalLength - this.importStringConfig.spacingPerImportExpression.afterComma <= maxLineLength) {
+                if (currentTotalLength <= maxLineLength) {
                     result[resultIndex] ? result[resultIndex].push(x) : result[resultIndex] = [x];
+                    currentTotalLength += this.importStringConfig.spacingPerImportExpression.afterComma;
                     return;
                 } else {
                     if (result[resultIndex]) {

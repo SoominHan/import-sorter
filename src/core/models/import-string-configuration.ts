@@ -1,7 +1,7 @@
 export interface ImportStringConfiguration {
     maximumNumberOfImportExpressionsPerLine: {
         count: number;
-        type: 'words' | 'maxLineLength'
+        type: 'words' | 'maxLineLength' | 'eachExpressionToNewLineAfterLimit'
     };
     quoteMark: 'single' | 'double';
     tabSize: number;
