@@ -129,7 +129,7 @@ export class ImportCreator {
                     ? x.length + commaShift
                     : x.length; //last element, so we remove comma
                 currentTotalLength += xLength;
-                if (currentTotalLength <= maxLineLength) {
+                if (currentTotalLength - this.importStringConfig.spacingPerImportExpression.afterComma <= maxLineLength) {
                     result[resultIndex] ? result[resultIndex].push(x) : result[resultIndex] = [x];
                     return;
                 } else {
