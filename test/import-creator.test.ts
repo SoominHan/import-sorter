@@ -261,6 +261,34 @@ suite('Import Creator Tests', () => {
                 }
             ],
             expected: "import {\n    ChangeDetectionStrategy, DebugElement\n} from \'@angular/core\'"
+        },
+        {
+            testName: 'test9 - import string has 4 new lines',
+            config: createConfiguration({
+                numberOfEmptyLinesAfterAllImports: 0,
+                maximumNumberOfImportExpressionsPerLine: {
+                    count: 10,
+                    type: 'maxLineLength'
+                }
+            } as ImportStringConfiguration),
+            elementGroups: [
+                {
+                    elements: [
+                        {
+                            moduleSpecifierName: '@angular/core',
+                            startPosition: { line: 0, character: 0 },
+                            endPosition: { line: 0, character: 40 },
+                            hasFromKeyWord: true,
+                            namedBindings: [
+                                { name: 'a', aliasName: null },
+                                { name: 'b', aliasName: null },
+                                { name: 'c', aliasName: null }
+                            ]
+                        }],
+                    numberOfEmptyLinesAfterGroup: 0
+                }
+            ],
+            expected: "import {\n    a, b,\n    c\n} from \'@angular/core\';"
         }
     ];
 

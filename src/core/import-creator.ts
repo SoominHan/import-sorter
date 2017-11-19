@@ -58,7 +58,7 @@ export class ImportCreator {
         const resultingChunks = this.createNameBindingChunks(nameBindingStringsExpr, element);
         return resultingChunks.isSingleLine
             ? { line: `${resultingChunks.nameBindings[0]}`, isSingleLine: true }
-            : { line: `${spaceConfig.tabSpace}${resultingChunks.nameBindings.join(`,\n${spaceConfig.tabSpace}`)}`, isSingleLine: false };
+            : { line: `${spaceConfig.tabSequence}${resultingChunks.nameBindings.join(`,\n${spaceConfig.tabSequence}`)}`, isSingleLine: false };
     }
 
     private createNameBindingChunks(nameBindingStringsExpr: LoDashExplicitArrayWrapper<string>, element: ImportElement): {
@@ -69,25 +69,24 @@ export class ImportCreator {
         const nameBindings = nameBindingStringsExpr.value();
 
         if (this.importStringConfig.maximumNumberOfImportExpressionsPerLine.type === 'words') {
-            return this.createNameBindingChunksByWords(nameBindings);
+            return this.createNameBindingChunksByWords(nameBindings, this.importStringConfig.maximumNumberOfImportExpressionsPerLine.count);
         }
 
         return this.createNameBindingChunksByLength(nameBindings, element);
     }
 
-    private createNameBindingChunksByWords(nameBindings: string[]): {
+    private createNameBindingChunksByWords(nameBindings: string[], maximumNumberOfWordsBeforeBreak: number): {
         nameBindings: string[],
         isSingleLine: boolean
     } {
-        const max = this.importStringConfig.maximumNumberOfImportExpressionsPerLine.count;
         const spaceConfig = this.getSpaceConfig();
         const beforeCommaAndAfterPart = `${spaceConfig.beforeComma},${spaceConfig.afterComma}`;
         const nameBindingsResult = chain(nameBindings)
-            .chunk(max)
+            .chunk(maximumNumberOfWordsBeforeBreak)
             .map(x => x.join(beforeCommaAndAfterPart))
             .value();
 
-        const isSingleLine = nameBindings.length <= max;
+        const isSingleLine = nameBindings.length <= maximumNumberOfWordsBeforeBreak;
         this.appendTrailingComma(nameBindingsResult, isSingleLine);
 
         return {
@@ -115,22 +114,24 @@ export class ImportCreator {
             };
         }
 
+        if (this.importStringConfig.maximumNumberOfImportExpressionsPerLine.type === 'newLineEachExpressionAfterCountLimit') {
+            return this.createNameBindingChunksByWords(nameBindings, 1);
+        }
+
         const result: string[][] = [];
         let resultIndex = 0;
         let currentTotalLength = 0;
         const maxLineLength = max - this.importStringConfig.tabSize;
-        const commaShift =
-            this.importStringConfig.spacingPerImportExpression.afterComma
-            + this.importStringConfig.spacingPerImportExpression.beforeComma + 1; // 1 for comma
         this.appendTrailingComma(nameBindings, false);
         nameBindings
             .forEach((x, ind) => {
                 const xLength = ind !== nameBindings.length - 1
-                    ? x.length + commaShift
-                    : x.length; //last element, so we remove comma
+                    ? x.length + this.importStringConfig.spacingPerImportExpression.beforeComma + 1 // 1 for comma
+                    : x.length; //last element, so we remove comma and space before comma
                 currentTotalLength += xLength;
                 if (currentTotalLength <= maxLineLength) {
                     result[resultIndex] ? result[resultIndex].push(x) : result[resultIndex] = [x];
+                    currentTotalLength += this.importStringConfig.spacingPerImportExpression.afterComma;
                     return;
                 } else {
                     if (result[resultIndex]) {
@@ -176,12 +177,15 @@ export class ImportCreator {
     }
 
     private getSpaceConfig() {
+        const tabSequence = this.importStringConfig.tabType === 'tab'
+            ? this.repeatString('\t', 1)
+            : this.repeatString(' ', this.importStringConfig.tabSize);
         return {
             beforeComma: this.repeatString(' ', this.importStringConfig.spacingPerImportExpression.beforeComma),
             afterComma: this.repeatString(' ', this.importStringConfig.spacingPerImportExpression.afterComma),
             afterStartingBracket: this.repeatString(' ', this.importStringConfig.spacingPerImportExpression.afterStartingBracket),
             beforeEndingBracket: this.repeatString(' ', this.importStringConfig.spacingPerImportExpression.beforeEndingBracket),
-            tabSpace: this.repeatString(' ', this.importStringConfig.tabSize)
+            tabSequence: tabSequence
         };
     }
 
