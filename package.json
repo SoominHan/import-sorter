@@ -155,7 +155,8 @@
                 "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.type": {
                     "enum": [
                         "maxLineLength",
-                        "words"
+                        "words",
+                        "eachExpressionToNewLineAfterLimit"
                     ],
                     "default": "maxLineLength",
                     "description": "The type of length restriction, before import is moved to a new line"

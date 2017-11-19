@@ -69,25 +69,24 @@ export class ImportCreator {
         const nameBindings = nameBindingStringsExpr.value();
 
         if (this.importStringConfig.maximumNumberOfImportExpressionsPerLine.type === 'words') {
-            return this.createNameBindingChunksByWords(nameBindings);
+            return this.createNameBindingChunksByWords(nameBindings, this.importStringConfig.maximumNumberOfImportExpressionsPerLine.count);
         }
 
         return this.createNameBindingChunksByLength(nameBindings, element);
     }
 
-    private createNameBindingChunksByWords(nameBindings: string[]): {
+    private createNameBindingChunksByWords(nameBindings: string[], maximumNumberOfWordsBeforeBreak: number): {
         nameBindings: string[],
         isSingleLine: boolean
     } {
-        const max = this.importStringConfig.maximumNumberOfImportExpressionsPerLine.count;
         const spaceConfig = this.getSpaceConfig();
         const beforeCommaAndAfterPart = `${spaceConfig.beforeComma},${spaceConfig.afterComma}`;
         const nameBindingsResult = chain(nameBindings)
-            .chunk(max)
+            .chunk(maximumNumberOfWordsBeforeBreak)
             .map(x => x.join(beforeCommaAndAfterPart))
             .value();
 
-        const isSingleLine = nameBindings.length <= max;
+        const isSingleLine = nameBindings.length <= maximumNumberOfWordsBeforeBreak;
         this.appendTrailingComma(nameBindingsResult, isSingleLine);
 
         return {
@@ -113,6 +112,10 @@ export class ImportCreator {
                 nameBindings: nameBindingsResult,
                 isSingleLine: true
             };
+        }
+
+        if (this.importStringConfig.maximumNumberOfImportExpressionsPerLine.type === 'eachExpressionToNewLineAfterLimit') {
+            return this.createNameBindingChunksByWords(nameBindings, 1);
         }
 
         const result: string[][] = [];
