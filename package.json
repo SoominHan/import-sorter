@@ -2,7 +2,8 @@
     "name": "import-sorter",
     "displayName": "TypeScript Import Sorter",
     "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
-    "version": "0.0.6",
+    "icon": "assets/icons/import-sorter.png",
+    "version": "1.0.0",
     "publisher": "mike-co",
     "engines": {
         "vscode": "^1.9.0"
@@ -137,7 +138,15 @@
                 "importSorter.importStringConfiguration.tabSize": {
                     "type": "number",
                     "default": 4,
-                    "description": "Left number of spaces for the new lined imports"
+                    "description": "Left number of spaces for the new lined imports. If tabType is set to 'tab', then the configuration defines the size of the tab in number of spaces"
+                },
+                "importSorter.importStringConfiguration.tabType": {
+                    "enum": [
+                        "space",
+                        "tab"
+                    ],
+                    "default": "space",
+                    "description": "Defines the character which will be printed on each new lined import expression"
                 },
                 "importSorter.importStringConfiguration.numberOfEmptyLinesAfterAllImports": {
                     "type": "number",
@@ -155,7 +164,8 @@
                 "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.type": {
                     "enum": [
                         "maxLineLength",
-                        "words"
+                        "words",
+                        "newLineEachExpressionAfterCountLimit"
                     ],
                     "default": "maxLineLength",
                     "description": "The type of length restriction, before import is moved to a new line"

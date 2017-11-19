@@ -55,6 +55,9 @@ an example of default configuration is provided bellow. For available options ha
     }
   ],
 
+  // Defines the character which will be printed on each new lined import expression
+  "importSorter.importStringConfiguration.tabType": "space",
+
   // Left number of spaces for the new lined imports
   "importSorter.importStringConfiguration.tabSize": 4,
 
@@ -138,10 +141,20 @@ As a result we get `4` sort `groups`. Those groups are `individually` sorted by 
   - `always` - will always append trailing comma.
   - `multiLine` - will append comma if import line is broken to multiple lines.
   - `none` - will not append comma(`This one is a default setting`)
+******
+
+- `importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.type` is an enum which can be `words`, `maxLineLength`, or `newLineEachExpressionAfterCountLimit`. The setting is set in pair with `importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count`, which determines the number after which the imports are going to be moved to the next line
+  - `words` - `count` denotes maximum number of import expressions per line.
+  - `maxLineLength` - `count` denotes maximum number of characters per line.
+  - `newLineEachExpressionAfterCountLimit` - `count` denotes maximum number of characters which can be on the first line. If all imports do not fit one line, then each import will be placed on a new line.
+******
+
+- `importSorter.importStringConfiguration.tabType` is an enum which can be `tab` or `space`.
+  - `space` - will add `importSorter.importStringConfiguration.tabSize` number of space characters for each new-lined import.
+  - `tab` - will add a tab character for each new-lined import. The tab character would assume to take `importSorter.importStringConfiguration.tabSize` number of space characters
+******
 
 ## Future roadmap
-- Better readme
-
 - Handle external dependencies based on the most external dependencies being at the top and group based on those. Sorting will be done within those groups.
 
 - Handle comments within import blocks

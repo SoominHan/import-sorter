@@ -1,10 +1,11 @@
 export interface ImportStringConfiguration {
     maximumNumberOfImportExpressionsPerLine: {
         count: number;
-        type: 'words' | 'maxLineLength'
+        type: 'words' | 'maxLineLength' | 'newLineEachExpressionAfterCountLimit'
     };
     quoteMark: 'single' | 'double';
     tabSize: number;
+    tabType: 'tab' | 'space';
     numberOfEmptyLinesAfterAllImports: number;
     trailingComma: 'none' | 'always' | 'multiLine';
     hasSemicolon: boolean;
@@ -18,6 +19,7 @@ export interface ImportStringConfiguration {
 
 export const defaultImportStringConfiguration: ImportStringConfiguration = {
     tabSize: 4,
+    tabType: 'space',
     numberOfEmptyLinesAfterAllImports: 2,
     trailingComma: 'none',
     quoteMark: 'single',
