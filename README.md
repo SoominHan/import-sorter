@@ -55,6 +55,9 @@ an example of default configuration is provided bellow. For available options ha
     }
   ],
 
+  // Defines the character which will be printed on each new lined import expression
+  "importSorter.importStringConfiguration.tabType": "space",
+
   // Left number of spaces for the new lined imports
   "importSorter.importStringConfiguration.tabSize": 4,
 
