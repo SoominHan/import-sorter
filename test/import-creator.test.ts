@@ -2,7 +2,10 @@ import * as expect from 'expect.js';
 import 'mocha';
 
 import {
-    defaultImportStringConfiguration, ImportCreator, ImportElementGroup, ImportStringConfiguration
+    defaultImportStringConfiguration,
+    ImportCreator,
+    ImportElementGroup,
+    ImportStringConfiguration
 } from '../src/core';
 
 interface ImportCreatorTest {

@@ -1,6 +1,7 @@
-import { ImportElement, ImportNode } from './models';
-import * as ts from 'typescript';
 import * as fs from 'fs';
+import * as ts from 'typescript';
+
+import { ImportElement, ImportNode } from './models';
 
 export class AstWalker {
 

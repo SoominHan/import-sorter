@@ -1,11 +1,29 @@
-import { window, StatusBarAlignment, StatusBarItem, TextDocument, TextEditorEdit, Range, Position, workspace, TextLine } from 'vscode';
-import {
-    AstWalker, ImportCreator, ImportElement,
-    ImportSorter, ImportStringConfiguration, SortConfiguration, ImportSorterConfiguration, GeneralConfiguration, defaultGeneralConfiguration
-} from './core';
-import { chain, range, merge } from 'lodash';
 import * as fs from 'fs';
+import { chain, merge, range } from 'lodash';
 import { sep } from 'path';
+import {
+    Position,
+    Range,
+    StatusBarAlignment,
+    StatusBarItem,
+    TextDocument,
+    TextEditorEdit,
+    TextLine,
+    window,
+    workspace
+} from 'vscode';
+
+import {
+    AstWalker,
+    defaultGeneralConfiguration,
+    GeneralConfiguration,
+    ImportCreator,
+    ImportElement,
+    ImportSorter,
+    ImportSorterConfiguration,
+    ImportStringConfiguration,
+    SortConfiguration
+} from './core';
 
 const EXTENSION_CONFIGURATION_NAME = 'importSorter';
 

@@ -1,4 +1,10 @@
-import { commands, Disposable, ExtensionContext, workspace } from 'vscode';
+import {
+    commands,
+    Disposable,
+    ExtensionContext,
+    workspace
+} from 'vscode';
+
 import { ImportSorterExtension } from './import-sorter-extension';
 
 export const activate = (context: ExtensionContext) => {
