@@ -51,6 +51,11 @@ export class ImportSorterExtension {
     }
 
     public sortActiveDocumentImportsFromOnBeforeSaveCommand() {
+        const isSortOnBeforeSaveEnabled =
+            workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<GeneralConfiguration>('generalConfiguration').sortOnBeforeSave;
+        if (!isSortOnBeforeSaveEnabled) {
+            return;
+        }
         if (!this.isSortAllowed(true)) {
             return;
         }

@@ -17,6 +17,9 @@ an example of default configuration is provided bellow. For available options ha
   // Default file configuration name
   "importSorter.generalConfiguration.configurationFilePath": "./import-sorter.json",
 
+  // Enables sort before each save of the document
+  "importSorter.generalConfiguration.sortOnBeforeSave": false,
+
   // Sort Order of names in curly brackets
   "importSorter.sortConfiguration.importMembers.order": "caseInsensitive",
 

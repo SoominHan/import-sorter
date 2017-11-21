@@ -65,6 +65,11 @@
                     "default": "./import-sorter.json",
                     "description": "Default file configuration name"
                 },
+                "importSorter.generalConfiguration.sortOnBeforeSave": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enables sort before each save of the document"
+                },
                 "importSorter.sortConfiguration.importMembers.order": {
                     "enum": [
                         "caseInsensitive",
