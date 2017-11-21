@@ -1,6 +1,10 @@
 import { chain, LoDashExplicitArrayWrapper } from 'lodash';
 
-import { ImportElement, ImportElementGroup, ImportStringConfiguration } from './models';
+import {
+    ImportElement,
+    ImportElementGroup,
+    ImportStringConfiguration
+} from './models';
 
 export class ImportCreator {
     private importStringConfig: ImportStringConfiguration;

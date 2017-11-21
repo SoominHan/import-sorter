@@ -1,6 +1,7 @@
-import 'mocha';
-import { AstWalker } from '../src/core/ast-walker';
 import * as expect from 'expect.js';
+import 'mocha';
+
+import { AstWalker } from '../src/core/ast-walker';
 import { ImportElement } from '../src/core/index';
 
 interface AstTest {

@@ -1,11 +1,30 @@
-import { window, StatusBarAlignment, StatusBarItem, TextDocument, TextEditorEdit, Range, Position, workspace, TextLine } from 'vscode';
-import {
-    AstWalker, ImportCreator, ImportElement,
-    ImportSorter, ImportStringConfiguration, SortConfiguration, ImportSorterConfiguration, GeneralConfiguration, defaultGeneralConfiguration
-} from './core';
-import { chain, range, merge } from 'lodash';
 import * as fs from 'fs';
+import { chain, merge, range } from 'lodash';
 import { sep } from 'path';
+import {
+    Position,
+    Range,
+    StatusBarAlignment,
+    StatusBarItem,
+    TextDocument,
+    TextEditorEdit,
+    TextLine,
+    window,
+    workspace
+} from 'vscode';
+
+import {
+    AstWalker,
+    defaultGeneralConfiguration,
+    GeneralConfiguration,
+    ImportCreator,
+    ImportElement,
+    ImportSorter,
+    ImportSorterConfiguration,
+    ImportStringConfiguration,
+    SortConfiguration
+} from './core';
+
 const EXTENSION_CONFIGURATION_NAME = 'importSorter';
 
 export class ImportSorterExtension {
@@ -24,12 +43,32 @@ export class ImportSorterExtension {
         }
     }
 
-    public sortActiveDocumentImports() {
+    public sortActiveDocumentImportsFromCommand() {
+        if (!this.isSortAllowed(false)) {
+            return;
+        }
+        this.sortActiveDocumentImports();
+    }
+
+    public sortActiveDocumentImportsFromOnBeforeSaveCommand() {
+        const isSortOnBeforeSaveEnabled =
+            workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<GeneralConfiguration>('generalConfiguration').sortOnBeforeSave;
+        if (!isSortOnBeforeSaveEnabled) {
+            return;
+        }
+        if (!this.isSortAllowed(true)) {
+            return;
+        }
+        this.sortActiveDocumentImports();
+    }
+
+    public dispose() {
+        this.statusBarItem.dispose();
+    }
+
+    private sortActiveDocumentImports() {
         if (!this.walker) {
             console.error('ImportSorterExtension: has not been initialized');
-        }
-        if (!this.isSortAllowed()) {
-            return;
         }
         try {
             const configuration = this.setConfig();
@@ -43,16 +82,27 @@ export class ImportSorterExtension {
             this.getConfiguration();
             window.activeTextEditor
                 .edit((editBuilder: TextEditorEdit) => {
+                    const lastRange = rangesToDelete[rangesToDelete.length - 1];
+                    if (!lastRange) {
+                        return;
+                    }
+
+                    const nextAfterLastLineToDelete = doc.lineAt(lastRange.end.line);
+                    const isNextAfterLastLineEmpty = nextAfterLastLineToDelete.isEmptyOrWhitespace;
                     rangesToDelete.forEach(x => {
                         editBuilder.delete(x);
                     });
-                    editBuilder.insert(new Position(0, 0), importText + '\n');
+                    editBuilder.insert(new Position(0, 0), isNextAfterLastLineEmpty ? importText : importText + '\n');
                 })
                 .then(x => {
                     if (!x) {
                         console.error('Sort Imports was unsuccessful', x);
                         return;
                     }
+                    if (!rangesToDelete.length) {
+                        return;
+                    }
+
                     window.activeTextEditor
                         .edit((editBuilder: TextEditorEdit) =>
                             this.addEmptyLinesAfterAllImports(editBuilder, importText, configuration.importStringConfiguration.numberOfEmptyLinesAfterAllImports)
@@ -66,10 +116,6 @@ export class ImportSorterExtension {
         } catch (error) {
             window.showErrorMessage(error.message);
         }
-    }
-
-    public dispose() {
-        this.statusBarItem.dispose();
     }
 
     private setConfig() {
@@ -148,7 +194,7 @@ export class ImportSorterExtension {
         };
     }
 
-    private isSortAllowed(): boolean {
+    private isSortAllowed(isFileExtensionErrorIgnored: boolean): boolean {
         const editor = window.activeTextEditor;
         if (!editor) {
             return false;
@@ -156,6 +202,10 @@ export class ImportSorterExtension {
 
         if ((editor.document.languageId === 'typescript') || (editor.document.languageId === 'typescriptreact')) {
             return true;
+        }
+
+        if (isFileExtensionErrorIgnored) {
+            return false;
         }
 
         window.showErrorMessage('Import Sorter currently only supports typescript (.ts) or typescriptreact (.tsx) language files');
