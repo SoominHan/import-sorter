@@ -76,6 +76,10 @@ export class ImportSorterExtension {
                         console.error('Sort Imports was unsuccessful', x);
                         return;
                     }
+                    if (!rangesToDelete.length) {
+                        return;
+                    }
+
                     window.activeTextEditor
                         .edit((editBuilder: TextEditorEdit) =>
                             this.addEmptyLinesAfterAllImports(editBuilder, importText, configuration.importStringConfiguration.numberOfEmptyLinesAfterAllImports)
