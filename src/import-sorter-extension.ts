@@ -6,6 +6,7 @@ import {
 import { chain, range, merge } from 'lodash';
 import * as fs from 'fs';
 import { sep } from 'path';
+
 const EXTENSION_CONFIGURATION_NAME = 'importSorter';
 
 export class ImportSorterExtension {
@@ -24,12 +25,27 @@ export class ImportSorterExtension {
         }
     }
 
-    public sortActiveDocumentImports() {
+    public sortActiveDocumentImportsFromCommand() {
+        if (!this.isSortAllowed(false)) {
+            return;
+        }
+        this.sortActiveDocumentImports();
+    }
+
+    public sortActiveDocumentImportsFromOnBeforeSaveCommand() {
+        if (!this.isSortAllowed(true)) {
+            return;
+        }
+        this.sortActiveDocumentImports();
+    }
+
+    public dispose() {
+        this.statusBarItem.dispose();
+    }
+
+    private sortActiveDocumentImports() {
         if (!this.walker) {
             console.error('ImportSorterExtension: has not been initialized');
-        }
-        if (!this.isSortAllowed()) {
-            return;
         }
         try {
             const configuration = this.setConfig();
@@ -43,10 +59,17 @@ export class ImportSorterExtension {
             this.getConfiguration();
             window.activeTextEditor
                 .edit((editBuilder: TextEditorEdit) => {
+                    const lastRange = rangesToDelete[rangesToDelete.length - 1];
+                    if (!lastRange) {
+                        return;
+                    }
+
+                    const nextAfterLastLineToDelete = doc.lineAt(lastRange.end.line);
+                    const isNextAfterLastLineEmpty = nextAfterLastLineToDelete.isEmptyOrWhitespace;
                     rangesToDelete.forEach(x => {
                         editBuilder.delete(x);
                     });
-                    editBuilder.insert(new Position(0, 0), importText + '\n');
+                    editBuilder.insert(new Position(0, 0), isNextAfterLastLineEmpty ? importText : importText + '\n');
                 })
                 .then(x => {
                     if (!x) {
@@ -66,10 +89,6 @@ export class ImportSorterExtension {
         } catch (error) {
             window.showErrorMessage(error.message);
         }
-    }
-
-    public dispose() {
-        this.statusBarItem.dispose();
     }
 
     private setConfig() {
@@ -148,7 +167,7 @@ export class ImportSorterExtension {
         };
     }
 
-    private isSortAllowed(): boolean {
+    private isSortAllowed(isFileExtensionErrorIgnored: boolean): boolean {
         const editor = window.activeTextEditor;
         if (!editor) {
             return false;
@@ -156,6 +175,10 @@ export class ImportSorterExtension {
 
         if ((editor.document.languageId === 'typescript') || (editor.document.languageId === 'typescriptreact')) {
             return true;
+        }
+
+        if (isFileExtensionErrorIgnored) {
+            return false;
         }
 
         window.showErrorMessage('Import Sorter currently only supports typescript (.ts) or typescriptreact (.tsx) language files');
