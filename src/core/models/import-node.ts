@@ -1,4 +1,7 @@
-import { ImportDeclaration, LineAndCharacter } from 'typescript';
+import {
+    ImportDeclaration,
+    LineAndCharacter
+} from 'typescript';
 
 export interface ImportNode {
     importDeclaration: ImportDeclaration;

@@ -1,7 +1,18 @@
-import { SortConfiguration, ImportElement, ImportSortOrder, ImportElementGroup } from './models';
-import { chain, cloneDeep, isNil, LoDashExplicitArrayWrapper } from 'lodash';
-import { ImportElementSortResult } from './models/import-element-sort-result';
+import {
+    chain,
+    cloneDeep,
+    isNil,
+    LoDashExplicitArrayWrapper
+} from 'lodash';
 import * as path from 'path';
+
+import {
+    ImportElement,
+    ImportElementGroup,
+    ImportSortOrder,
+    SortConfiguration
+} from './models';
+import { ImportElementSortResult } from './models/import-element-sort-result';
 
 const NEW_PERIOD_CHAR = String.fromCharCode(128);
 export class ImportSorter {

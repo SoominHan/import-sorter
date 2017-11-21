@@ -3,7 +3,7 @@
     "displayName": "TypeScript Import Sorter",
     "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
     "icon": "assets/icons/import-sorter.png",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "publisher": "mike-co",
     "engines": {
         "vscode": "^1.9.0"
@@ -24,7 +24,7 @@
         "sort imports"
     ],
     "activationEvents": [
-        "onCommand:extension.sortImports"
+        "*"
     ],
     "main": "./out/src/extension",
     "scripts": {
@@ -64,6 +64,11 @@
                     "type": "string",
                     "default": "./import-sorter.json",
                     "description": "Default file configuration name"
+                },
+                "importSorter.generalConfiguration.sortOnBeforeSave": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enables sort before each save of the document"
                 },
                 "importSorter.sortConfiguration.importMembers.order": {
                     "enum": [
