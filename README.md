@@ -9,7 +9,10 @@ Configuration supports regex functions to set sorting priority and rules
 For now sorting supports only typescript language.
 
 ## Command
-To run the sorter use `Sort Imports` command from the `Command Palette` (Ctrl+Shift+P)
+To run the sorter use `Sort Imports` command from the `Command Palette` (Ctrl+Shift+P).
+
+Alternatively, you can set `importSorter.generalConfiguration.sortOnBeforeSave` to `true`, which would
+trigger sorting before each save operation.
 
 ## Extension Settings
 an example of default configuration is provided bellow. For available options have a look at vs code settings(it should show available settings when you search for importSorter)
@@ -113,7 +116,7 @@ The default value is `./import-sorter.json`. Bellow is a example of the configur
       }
     }
 ```
-The priority of settings is given to configuration file. If the setting does not exist in the configuration file then the value of the vscode setting will be taken. If file does not exist, then all settings will be taken from vscode.
+The priority of settings is given to the configuration file. If the setting does not exist in the configuration file then the value of the vscode setting will be taken. If file does not exist, then all settings will be taken from vscode.
 ******
 -  `importSorter.sortConfiguration.customOrderingRules.rules` is a json array of regex expressions which sets the sort group order.
 As of now the default(might change later on) setting is
