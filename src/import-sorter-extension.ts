@@ -10,7 +10,9 @@ import {
     TextEditorEdit,
     TextLine,
     window,
-    workspace
+    workspace,
+    TextEdit,
+    TextDocumentWillSaveEvent
 } from 'vscode';
 
 import {
@@ -43,91 +45,104 @@ export class ImportSorterExtension {
         }
     }
 
-    public sortActiveDocumentImportsFromCommand(): Promise<boolean> {
+    public sortActiveDocumentImportsFromCommand(): void {
         if (!this.isSortAllowed(false)) {
-            return Promise.reject('Sort is not allowed');
+            return;
         }
-        return this.getSortActiveDocumentImports$();
+        return this.sortActiveDocumentImports();
     }
 
-    public sortActiveDocumentImportsFromOnBeforeSaveCommand(): Promise<boolean> {
+    public sortActiveDocumentImportsFromOnBeforeSaveCommand(event: TextDocumentWillSaveEvent): void {
         const isSortOnBeforeSaveEnabled =
             workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<GeneralConfiguration>('generalConfiguration').sortOnBeforeSave;
         if (!isSortOnBeforeSaveEnabled) {
-            return Promise.resolve(true);
+            return;
         }
         if (!this.isSortAllowed(true)) {
-            return Promise.resolve(true);
+            return;
         }
-        return this.getSortActiveDocumentImports$();
+        return this.sortActiveDocumentImports(event);
     }
 
     public dispose() {
         this.statusBarItem.dispose();
     }
 
-    private getSortActiveDocumentImports$(): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-            if (!this.walker) {
-                console.error('ImportSorterExtension: has not been initialized');
-                reject('ImportSorterExtension: has not been initialized');
+    private sortActiveDocumentImports(event?: TextDocumentWillSaveEvent): void {
+        if (!this.walker) {
+            console.error('ImportSorterExtension: has not been initialized');
+            return;
+        }
+        try {
+            const configuration = this.setConfig();
+            const doc: TextDocument = window.activeTextEditor.document;
+            const text = doc.getText();
+            const imports = this.walker.parseImports(doc.uri.fsPath, text);
+            if (!imports.length) {
+                return;
             }
-            try {
-                const configuration = this.setConfig();
-                const doc: TextDocument = window.activeTextEditor.document;
-                const text = doc.getText();
-                const imports = this.walker.parseImports(doc.uri.fsPath, text);
-                const sortedImports = this.sorter.sortImportElements(imports);
-                const importText = this.importCreator.createImportText(sortedImports.groups);
-
-                const rangesToDelete = this.getRangesToDelete(chain(sortedImports.groups).flatMap(x => x.elements).value(), sortedImports.duplicates, doc);
-                this.getConfiguration();
-                window.activeTextEditor
-                    .edit((editBuilder: TextEditorEdit) => {
-                        const lastRange = rangesToDelete[rangesToDelete.length - 1];
-                        if (!lastRange) {
-                            return;
-                        }
-                        rangesToDelete.forEach(x => {
-                            editBuilder.delete(x);
-                        });
-                        editBuilder.insert(new Position(0, 0), importText);
-                    })
-                    .then(x => {
-                        if (!x) {
-                            console.error('Sort Imports was unsuccessful', x);
-                            return Promise.reject('Sort Imports was unsuccessful');
-
-                        }
-                        if (!rangesToDelete.length) {
-                            Promise.resolve();
-                        }
-
-                        return window.activeTextEditor
-                            .edit((editBuilder: TextEditorEdit) =>
-                                this.addEmptyLinesAfterAllImports(editBuilder, importText, configuration.importStringConfiguration.numberOfEmptyLinesAfterAllImports, doc)
-                            )
-                            .then(y => {
-                                if (!y) {
-                                    console.error('Sort Imports was unsuccessful', x);
-                                    return Promise.reject('Sort Imports was unsuccessful');
-                                }
-                                Promise.resolve();
-                            });
-                    })
-                    .then(
-                    _ => {
-                        resolve();
-                    },
-                    err => {
-                        reject(err);
-                    });
-
-            } catch (error) {
-                window.showErrorMessage(error.message);
-                reject(error.message);
+            const sortedImports = this.sorter.sortImportElements(imports);
+            const importText = this.importCreator.createImportText(sortedImports.groups);
+            if (text.replace(/\r/g, '').startsWith(importText)) {
+                return;
             }
-        });
+            const rangesToDelete = this.getRangesToDelete(chain(sortedImports.groups).flatMap(x => x.elements).value(), sortedImports.duplicates, doc);
+            this.getConfiguration();
+
+            const lastRange = rangesToDelete[rangesToDelete.length - 1];
+            if (!lastRange) {
+                return;
+            }
+            const deleteEdits = rangesToDelete.map(x => TextEdit.delete(x));
+            //if (deleteEdits[0].range.start.line === 0) {
+            //    const nonEmptyIndex = deleteEdits[0].range.end.line + 1;
+            //}
+            const insertEdit = TextEdit.insert(new Position(0, 0), importText + '\n');
+            event.waitUntil(Promise.resolve([...deleteEdits, insertEdit]));
+            // window.activeTextEditor
+            //     .edit((editBuilder: TextEditorEdit) => {
+            //         const lastRange = rangesToDelete[rangesToDelete.length - 1];
+            //         if (!lastRange) {
+            //             return;
+            //         }
+            //         rangesToDelete.forEach(x => {
+            //             editBuilder.delete(x);
+            //         });
+            //         editBuilder.insert(new Position(0, 0), importText);
+            //     })
+            //     .then(x => {
+            //         if (!x) {
+            //             console.error('Sort Imports was unsuccessful', x);
+            //             return Promise.reject('Sort Imports was unsuccessful');
+
+            //         }
+            //         if (!rangesToDelete.length) {
+            //             Promise.resolve();
+            //         }
+
+            //         return window.activeTextEditor
+            //             .edit((editBuilder: TextEditorEdit) =>
+            //                 this.addEmptyLinesAfterAllImports(editBuilder, importText, configuration.importStringConfiguration.numberOfEmptyLinesAfterAllImports, doc)
+            //             )
+            //             .then(y => {
+            //                 if (!y) {
+            //                     console.error('Sort Imports was unsuccessful', x);
+            //                     return Promise.reject('Sort Imports was unsuccessful');
+            //                 }
+            //                 Promise.resolve();
+            //             });
+            //     })
+            //     .then(
+            //     _ => {
+            //         resolve();
+            //     },
+            //     err => {
+            //         reject(err);
+            //     });
+
+        } catch (error) {
+            window.showErrorMessage(error.message);
+        }
     }
 
     private setConfig() {
@@ -161,17 +176,18 @@ export class ImportSorterExtension {
             .sortBy(x => x.startPosition.line)
             .forEach((x, ind, data) => {
                 const previousRange = rangesToDelete[rangesToDelete.length - 1];
-                let currentRange = data.length - 1 !== ind
-                    ? new Range(x.startPosition.line, x.startPosition.character, x.endPosition.line + 1, 0)
-                    : new Range(x.startPosition.line, x.startPosition.character, x.endPosition.line, x.endPosition.character);
-                if (!previousRange) {
-                    rangesToDelete.push(currentRange);
-                    return;
-                }
-                const nextNonEmptyLine = data.length - 1 !== ind ? this.getNextNonEmptyLine(currentRange.end.line - 1, doc) : null;
+                let currentRange = new Range(x.startPosition.line, x.startPosition.character, x.endPosition.line + 1, 0); //data.length - 1 !== ind
+                //? new Range(x.startPosition.line, x.startPosition.character, x.endPosition.line + 1, 0)
+                // : new Range(x.startPosition.line, x.startPosition.character, x.endPosition.line, x.endPosition.character);
+                const nextNonEmptyLine = this.getNextNonEmptyLine(currentRange.end.line - 1, doc);
 
                 if (nextNonEmptyLine && nextNonEmptyLine.lineNumber !== currentRange.end.line) {
                     currentRange = new Range(currentRange.start.line, currentRange.start.character, nextNonEmptyLine.lineNumber, 0);
+                }
+
+                if (!previousRange) {
+                    rangesToDelete.push(currentRange);
+                    return;
                 }
 
                 if (previousRange.intersection(currentRange)) {
