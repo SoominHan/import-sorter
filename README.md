@@ -14,6 +14,8 @@ To run the sorter use `Sort Imports` command from the `Command Palette` (Ctrl+Sh
 Alternatively, you can set `importSorter.generalConfiguration.sortOnBeforeSave` to `true`, which would
 trigger sorting before each save operation.
 
+Also you could use/redefine keybindings. The default one is `ctrl + alt + o`.
+
 ## Extension Settings
 an example of default configuration is provided bellow. For available options have a look at vs code settings(it should show available settings when you search for importSorter)
 ```json

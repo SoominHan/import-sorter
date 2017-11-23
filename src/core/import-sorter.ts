@@ -23,7 +23,7 @@ export class ImportSorter {
     }
 
     public sortImportElements(imports: ImportElement[]): ImportElementSortResult {
-        this.assertIsinitialised();
+        this.assertIsInitialised();
         const clonedElements = cloneDeep(imports);
         const joinedImportsResult = this.joinImportPaths(clonedElements);
         const duplicates = joinedImportsResult.duplicates;
@@ -36,7 +36,7 @@ export class ImportSorter {
         };
     }
 
-    private assertIsinitialised() {
+    private assertIsInitialised() {
         if (!this.sortConfig) {
             throw new Error('SortConfiguration: has not been initialised');
         }
