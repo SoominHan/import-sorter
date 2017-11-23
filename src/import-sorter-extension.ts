@@ -70,11 +70,12 @@ export class ImportSorterExtension {
 
     private sortActiveDocumentImports(event?: TextDocumentWillSaveEvent): void {
         if (!this.walker) {
-            console.error('ImportSorterExtension: has not been initialized');
+            console.error('Typescript import sorter - ImportSorterExtension: has not been initialized');
             return;
         }
         try {
-            const configuration = this.setConfig();
+            this.setConfig();
+
             const doc: TextDocument = window.activeTextEditor.document;
             const text = doc.getText();
             const imports = this.walker.parseImports(doc.uri.fsPath, text);
@@ -83,65 +84,31 @@ export class ImportSorterExtension {
             }
             const sortedImports = this.sorter.sortImportElements(imports);
             const importText = this.importCreator.createImportText(sortedImports.groups);
-            if (text.replace(/\r/g, '').startsWith(importText)) {
+            const numberOfImportLines = importText.split('\n').length;
+
+            if (doc.lineCount >= numberOfImportLines &&
+                doc.lineAt(numberOfImportLines - 1).isEmptyOrWhitespace &&
+                (
+                    (doc.lineCount > numberOfImportLines && !doc.lineAt(numberOfImportLines).isEmptyOrWhitespace) ||
+                    (doc.lineCount === numberOfImportLines + 1 && doc.lineAt(numberOfImportLines).isEmptyOrWhitespace) ||
+                    doc.lineCount === numberOfImportLines
+                ) &&
+                text.replace(/\r/g, '').startsWith(importText)) {
                 return;
             }
+
             const rangesToDelete = this.getRangesToDelete(chain(sortedImports.groups).flatMap(x => x.elements).value(), sortedImports.duplicates, doc);
-            this.getConfiguration();
 
             const lastRange = rangesToDelete[rangesToDelete.length - 1];
             if (!lastRange) {
                 return;
             }
             const deleteEdits = rangesToDelete.map(x => TextEdit.delete(x));
-            //if (deleteEdits[0].range.start.line === 0) {
-            //    const nonEmptyIndex = deleteEdits[0].range.end.line + 1;
-            //}
             const insertEdit = TextEdit.insert(new Position(0, 0), importText + '\n');
+
             event.waitUntil(Promise.resolve([...deleteEdits, insertEdit]));
-            // window.activeTextEditor
-            //     .edit((editBuilder: TextEditorEdit) => {
-            //         const lastRange = rangesToDelete[rangesToDelete.length - 1];
-            //         if (!lastRange) {
-            //             return;
-            //         }
-            //         rangesToDelete.forEach(x => {
-            //             editBuilder.delete(x);
-            //         });
-            //         editBuilder.insert(new Position(0, 0), importText);
-            //     })
-            //     .then(x => {
-            //         if (!x) {
-            //             console.error('Sort Imports was unsuccessful', x);
-            //             return Promise.reject('Sort Imports was unsuccessful');
-
-            //         }
-            //         if (!rangesToDelete.length) {
-            //             Promise.resolve();
-            //         }
-
-            //         return window.activeTextEditor
-            //             .edit((editBuilder: TextEditorEdit) =>
-            //                 this.addEmptyLinesAfterAllImports(editBuilder, importText, configuration.importStringConfiguration.numberOfEmptyLinesAfterAllImports, doc)
-            //             )
-            //             .then(y => {
-            //                 if (!y) {
-            //                     console.error('Sort Imports was unsuccessful', x);
-            //                     return Promise.reject('Sort Imports was unsuccessful');
-            //                 }
-            //                 Promise.resolve();
-            //             });
-            //     })
-            //     .then(
-            //     _ => {
-            //         resolve();
-            //     },
-            //     err => {
-            //         reject(err);
-            //     });
-
         } catch (error) {
-            window.showErrorMessage(error.message);
+            window.showErrorMessage(`Typescript import sorter failed with - ${error.message}. Please log a bug.`);
         }
     }
 
@@ -152,37 +119,23 @@ export class ImportSorterExtension {
         return configuration;
     }
 
-    private addEmptyLinesAfterAllImports(textEditorEdit: TextEditorEdit, importText: string, numberOfEmptyLinesAfterAllImports: number, doc: TextDocument) {
-        const numberOfImportTextLines = importText.split('\n').length;
-        const firstLine = this.getNextNonEmptyLine(numberOfImportTextLines - 1, doc);
-        const lineDifference = firstLine
-            ? firstLine.lineNumber - numberOfImportTextLines
-            : doc.lineCount - numberOfImportTextLines;
-        const lineNumbersToAdd = numberOfEmptyLinesAfterAllImports - lineDifference;
-        if (lineNumbersToAdd > 0) {
-            const stringToInsert = '\n'.repeat(lineNumbersToAdd);
-            textEditorEdit.insert(new Position(numberOfImportTextLines, 0), stringToInsert);
-        }
-        if (lineNumbersToAdd < 0) {
-            const rangeToDelete = new Range(numberOfImportTextLines, 0, numberOfImportTextLines + Math.abs(lineNumbersToAdd), 0);
-            textEditorEdit.delete(rangeToDelete);
-        }
-    }
-
     private getRangesToDelete(sortedImports: ImportElement[], duplicates: ImportElement[], doc: TextDocument) {
         const rangesToDelete: Range[] = [];
         chain(sortedImports)
             .concat(duplicates)
             .sortBy(x => x.startPosition.line)
-            .forEach((x, ind, data) => {
+            .forEach(x => {
                 const previousRange = rangesToDelete[rangesToDelete.length - 1];
-                let currentRange = new Range(x.startPosition.line, x.startPosition.character, x.endPosition.line + 1, 0); //data.length - 1 !== ind
-                //? new Range(x.startPosition.line, x.startPosition.character, x.endPosition.line + 1, 0)
-                // : new Range(x.startPosition.line, x.startPosition.character, x.endPosition.line, x.endPosition.character);
+                let currentRange = new Range(x.startPosition.line, x.startPosition.character, x.endPosition.line + 1, 0);
                 const nextNonEmptyLine = this.getNextNonEmptyLine(currentRange.end.line - 1, doc);
 
-                if (nextNonEmptyLine && nextNonEmptyLine.lineNumber !== currentRange.end.line) {
-                    currentRange = new Range(currentRange.start.line, currentRange.start.character, nextNonEmptyLine.lineNumber, 0);
+                if (nextNonEmptyLine && !nextNonEmptyLine.isLast && nextNonEmptyLine.line.lineNumber !== currentRange.end.line) {
+                    currentRange = new Range(currentRange.start.line, currentRange.start.character, nextNonEmptyLine.line.lineNumber, 0);
+                }
+
+                if (nextNonEmptyLine && nextNonEmptyLine.isLast) {
+                    const lastLine = doc.lineAt(doc.lineCount - 1);
+                    currentRange = new Range(currentRange.start.line, currentRange.start.character, lastLine.lineNumber, lastLine.range.end.character);
                 }
 
                 if (!previousRange) {
@@ -200,17 +153,20 @@ export class ImportSorterExtension {
         return rangesToDelete;
     }
 
-    private getNextNonEmptyLine(startLineIndex: number, doc: TextDocument): TextLine {
+    private getNextNonEmptyLine(startLineIndex: number, doc: TextDocument): { line: TextLine, isLast: boolean } {
 
         const nextLineIndex = startLineIndex + 1;
-        if (doc.lineCount < 0 || nextLineIndex > doc.lineCount - 1) {
+        if (doc.lineCount < 0) {
             return null;
+        }
+        if (nextLineIndex > doc.lineCount - 1) {
+            return { line: null, isLast: true };
         }
         const nextLine = doc.lineAt(nextLineIndex);
         if (!nextLine) {
             return null;
         } else if (!nextLine.isEmptyOrWhitespace) {
-            return nextLine;
+            return { line: nextLine, isLast: false };
         } else {
             return this.getNextNonEmptyLine(nextLineIndex, doc);
         }
