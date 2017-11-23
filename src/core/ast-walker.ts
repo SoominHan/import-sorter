@@ -6,6 +6,9 @@ import { ImportElement, ImportNode } from './models';
 export class AstWalker {
 
     public parseImports(fullFilePath: string, _sourceText?: string): ImportElement[] {
+        if (_sourceText !== null && _sourceText !== undefined && _sourceText.trim() === '') {
+            return [];
+        }
         const sourceText = _sourceText || fs.readFileSync(fullFilePath).toString();
         const sourceFile = this.createSourceFile(fullFilePath, sourceText);
         const imports = this.delintImports(sourceFile);

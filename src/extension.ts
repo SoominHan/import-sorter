@@ -15,9 +15,7 @@ export const activate = (context: ExtensionContext) => {
         importSorterExtension.sortActiveDocumentImportsFromCommand();
     });
 
-    const onWillSaveTextDocument = workspace.onWillSaveTextDocument(event =>
-        event.waitUntil(Promise.resolve(importSorterExtension.sortActiveDocumentImportsFromOnBeforeSaveCommand()))
-    );
+    const onWillSaveTextDocument = workspace.onWillSaveTextDocument(event =>importSorterExtension.sortActiveDocumentImportsFromOnBeforeSaveCommand(event));
 
     context.subscriptions.push(sortImportsCommand);
     context.subscriptions.push(importSorterExtension);

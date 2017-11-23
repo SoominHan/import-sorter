@@ -1,3 +1,7 @@
+# [1.1.1]
+### Bug fixes
+* fixing behavior of on before save sorting.
+
 # [1.1.0]
 ### New features
 * added an option to sort imports before each save of the document. The corresponding config record is "importSorter.generalConfiguration.sortOnBeforeSave". The default value is false, which disables sort on save.

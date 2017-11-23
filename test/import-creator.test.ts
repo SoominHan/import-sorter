@@ -128,7 +128,7 @@ suite('Import Creator Tests', () => {
                     numberOfEmptyLinesAfterGroup: 0
                 }
             ],
-            expected: "import { ChangeDetectionStrategy, DebugElement, } from '@angular/core';"
+            expected: "import { ChangeDetectionStrategy, DebugElement, } from '@angular/core';\n"
         },
         {
             testName: 'test4 - trailing comma',
@@ -155,7 +155,7 @@ suite('Import Creator Tests', () => {
                     numberOfEmptyLinesAfterGroup: 0
                 }
             ],
-            expected: "import {\n    ChangeDetectionStrategy, DebugElement,\n} from \'@angular/core\';"
+            expected: "import {\n    ChangeDetectionStrategy, DebugElement,\n} from \'@angular/core\';\n"
         },
         {
             testName: 'test5 - trailing comma',
@@ -182,7 +182,7 @@ suite('Import Creator Tests', () => {
                     numberOfEmptyLinesAfterGroup: 0
                 }
             ],
-            expected: "import { ChangeDetectionStrategy, DebugElement } from '@angular/core';"
+            expected: "import { ChangeDetectionStrategy, DebugElement } from '@angular/core';\n"
         },
         {
             testName: 'test6 - trailing comma',
@@ -209,7 +209,7 @@ suite('Import Creator Tests', () => {
                     numberOfEmptyLinesAfterGroup: 0
                 }
             ],
-            expected: "import {\n    ChangeDetectionStrategy, DebugElement,\n} from \'@angular/core\';"
+            expected: "import {\n    ChangeDetectionStrategy, DebugElement,\n} from \'@angular/core\';\n"
         },
         {
             testName: 'test7 - optional semi-colon',
@@ -236,7 +236,7 @@ suite('Import Creator Tests', () => {
                     numberOfEmptyLinesAfterGroup: 0
                 }
             ],
-            expected: "import { ChangeDetectionStrategy, DebugElement } from '@angular/core'"
+            expected: "import { ChangeDetectionStrategy, DebugElement } from '@angular/core'\n"
         },
         {
             testName: 'test8 - optional semi-colon',
@@ -263,7 +263,7 @@ suite('Import Creator Tests', () => {
                     numberOfEmptyLinesAfterGroup: 0
                 }
             ],
-            expected: "import {\n    ChangeDetectionStrategy, DebugElement\n} from \'@angular/core\'"
+            expected: "import {\n    ChangeDetectionStrategy, DebugElement\n} from \'@angular/core\'\n"
         },
         {
             testName: 'test9 - import string has 4 new lines',
