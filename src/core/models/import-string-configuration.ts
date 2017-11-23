@@ -20,7 +20,7 @@ export interface ImportStringConfiguration {
 export const defaultImportStringConfiguration: ImportStringConfiguration = {
     tabSize: 4,
     tabType: 'space',
-    numberOfEmptyLinesAfterAllImports: 2,
+    numberOfEmptyLinesAfterAllImports: 1,
     trailingComma: 'none',
     quoteMark: 'single',
     maximumNumberOfImportExpressionsPerLine: {
