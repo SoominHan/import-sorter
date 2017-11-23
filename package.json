@@ -56,6 +56,11 @@
                 "title": "Sort Imports"
             }
         ],
+        "keybindings": [{
+            "command": "extension.sortImports",
+            "key": "ctrl+alt+o",
+            "when": "editorTextFocus && !editorReadonly"
+        }],
         "configuration": {
             "type": "object",
             "title": "Import Sorter configuration",
