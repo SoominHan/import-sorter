@@ -104,9 +104,19 @@ export class ImportSorterExtension {
                 return;
             }
             const deleteEdits = rangesToDelete.map(x => TextEdit.delete(x));
-            const insertEdit = TextEdit.insert(new Position(0, 0), importText + '\n');
 
-            event.waitUntil(Promise.resolve([...deleteEdits, insertEdit]));
+            if (event) {
+                const insertEdit = TextEdit.insert(new Position(0, 0), importText + '\n');
+                event.waitUntil(Promise.resolve([...deleteEdits, insertEdit]));
+            } else {
+                window.activeTextEditor
+                    .edit((editBuilder: TextEditorEdit) => {
+                        deleteEdits.forEach(x => {
+                            editBuilder.delete(x.range);
+                        });
+                        editBuilder.insert(new Position(0, 0), importText + '\n');
+                    });
+            }
         } catch (error) {
             window.showErrorMessage(`Typescript import sorter failed with - ${error.message}. Please log a bug.`);
         }
