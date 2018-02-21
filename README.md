@@ -25,6 +25,9 @@ an example of default configuration is provided bellow. For available options ha
   // Enables sort before each save of the document
   "importSorter.generalConfiguration.sortOnBeforeSave": false,
 
+  // Excludes sorting for files which match given regex expression. Regex considers the whole file path. The file path separator is normalized to /
+  "importSorter.generalConfiguration.exclude": [],
+
   // Sort Order of names in curly brackets
   "importSorter.sortConfiguration.importMembers.order": "caseInsensitive",
 
@@ -119,6 +122,19 @@ The default value is `./import-sorter.json`. Bellow is a example of the configur
     }
 ```
 The priority of settings is given to the configuration file. If the setting does not exist in the configuration file then the value of the vscode setting will be taken. If file does not exist, then all settings will be taken from vscode.
+******
+- `importSorter.generalConfiguration.exclude` represents an array of regex expressions to match agaist full file paths. If matched, then the file will be excluded from sorting.
+The default value is `[]`. Bellow is a example of the configuration: importSorter.generalConfiguration.exclude
+```json
+    {
+      "generalConfiguration": {
+        "exclude": [
+          ".*polyfill\.ts"
+        ]
+      }
+    }
+```
+In the example, any path which finishes with `pollyfill.ts` path will be excluded.
 ******
 -  `importSorter.sortConfiguration.customOrderingRules.rules` is a json array of regex expressions which sets the sort group order.
 As of now the default(might change later on) setting is

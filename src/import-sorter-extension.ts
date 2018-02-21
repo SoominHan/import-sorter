@@ -74,9 +74,13 @@ export class ImportSorterExtension {
             return;
         }
         try {
-            this.setConfig();
-
+            const configuration = this.setConfig();
             const doc: TextDocument = event ? event.document : window.activeTextEditor.document;
+
+            if (this.isFileExcludedFromSorting(configuration.generalConfiguration, doc)) {
+                return;
+            }
+
             const text = doc.getText();
             const imports = this.walker.parseImports(doc.uri.fsPath, text);
             if (!imports.length) {
@@ -198,9 +202,11 @@ export class ImportSorterExtension {
         const importStringConfig = workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<ImportStringConfiguration>('importStringConfiguration');
         const sortConfiguration = merge(sortConfig, fileConfig.sortConfiguration || {});
         const importStringConfiguration = merge(importStringConfig, fileConfig.importStringConfiguration || {});
+        const generalConfiguration = merge(generalConfig, fileConfig.generalConfig || {});
         return {
             sortConfiguration,
-            importStringConfiguration
+            importStringConfiguration,
+            generalConfiguration
         };
     }
 
@@ -219,5 +225,15 @@ export class ImportSorterExtension {
 
         window.showErrorMessage('Import Sorter currently only supports typescript (.ts) or typescriptreact (.tsx) language files');
         return false;
+    }
+
+    private isFileExcludedFromSorting(generalConfiguration: GeneralConfiguration, doc: TextDocument) {
+        const excludedFiles = generalConfiguration.exclude || [];
+        if (!excludedFiles.length) {
+            return false;
+        }
+        const filePath = doc.uri.fsPath.replace(new RegExp('\\' + sep, 'g'), '/');
+        const isExcluded = excludedFiles.some(fileToExclude => filePath.match(fileToExclude) !== null);
+        return isExcluded;
     }
 }
