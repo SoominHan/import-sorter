@@ -9,7 +9,6 @@ import {
     TextDocument,
     TextDocumentWillSaveEvent,
     TextEdit,
-    TextEditor,
     TextEditorEdit,
     TextLine,
     window,
