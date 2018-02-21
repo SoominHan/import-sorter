@@ -129,7 +129,7 @@ The default value is `[]`. Bellow is a example of the configuration: importSorte
     {
       "generalConfiguration": {
         "exclude": [
-          ".*polyfill\.ts"
+          ".*polyfill\\.ts"
         ]
       }
     }
