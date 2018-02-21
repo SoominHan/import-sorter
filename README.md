@@ -124,7 +124,7 @@ The default value is `./import-sorter.json`. Bellow is a example of the configur
 The priority of settings is given to the configuration file. If the setting does not exist in the configuration file then the value of the vscode setting will be taken. If file does not exist, then all settings will be taken from vscode.
 ******
 - `importSorter.generalConfiguration.exclude` represents an array of regex expressions to match agaist full file paths. If matched, then the file will be excluded from sorting.
-The default value is `[]`. Bellow is a example of the configuration: importSorter.generalConfiguration.exclude
+The default value is `[]`. Bellow is a example of the configuration:
 ```json
     {
       "generalConfiguration": {
