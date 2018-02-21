@@ -1,3 +1,9 @@
+# [1.2.0]
+### New features
+* added `importSorter.generalConfiguration.exclude` to define the type of characters for new-lined imports
+### Bug fixes
+* fixing multisave sort: so if auto save is enabled, then multiple files are sorted correctly.
+
 # [1.1.1]
 ### Bug fixes
 * fixing behavior of on before save sorting.
