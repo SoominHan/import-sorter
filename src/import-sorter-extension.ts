@@ -7,12 +7,13 @@ import {
     StatusBarAlignment,
     StatusBarItem,
     TextDocument,
+    TextDocumentWillSaveEvent,
+    TextEdit,
+    TextEditor,
     TextEditorEdit,
     TextLine,
     window,
-    workspace,
-    TextEdit,
-    TextDocumentWillSaveEvent
+    workspace
 } from 'vscode';
 
 import {
@@ -46,19 +47,19 @@ export class ImportSorterExtension {
     }
 
     public sortActiveDocumentImportsFromCommand(): void {
-        if (!this.isSortAllowed(false)) {
+        if (!window.activeTextEditor || !this.isSortAllowed(window.activeTextEditor.document, false)) {
             return;
         }
         return this.sortActiveDocumentImports();
     }
 
-    public sortActiveDocumentImportsFromOnBeforeSaveCommand(event: TextDocumentWillSaveEvent): void {
+    public sortModifiedDocumentImportsFromOnBeforeSaveCommand(event: TextDocumentWillSaveEvent): void {
         const isSortOnBeforeSaveEnabled =
             workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<GeneralConfiguration>('generalConfiguration').sortOnBeforeSave;
         if (!isSortOnBeforeSaveEnabled) {
             return;
         }
-        if (!this.isSortAllowed(true)) {
+        if (!this.isSortAllowed(event.document, true)) {
             return;
         }
         return this.sortActiveDocumentImports(event);
@@ -76,7 +77,7 @@ export class ImportSorterExtension {
         try {
             this.setConfig();
 
-            const doc: TextDocument = window.activeTextEditor.document;
+            const doc: TextDocument = event ? event.document : window.activeTextEditor.document;
             const text = doc.getText();
             const imports = this.walker.parseImports(doc.uri.fsPath, text);
             if (!imports.length) {
@@ -204,13 +205,12 @@ export class ImportSorterExtension {
         };
     }
 
-    private isSortAllowed(isFileExtensionErrorIgnored: boolean): boolean {
-        const editor = window.activeTextEditor;
-        if (!editor) {
+    private isSortAllowed(document: TextDocument, isFileExtensionErrorIgnored: boolean): boolean {
+        if (!document) {
             return false;
         }
 
-        if ((editor.document.languageId === 'typescript') || (editor.document.languageId === 'typescriptreact')) {
+        if ((document.languageId === 'typescript') || (document.languageId === 'typescriptreact')) {
             return true;
         }
 

@@ -1,3 +1,7 @@
+# [1.2.0]
+### Bug fixes
+* fixing multisave sort: so if auto save is enabled, then multiple files are sorted correctly.
+
 # [1.1.1]
 ### Bug fixes
 * fixing behavior of on before save sorting.
