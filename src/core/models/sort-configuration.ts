@@ -36,6 +36,25 @@ export const defaultSortConfiguration: SortConfiguration = {
     customOrderingRules: {
         defaultOrderLevel: 20,
         defaultNumberOfEmptyLinesAfterGroup: 1,
-        rules: [{ regex: '^@angular', orderLevel: 0, numberOfEmptyLinesAfterGroup: 0 }, { regex: '^[@]', orderLevel: 10 }, { regex: '^[.]', orderLevel: 30 }]
+
+        rules: [
+            {
+                type: 'importMember',
+                regex: '^$',
+                orderLevel: 0,
+                numberOfEmptyLinesAfterGroup: 0
+            },
+            {
+                regex: '^@angular',
+                orderLevel: 10
+            },
+            {
+                regex: '^[@]',
+                orderLevel: 15
+            },
+            {
+                regex: '^[.]',
+                orderLevel: 30
+            }]
     }
 };

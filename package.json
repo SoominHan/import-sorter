@@ -138,13 +138,18 @@
                     "type": "array",
                     "default": [
                         {
-                            "regex": "^@angular",
+                            "type": "importMember",
+                            "regex": "^$",
                             "orderLevel": 0,
                             "numberOfEmptyLinesAfterGroup": 0
                         },
                         {
-                            "regex": "^[@]",
+                            "regex": "^@angular",
                             "orderLevel": 10
+                        },
+                        {
+                            "regex": "^[@]",
+                            "orderLevel": 15
                         },
                         {
                             "regex": "^[.]",
