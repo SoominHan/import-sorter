@@ -33,7 +33,7 @@ export class ImportCreator {
             leadingCommentText = leadingCommentText ? leadingCommentText + '\n' : leadingCommentText;
 
             let trailingCommentText = x.importComment.trailingComments.map(comment => comment.text).join('\n');
-            trailingCommentText = trailingCommentText ? ' ' + trailingCommentText : trailingCommentText;
+            trailingCommentText = trailingCommentText ? ' '  + trailingCommentText : trailingCommentText;
 
             const importWithComments = leadingCommentText + importString + trailingCommentText;
             return importWithComments;

@@ -58,7 +58,7 @@ export class AstWalker {
     private getComment(range: ts.CommentRange, sourceFileText: string) {
         const comment: Comment = {
             range,
-            text: sourceFileText.slice(range.pos, range.end)
+            text: sourceFileText.slice(range.pos, range.end).replace(/\r/g, '')
         };
         return comment;
     }
