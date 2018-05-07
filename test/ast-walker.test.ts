@@ -83,6 +83,59 @@ suite('AstWalker tests', () => {
                     trailingComments: []
                 }
             }
+        },
+        {
+            testName: 'test1d',
+            text: `/* leadingComment1 */
+            //leadingComment2
+            import  {  a  ,
+                    c  as  cc , b
+                }
+                from 'test.js'; //trailingComment
+
+                `,
+            expected: {
+                moduleSpecifierName: 'test.js',
+                startPosition: { line: 2, character: 12 },
+                endPosition: { line: 5, character: 31 },
+                hasFromKeyWord: true,
+                namedBindings: [
+                    { name: 'a', aliasName: null },
+                    { name: 'c', aliasName: 'cc' },
+                    { name: 'b', aliasName: null }
+                ],
+                importComment: {
+                    leadingComments: [{
+                        range: {
+                            end: 21,
+                            pos: 0,
+                            kind: 3,
+                            hasTrailingNewLine: true
+                        },
+                        text: '/* leadingComment1 */'
+                    },
+                    {
+                        range: {
+                            end: 51,
+                            hasTrailingNewLine: true,
+                            kind: 2,
+                            pos: 34
+                        },
+                        text: '//leadingComment2'
+                    }],
+                    trailingComments: [
+                        {
+                            range: {
+                                end: 181,
+                                hasTrailingNewLine: true,
+                                kind: 2,
+                                pos: 164
+                            },
+                            text: '//trailingComment'
+                        }
+                    ]
+                }
+            }
         }
     ];
 
