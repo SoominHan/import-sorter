@@ -42,7 +42,11 @@ suite('Import Creator Tests', () => {
                                 { name: 'B', aliasName: null },
                                 { name: 'a', aliasName: 'cc' },
                                 { name: 'ac', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
                     numberOfEmptyLinesAfterGroup: 3
                 }
@@ -69,7 +73,11 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
                     numberOfEmptyLinesAfterGroup: 0
                 }
@@ -96,7 +104,11 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
                     numberOfEmptyLinesAfterGroup: 0
                 }
@@ -123,7 +135,11 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
                     numberOfEmptyLinesAfterGroup: 0
                 }
@@ -150,7 +166,11 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
                     numberOfEmptyLinesAfterGroup: 0
                 }
@@ -177,7 +197,11 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
                     numberOfEmptyLinesAfterGroup: 0
                 }
@@ -204,7 +228,11 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
                     numberOfEmptyLinesAfterGroup: 0
                 }
@@ -231,7 +259,11 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
                     numberOfEmptyLinesAfterGroup: 0
                 }
@@ -258,7 +290,11 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
                     numberOfEmptyLinesAfterGroup: 0
                 }
@@ -286,7 +322,11 @@ suite('Import Creator Tests', () => {
                                 { name: 'a', aliasName: null },
                                 { name: 'b', aliasName: null },
                                 { name: 'c', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
                     numberOfEmptyLinesAfterGroup: 0
                 }

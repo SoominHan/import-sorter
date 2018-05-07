@@ -31,9 +31,7 @@ suite('AstWalker tests', () => {
                     trailingComments: []
                 }
             }
-
         },
-
         {
             testName: 'test1b',
             text: `//comment
@@ -54,7 +52,15 @@ suite('AstWalker tests', () => {
                     { name: 'b', aliasName: null }
                 ],
                 importComment: {
-                    leadingComments: [],
+                    leadingComments: [{
+                        range: {
+                            end: 9,
+                            pos: 0,
+                            kind: 2,
+                            hasTrailingNewLine: true
+                        },
+                        text: '//comment'
+                    }],
                     trailingComments: []
                 }
             }
