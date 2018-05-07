@@ -98,7 +98,7 @@ export class ImportCreator {
         const spaceConfig = this.getSpaceConfig();
         const beforeCommaAndAfterPart = `${spaceConfig.beforeComma},${spaceConfig.afterComma}`;
         const nameBindingsResult = chain(nameBindings)
-            .chunk(maximumNumberOfWordsBeforeBreak)
+            .chunk(maximumNumberOfWordsBeforeBreak || 1)
             .map(x => x.join(beforeCommaAndAfterPart))
             .value();
 
@@ -131,7 +131,7 @@ export class ImportCreator {
         }
 
         if (this.importStringConfig.maximumNumberOfImportExpressionsPerLine.type === 'newLineEachExpressionAfterCountLimit') {
-            return this.createNameBindingChunksByWords(nameBindings, 1);
+            return this.createNameBindingChunksByWords(nameBindings, 0);
         }
 
         const result: string[][] = [];
