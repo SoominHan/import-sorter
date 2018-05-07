@@ -44,12 +44,18 @@ export class ImportSorter {
 
     private normalizePaths(imports: ImportElement[]) {
         return chain(imports).map(x => {
-            const isRelativePath = x.moduleSpecifierName.startsWith(`./`) || x.moduleSpecifierName.startsWith(`../`);
-            x.moduleSpecifierName = path
-                .normalize(x.moduleSpecifierName)
-                .replace(new RegExp('\\' + path.sep, 'g'), '/');
+            const isRelativePath =
+                x.moduleSpecifierName.startsWith(`.`)
+                || x.moduleSpecifierName.startsWith(`..`);
+            x.moduleSpecifierName = isRelativePath ? path.normalize(x.moduleSpecifierName).replace(new RegExp('\\' + path.sep, 'g'), '/') : x.moduleSpecifierName;
             if (isRelativePath && !x.moduleSpecifierName.startsWith(`./`) && !x.moduleSpecifierName.startsWith(`../`)) {
-                x.moduleSpecifierName = `./${x.moduleSpecifierName}`;
+                if (x.moduleSpecifierName === '.') {
+                    x.moduleSpecifierName = './';
+                } else if (x.moduleSpecifierName === '..') {
+                    x.moduleSpecifierName = '../';
+                } else {
+                    x.moduleSpecifierName = `./${x.moduleSpecifierName}`;
+                }
             }
             return x;
         });
