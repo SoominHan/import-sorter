@@ -6,7 +6,10 @@ import { Comment } from './comment';
 
 export interface ImportNode {
     importDeclaration: ImportDeclaration;
-    comments: Comment[];
+    importComment: {
+        leadingComments: Comment[];
+        trailingComments: Comment[];
+    };
     start: LineAndCharacter;
     end: LineAndCharacter;
 }

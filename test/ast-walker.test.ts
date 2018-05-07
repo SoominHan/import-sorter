@@ -25,7 +25,11 @@ suite('AstWalker tests', () => {
                     { name: 'c', aliasName: 'cc' },
                     { name: 'b', aliasName: null }
                 ],
-                startPosition: { line: 0, character: 0 }
+                startPosition: { line: 0, character: 0 },
+                importComment: {
+                    leadingComments: [],
+                    trailingComments: []
+                }
             }
 
         },
@@ -48,7 +52,11 @@ suite('AstWalker tests', () => {
                     { name: 'a', aliasName: null },
                     { name: 'c', aliasName: 'cc' },
                     { name: 'b', aliasName: null }
-                ]
+                ],
+                importComment: {
+                    leadingComments: [],
+                    trailingComments: []
+                }
             }
         },
         {
@@ -63,14 +71,18 @@ suite('AstWalker tests', () => {
                     { name: 'c', aliasName: 'cc' },
                     { name: 'b', aliasName: null }
                 ],
-                startPosition: { line: 0, character: 0 }
+                startPosition: { line: 0, character: 0 },
+                importComment: {
+                    leadingComments: [],
+                    trailingComments: []
+                }
             }
         }
     ];
 
     const getImports = (text: string) => {
         const walker = new AstWalker();
-        const imports = walker.parseImports('nonExistantFile', text);
+        const imports = walker.parseImports('nonExistentFile', text);
         return imports;
     };
 

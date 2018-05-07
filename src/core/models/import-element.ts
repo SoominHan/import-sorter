@@ -10,5 +10,8 @@ export interface ImportElement {
         aliasName: string;
         name: string;
     }[];
-    comments: Comment[];
+    importComment: {
+        leadingComments: Comment[],
+        trailingComments: Comment[]
+    };
 }

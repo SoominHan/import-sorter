@@ -3,7 +3,6 @@ import * as ts from 'typescript';
 
 import {
     Comment,
-    CommentType,
     ImportElement,
     ImportNode
 } from './models';
@@ -35,7 +34,7 @@ export class AstWalker {
                         importDeclaration: (node as ts.ImportDeclaration),
                         start: lines.importStartLine,
                         end: lines.importEndLine,
-                        comments: this.getComments(sourceFileText, node)
+                        importComment: this.getComments(sourceFileText, node)
                     });
                     this.getCodeLineNumbers(node, sourceFile);
                     break;
@@ -50,17 +49,16 @@ export class AstWalker {
 
     private getComments(sourceFileText: string, node: ts.Node) {
         const leadingComments = (ts.getLeadingCommentRanges(sourceFileText, node.getFullStart()) || [])
-            .map(range => this.getComment(range, sourceFileText, 'leading'));
+            .map(range => this.getComment(range, sourceFileText));
         const trailingComments = (ts.getTrailingCommentRanges(sourceFileText, node.getEnd()) || [])
-            .map(range => this.getComment(range, sourceFileText, 'trailing'));
-        return [...leadingComments, ...trailingComments];
+            .map(range => this.getComment(range, sourceFileText));
+        return { leadingComments, trailingComments };
     }
 
-    private getComment(range: ts.CommentRange, sourceFileText: string, commentType: CommentType) {
+    private getComment(range: ts.CommentRange, sourceFileText: string) {
         const comment: Comment = {
             range,
-            text: sourceFileText.slice(range.pos, range.end),
-            type: commentType
+            text: sourceFileText.slice(range.pos, range.end)
         };
         return comment;
     }
@@ -81,7 +79,7 @@ export class AstWalker {
             endPosition: importNode.end,
             hasFromKeyWord: false,
             namedBindings: [],
-            comments: importNode.comments
+            importComment: importNode.importComment
         };
 
         const importClause = importNode.importDeclaration.importClause;

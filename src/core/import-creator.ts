@@ -26,7 +26,18 @@ export class ImportCreator {
 
     private createImportStrings(element: ImportElement[]): string[] {
         this.assertIsInitialised();
-        return element.map(x => this.createSingleImportString(x));
+        return element.map(x => {
+            const importString = this.createSingleImportString(x);
+
+            let leadingCommentText = x.importComment.leadingComments.map(comment => comment.text).join('\n');
+            leadingCommentText = leadingCommentText ? leadingCommentText + '\n' : leadingCommentText;
+
+            let trailingCommentText = x.importComment.trailingComments.map(comment => comment.text).join('\n');
+            trailingCommentText = trailingCommentText ? ' ' + trailingCommentText : trailingCommentText;
+
+            const importWithComments = leadingCommentText + importString + trailingCommentText;
+            return importWithComments;
+        });
     }
 
     private assertIsInitialised() {
