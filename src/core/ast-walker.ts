@@ -51,17 +51,17 @@ export class AstWalker {
     private getComments(sourceFileText: string, node: ts.Node) {
         const leadingComments = (ts.getLeadingCommentRanges(sourceFileText, node.getFullStart()) || [])
             .map(range => this.getComment(range, sourceFileText, 'leading'));
-        const trailingComments = (ts.getTrailingCommentRanges(sourceFileText, node.getFullStart()) || [])
+        const trailingComments = (ts.getTrailingCommentRanges(sourceFileText, node.getEnd()) || [])
             .map(range => this.getComment(range, sourceFileText, 'trailing'));
         return [...leadingComments, ...trailingComments];
     }
 
-    private getComment(range: ts.TextRange, sourceFileText: string, commentType: CommentType) {
+    private getComment(range: ts.CommentRange, sourceFileText: string, commentType: CommentType) {
         const comment: Comment = {
             range,
-            text: sourceFileText.slice(range.pos + 2, range.end),
+            text: sourceFileText.slice(range.pos, range.end),
             type: commentType
-        }
+        };
         return comment;
     }
 
@@ -80,7 +80,8 @@ export class AstWalker {
             startPosition: importNode.start,
             endPosition: importNode.end,
             hasFromKeyWord: false,
-            namedBindings: []
+            namedBindings: [],
+            comments: importNode.comments
         };
 
         const importClause = importNode.importDeclaration.importClause;

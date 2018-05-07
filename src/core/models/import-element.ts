@@ -1,3 +1,5 @@
+import { Comment } from './comment';
+
 export interface ImportElement {
     moduleSpecifierName: string;
     startPosition: { line: number; character: number };
@@ -8,4 +10,5 @@ export interface ImportElement {
         aliasName: string;
         name: string;
     }[];
+    comments: Comment[];
 }

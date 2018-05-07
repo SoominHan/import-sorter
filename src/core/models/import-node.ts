@@ -1,8 +1,8 @@
 import {
     ImportDeclaration,
-    LineAndCharacter,
-    TextRange
+    LineAndCharacter
 } from 'typescript';
+import { Comment } from './comment';
 
 export interface ImportNode {
     importDeclaration: ImportDeclaration;
@@ -11,10 +11,3 @@ export interface ImportNode {
     end: LineAndCharacter;
 }
 
-export type CommentType = 'leading' | 'trailing';
-
-export interface Comment {
-    text: string;
-    range: TextRange;
-    type: CommentType;
-}
