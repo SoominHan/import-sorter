@@ -3,7 +3,7 @@
     "displayName": "TypeScript Import Sorter",
     "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
     "icon": "assets/icons/import-sorter.png",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "publisher": "mike-co",
     "engines": {
         "vscode": "^1.9.0"
@@ -12,7 +12,7 @@
         "type": "git",
         "url": "https://github.com/SoominHan/import-sorter.git"
     },
-    "license" : "SEE LICENSE IN LICENSE",
+    "license": "SEE LICENSE IN LICENSE",
     "categories": [
         "Formatters"
     ],
@@ -40,7 +40,7 @@
         "lodash": "4.17.2"
     },
     "devDependencies": {
-        "@types/lodash": "4.14.54",
+        "@types/lodash": "4.14.95",
         "@types/mocha": "^2.2.32",
         "@types/node": "^6.0.40",
         "expect.js": "^0.3.1",
@@ -56,11 +56,13 @@
                 "title": "Sort Imports"
             }
         ],
-        "keybindings": [{
-            "command": "extension.sortImports",
-            "key": "ctrl+alt+o",
-            "when": "editorTextFocus && !editorReadonly"
-        }],
+        "keybindings": [
+            {
+                "command": "extension.sortImports",
+                "key": "ctrl+alt+o",
+                "when": "editorTextFocus && !editorReadonly"
+            }
+        ],
         "configuration": {
             "type": "object",
             "title": "Import Sorter configuration",
