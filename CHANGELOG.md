@@ -1,3 +1,12 @@
+# [2.0.0]
+### New features
+* added support of the comments blocks.
+* added `importSorter.sortConfiguration.customOrderingRules.disableDefaultOrderSort` and `importSorter.sortConfiguration.customOrderingRules.rules.disableSort` which allows to
+disable sort for the group of imports
+### Bug fixes
+* fixing semi-relative import paths
+* correcting `newLineEachExpressionAfterCountLimit`
+
 # [1.2.0]
 ### New features
 * added `importSorter.generalConfiguration.exclude` to define the type of characters for new-lined imports
