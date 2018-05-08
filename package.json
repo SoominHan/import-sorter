@@ -134,17 +134,27 @@
                     "default": 1,
                     "description": "The default number of empty lines after any group. This has lesser priority then empty lines in rules"
                 },
+                "importSorter.sortConfiguration.customOrderingRules.disableDefaultOrderSort": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Disable sorting of path on the default group"
+                },
                 "importSorter.sortConfiguration.customOrderingRules.rules": {
                     "type": "array",
                     "default": [
                         {
                             "type": "importMember",
                             "regex": "^$",
-                            "orderLevel": 0
+                            "orderLevel": 5,
+                            "disableSort": true
+                        },
+                        {
+                            "regex": "^[^.@]",
+                            "orderLevel": 10
                         },
                         {
                             "regex": "^[@]",
-                            "orderLevel": 10
+                            "orderLevel": 15
                         },
                         {
                             "regex": "^[.]",

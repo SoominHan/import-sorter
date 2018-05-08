@@ -48,7 +48,8 @@ suite('Import Creator Tests', () => {
                                 trailingComments: []
                             }
                         }],
-                    numberOfEmptyLinesAfterGroup: 3
+                    numberOfEmptyLinesAfterGroup: 3,
+                    customOrderRule: null
                 }
             ],
             expected: "import t, {\n    B, a as cc, ac\n} from \'createString.ts\';"
@@ -79,7 +80,8 @@ suite('Import Creator Tests', () => {
                                 trailingComments: []
                             }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import { ChangeDetectionStrategy, DebugElement } from '@angular/core';"
@@ -110,7 +112,8 @@ suite('Import Creator Tests', () => {
                                 trailingComments: []
                             }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import {\n    ChangeDetectionStrategy, DebugElement\n} from \'@angular/core\';"
@@ -141,7 +144,8 @@ suite('Import Creator Tests', () => {
                                 trailingComments: []
                             }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import { ChangeDetectionStrategy, DebugElement, } from '@angular/core';\n"
@@ -172,7 +176,8 @@ suite('Import Creator Tests', () => {
                                 trailingComments: []
                             }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import {\n    ChangeDetectionStrategy, DebugElement,\n} from \'@angular/core\';\n"
@@ -203,7 +208,8 @@ suite('Import Creator Tests', () => {
                                 trailingComments: []
                             }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import { ChangeDetectionStrategy, DebugElement } from '@angular/core';\n"
@@ -234,7 +240,8 @@ suite('Import Creator Tests', () => {
                                 trailingComments: []
                             }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import {\n    ChangeDetectionStrategy, DebugElement,\n} from \'@angular/core\';\n"
@@ -265,7 +272,8 @@ suite('Import Creator Tests', () => {
                                 trailingComments: []
                             }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import { ChangeDetectionStrategy, DebugElement } from '@angular/core'\n"
@@ -296,7 +304,8 @@ suite('Import Creator Tests', () => {
                                 trailingComments: []
                             }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import {\n    ChangeDetectionStrategy, DebugElement\n} from \'@angular/core\'\n"
@@ -328,7 +337,8 @@ suite('Import Creator Tests', () => {
                                 trailingComments: []
                             }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import {\n    a, b,\n    c\n} from \'@angular/core\';"

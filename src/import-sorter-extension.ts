@@ -24,8 +24,7 @@ import {
     ImportSorter,
     ImportSorterConfiguration,
     ImportStringConfiguration,
-    SortConfiguration,
-    Comment
+    SortConfiguration
 } from './core';
 
 const EXTENSION_CONFIGURATION_NAME = 'importSorter';

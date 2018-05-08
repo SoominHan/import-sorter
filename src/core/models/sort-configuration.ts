@@ -1,6 +1,8 @@
+import { CustomOrderRule } from './custom-order-rule';
+
 export type ImportSortOrder = 'caseInsensitive' | 'lowercaseFirst' | 'lowercaseLast' | 'unsorted';
 export type ImportSortOrderDirection = 'asc' | 'desc';
-export type CustomOrderRuleType = 'path' | 'importMember';
+
 export interface SortConfiguration {
     importMembers: {
         order: ImportSortOrder,
@@ -13,13 +15,9 @@ export interface SortConfiguration {
     joinImportPaths?: boolean;
     customOrderingRules?: {
         defaultOrderLevel: number;
+        disableDefaultOrderSort?: boolean;
         defaultNumberOfEmptyLinesAfterGroup?: number;
-        rules: {
-            type?: CustomOrderRuleType
-            numberOfEmptyLinesAfterGroup?: number;
-            regex: string;
-            orderLevel: number
-        }[]
+        rules: CustomOrderRule[]
     };
 }
 
@@ -36,19 +34,29 @@ export const defaultSortConfiguration: SortConfiguration = {
     customOrderingRules: {
         defaultOrderLevel: 20,
         defaultNumberOfEmptyLinesAfterGroup: 1,
+        disableDefaultOrderSort: false,
         rules: [
             {
                 type: 'importMember',
                 regex: '^$',
-                orderLevel: 0
+                orderLevel: 5,
+                disableSort: true
+            },
+            {
+                regex: '^[^.@]',
+                orderLevel: 10,
+                disableSort: false
             },
             {
                 regex: '^[@]',
-                orderLevel: 10
+                orderLevel: 15,
+                disableSort: false
             },
             {
                 regex: '^[.]',
-                orderLevel: 30
-            }]
+                orderLevel: 30,
+                disableSort: false
+            }
+        ]
     }
 };
