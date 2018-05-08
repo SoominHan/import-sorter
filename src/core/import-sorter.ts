@@ -68,7 +68,7 @@ export class ImportSorter {
             if (x.namedBindings && x.namedBindings.length) {
                 x.namedBindings =
                     chain(x.namedBindings)
-                        .orderBy((y: { name: string }) => sortOrder(y.name), [this.sortConfig.importMembers.direction])
+                        .orderBy((y: { name: string, aliasName: string }) => sortOrder(y.name), [this.sortConfig.importMembers.direction])
                         .value();
                 return x;
             }
