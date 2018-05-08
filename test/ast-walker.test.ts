@@ -25,11 +25,13 @@ suite('AstWalker tests', () => {
                     { name: 'c', aliasName: 'cc' },
                     { name: 'b', aliasName: null }
                 ],
-                startPosition: { line: 0, character: 0 }
+                startPosition: { line: 0, character: 0 },
+                importComment: {
+                    leadingComments: [],
+                    trailingComments: []
+                }
             }
-
         },
-
         {
             testName: 'test1b',
             text: `//comment
@@ -48,7 +50,19 @@ suite('AstWalker tests', () => {
                     { name: 'a', aliasName: null },
                     { name: 'c', aliasName: 'cc' },
                     { name: 'b', aliasName: null }
-                ]
+                ],
+                importComment: {
+                    leadingComments: [{
+                        range: {
+                            end: 9,
+                            pos: 0,
+                            kind: 2,
+                            hasTrailingNewLine: true
+                        },
+                        text: '//comment'
+                    }],
+                    trailingComments: []
+                }
             }
         },
         {
@@ -63,14 +77,71 @@ suite('AstWalker tests', () => {
                     { name: 'c', aliasName: 'cc' },
                     { name: 'b', aliasName: null }
                 ],
-                startPosition: { line: 0, character: 0 }
+                startPosition: { line: 0, character: 0 },
+                importComment: {
+                    leadingComments: [],
+                    trailingComments: []
+                }
+            }
+        },
+        {
+            testName: 'test1d',
+            text: `/* leadingComment1 */
+            //leadingComment2
+            import  {  a  ,
+                    c  as  cc , b
+                }
+                from 'test.js'; //trailingComment
+
+                `,
+            expected: {
+                moduleSpecifierName: 'test.js',
+                startPosition: { line: 2, character: 12 },
+                endPosition: { line: 5, character: 31 },
+                hasFromKeyWord: true,
+                namedBindings: [
+                    { name: 'a', aliasName: null },
+                    { name: 'c', aliasName: 'cc' },
+                    { name: 'b', aliasName: null }
+                ],
+                importComment: {
+                    leadingComments: [{
+                        range: {
+                            end: 21,
+                            pos: 0,
+                            kind: 3,
+                            hasTrailingNewLine: true
+                        },
+                        text: '/* leadingComment1 */'
+                    },
+                    {
+                        range: {
+                            end: 51,
+                            hasTrailingNewLine: true,
+                            kind: 2,
+                            pos: 34
+                        },
+                        text: '//leadingComment2'
+                    }],
+                    trailingComments: [
+                        {
+                            range: {
+                                end: 181,
+                                hasTrailingNewLine: true,
+                                kind: 2,
+                                pos: 164
+                            },
+                            text: '//trailingComment'
+                        }
+                    ]
+                }
             }
         }
     ];
 
     const getImports = (text: string) => {
         const walker = new AstWalker();
-        const imports = walker.parseImports('nonExistantFile', text);
+        const imports = walker.parseImports('nonExistentFile', text);
         return imports;
     };
 

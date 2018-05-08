@@ -140,7 +140,14 @@ export class ImportSorterExtension {
             .sortBy(x => x.startPosition.line)
             .forEach(x => {
                 const previousRange = rangesToDelete[rangesToDelete.length - 1];
-                let currentRange = new Range(x.startPosition.line, x.startPosition.character, x.endPosition.line + 1, 0);
+                const firstLeadingComment = x.importComment.leadingComments[0];
+                const lastTrailingComment = x.importComment.trailingComments.reverse()[0];
+
+                const startPosition = firstLeadingComment ? doc.positionAt(firstLeadingComment.range.pos) : x.startPosition;
+                const endPosition = lastTrailingComment ? doc.positionAt(lastTrailingComment.range.end) : x.endPosition;
+
+                let currentRange = new Range(startPosition.line, startPosition.character, endPosition.line + 1, 0);
+
                 const nextNonEmptyLine = this.getNextNonEmptyLine(currentRange.end.line - 1, doc);
 
                 if (nextNonEmptyLine && !nextNonEmptyLine.isLast && nextNonEmptyLine.line.lineNumber !== currentRange.end.line) {

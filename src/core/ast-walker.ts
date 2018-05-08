@@ -1,7 +1,11 @@
 import * as fs from 'fs';
 import * as ts from 'typescript';
 
-import { ImportElement, ImportNode } from './models';
+import {
+    Comment,
+    ImportElement,
+    ImportNode
+} from './models';
 
 export class AstWalker {
 
@@ -11,7 +15,7 @@ export class AstWalker {
         }
         const sourceText = _sourceText || fs.readFileSync(fullFilePath).toString();
         const sourceFile = this.createSourceFile(fullFilePath, sourceText);
-        const imports = this.delintImports(sourceFile);
+        const imports = this.delintImports(sourceFile, sourceText);
         return imports.map(x => this.parseImport(x, sourceFile)).filter(x => x !== null);
     }
 
@@ -19,13 +23,19 @@ export class AstWalker {
         return ts.createSourceFile(fullFilePath, sourceText, ts.ScriptTarget.ES2016, false);
     }
 
-    private delintImports(sourceFile: ts.SourceFile) {
+    private delintImports(sourceFile: ts.SourceFile, sourceText?: string) {
         const importNodes: ImportNode[] = [];
+        const sourceFileText = sourceText || sourceFile.getText();
         const delintNode = (node: ts.Node) => {
             switch (node.kind) {
                 case ts.SyntaxKind.ImportDeclaration:
                     const lines = this.getCodeLineNumbers(node, sourceFile);
-                    importNodes.push({ importDeclaration: (node as ts.ImportDeclaration), start: lines.importStartLine, end: lines.importEndLine });
+                    importNodes.push({
+                        importDeclaration: (node as ts.ImportDeclaration),
+                        start: lines.importStartLine,
+                        end: lines.importEndLine,
+                        importComment: this.getComments(sourceFileText, node)
+                    });
                     this.getCodeLineNumbers(node, sourceFile);
                     break;
                 default:
@@ -36,6 +46,22 @@ export class AstWalker {
         delintNode(sourceFile);
         return importNodes;
     };
+
+    private getComments(sourceFileText: string, node: ts.Node) {
+        const leadingComments = (ts.getLeadingCommentRanges(sourceFileText, node.getFullStart()) || [])
+            .map(range => this.getComment(range, sourceFileText));
+        const trailingComments = (ts.getTrailingCommentRanges(sourceFileText, node.getEnd()) || [])
+            .map(range => this.getComment(range, sourceFileText));
+        return { leadingComments, trailingComments };
+    }
+
+    private getComment(range: ts.CommentRange, sourceFileText: string) {
+        const comment: Comment = {
+            range,
+            text: sourceFileText.slice(range.pos, range.end).replace(/\r/g, '')
+        };
+        return comment;
+    }
 
     private getCodeLineNumbers(node: ts.Node, sourceFile: ts.SourceFile) {
         const importStartLine = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
@@ -52,7 +78,8 @@ export class AstWalker {
             startPosition: importNode.start,
             endPosition: importNode.end,
             hasFromKeyWord: false,
-            namedBindings: []
+            namedBindings: [],
+            importComment: importNode.importComment
         };
 
         const importClause = importNode.importDeclaration.importClause;

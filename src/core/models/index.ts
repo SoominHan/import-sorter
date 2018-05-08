@@ -1,3 +1,4 @@
+export * from './comment';
 export * from './import-element';
 export * from './import-node';
 export * from './import-string-configuration';
