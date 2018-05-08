@@ -22,55 +22,20 @@ an example of default configuration is provided bellow. For available options ha
   // Default file configuration name
   "importSorter.generalConfiguration.configurationFilePath": "./import-sorter.json",
 
-  // Enables sort before each save of the document
-  "importSorter.generalConfiguration.sortOnBeforeSave": false,
-
   // Excludes sorting for files which match given regex expression. Regex considers the whole file path. The file path separator is normalized to /
   "importSorter.generalConfiguration.exclude": [],
 
-  // Sort Order of names in curly brackets
-  "importSorter.sortConfiguration.importMembers.order": "caseInsensitive",
+  // Enables sort before each save of the document
+  "importSorter.generalConfiguration.sortOnBeforeSave": false,
 
-  // Sort Direction of names in curly brackets
-  "importSorter.sortConfiguration.importMembers.direction": "asc",
+  // If true then the import string has a semicolon at the end, otherwise it will not be appended. Default is true
+  "importSorter.importStringConfiguration.hasSemicolon": true,
 
-  // Sort Order of paths
-  "importSorter.sortConfiguration.importPaths.order": "caseInsensitive",
+  // The count of units before import is new-lined
+  "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": 100,
 
-  // Sort Direction of paths
-  "importSorter.sortConfiguration.importPaths.direction": "asc",
-
-  // Combine imports with the same path
-  "importSorter.sortConfiguration.joinImportPaths": true,
-
-  // The default order level of everything which is not include into rules
-  "importSorter.sortConfiguration.customOrderingRules.defaultOrderLevel": 20,
-
-  // The default number of empty lines after any group. This has lesser priority then empty lines in rules
-  "importSorter.sortConfiguration.customOrderingRules.defaultNumberOfEmptyLinesAfterGroup": 1,
-
-  // The default order level of everything which is not include into rules
-  "importSorter.sortConfiguration.customOrderingRules.rules": [
-    {
-      "regex": "^@angular",
-      "orderLevel": 0,
-      "numberOfEmptyLinesAfterGroup": 0
-    },
-    {
-      "regex": "^[@]",
-      "orderLevel": 10
-    },
-    {
-      "regex": "^[.]",
-      "orderLevel": 30
-    }
-  ],
-
-  // Defines the character which will be printed on each new lined import expression
-  "importSorter.importStringConfiguration.tabType": "space",
-
-  // Left number of spaces for the new lined imports
-  "importSorter.importStringConfiguration.tabSize": 4,
+  // The type of length restriction, before import is moved to a new line
+  "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.type": "maxLineLength",
 
   // The number of new lines after the last sorted import
   "importSorter.importStringConfiguration.numberOfEmptyLinesAfterAllImports": 1,
@@ -78,29 +43,68 @@ an example of default configuration is provided bellow. For available options ha
   // The path quotes
   "importSorter.importStringConfiguration.quoteMark": "single",
 
-  // The type of length restriction, before import is moved to a new line
-  "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.type": "maxLineLength",
-
-  // The count of units before import is newlined
-  "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": 100,
+  // Number of spaces after comma
+  "importSorter.importStringConfiguration.spacingPerImportExpression.afterComma": 1,
 
   // Number of spaces after {
   "importSorter.importStringConfiguration.spacingPerImportExpression.afterStartingBracket": 1,
 
-  // Number of spaces before }
-  "importSorter.importStringConfiguration.spacingPerImportExpression.beforeEndingBracket": 1,
-
   // Number of spaces before comma
   "importSorter.importStringConfiguration.spacingPerImportExpression.beforeComma": 0,
 
-  // Number of spaces after comma
-  "importSorter.importStringConfiguration.spacingPerImportExpression.afterComma": 1,
+  // Number of spaces before }
+  "importSorter.importStringConfiguration.spacingPerImportExpression.beforeEndingBracket": 1,
+
+  // Left number of spaces for the new lined imports. If tabType is set to 'tab', then the configuration defines the size of the tab in number of spaces
+  "importSorter.importStringConfiguration.tabSize": 4,
+
+  // Defines the character which will be printed on each new lined import expression
+  "importSorter.importStringConfiguration.tabType": "space",
 
   // If always/multiLine then adds a trailing comma at the end of the imports for 'single and multi' and 'multi-line' imports respectively. Default is none therefore no trailing comma
   "importSorter.importStringConfiguration.trailingComma": "none",
 
-  // If true then the import string has a semicolon at the end, otherwise it will not be appended. Default is true
-  "importSorter.importStringConfiguration.hasSemicolon": true
+  // The default number of empty lines after any group. This has lesser priority then empty lines in rules
+  "importSorter.sortConfiguration.customOrderingRules.defaultNumberOfEmptyLinesAfterGroup": 1,
+
+  // The default order level of everything which is not included into rules
+  "importSorter.sortConfiguration.customOrderingRules.defaultOrderLevel": 20,
+
+  // Disable sorting of path on the default group
+  "importSorter.sortConfiguration.customOrderingRules.disableDefaultOrderSort": false,
+
+  // The default order level of everything which is not included into rules
+  "importSorter.sortConfiguration.customOrderingRules.rules": [
+        {
+            "type": "importMember",
+            "regex": "^$",
+            "orderLevel": 10,
+            "disableSort": true
+        },
+        {
+            "regex": "^[@]",
+            "orderLevel": 30
+        },
+        {
+            "regex": "^[.]",
+            "orderLevel": 40
+        }
+  ],
+
+  // Sort Direction of names in curly brackets
+  "importSorter.sortConfiguration.importMembers.direction": "asc",
+
+  // Sort Order of names in curly brackets
+  "importSorter.sortConfiguration.importMembers.order": "caseInsensitive",
+
+  // Sort Direction of paths
+  "importSorter.sortConfiguration.importPaths.direction": "asc",
+
+  // Sort Order of paths
+  "importSorter.sortConfiguration.importPaths.order": "caseInsensitive",
+
+  // Combine imports with the same path
+  "importSorter.sortConfiguration.joinImportPaths": true
 ```
 ## Some settings in more details:
 - `importSorter.generalConfiguration.configurationFilePath` adds an option to read configuration from file. The setting represents a relative path to the root of the open vscode workspace.
@@ -137,28 +141,28 @@ The default value is `[]`. Bellow is a example of the configuration:
 In the example, any path which finishes with `pollyfill.ts` path will be excluded.
 ******
 -  `importSorter.sortConfiguration.customOrderingRules.rules` is a json array of regex expressions which sets the sort group order.
-As of now the default(might change later on) setting is
+As of now the default setting is
 ```json
 [
     {
-      "regex": "^@angular",
-      "orderLevel": 0,
-      "numberOfEmptyLinesAfterGroup": 0,
-      "type": "path"
+        "type": "importMember",
+        "regex": "^$",
+        "orderLevel": 10,
+        "disableSort": true
     },
     {
-      "regex": "^[@]",
-      "orderLevel": 10
+        "regex": "^[@]",
+        "orderLevel": 30
     },
     {
-      "regex": "^[.]",
-      "orderLevel": 30
+        "regex": "^[.]",
+        "orderLevel": 40
     }
 ]
 ```
-The `type` is an optional and defaults to `path`(another value is `importMember`). That setting says that we make any import which starts from `@angular` in the path to have the highest order priority `0`. The highest priority given to the lowest number. Then anything which starts from `@` in the path gets next priority with order `10`. The default priority for everything else is denoted by `importSorter.sortConfiguration.customOrderingRules.defaultOrderLevel` and default to `20`. The least priority is given to anything which starts from `.` in the path.
+The `type` is an optional and defaults to `path`(another value is `importMember`). That setting says that we make any import which does not have `from` keyword `(possibly an import with side effect)` to have the highest order priority of `10`. The highest priority given to the lowest number. We also say that we do not want to apply sorting rules to that group of `disableSort: false`. Then anything which does have `.` in the import path gets next priority of `40`. Everything else which is not included by those rules get a default priority of 20 denoted by `importSorter.sortConfiguration.customOrderingRules.defaultOrderLevel`.
 
-As a result we get `4` sort `groups`. Those groups are `individually` sorted by the rules applied in the settings.
+As a result we get `4` sort `groups`. Those groups are `individually` sorted by the rules applied in the settings unless `disableSort: true` which would preserve the order of imports.
 ******
 
 - `importSorter.importStringConfiguration.trailingComma` is an enum which can be `always`, `multiLine`, or `none`.
@@ -180,8 +184,6 @@ As a result we get `4` sort `groups`. Those groups are `individually` sorted by 
 
 ## Future roadmap
 - Handle external dependencies based on the most external dependencies being at the top and group based on those. Sorting will be done within those groups.
-
-- Handle comments within import blocks
 
 ## Release Notes
 

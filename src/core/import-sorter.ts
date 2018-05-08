@@ -12,6 +12,7 @@ import {
     ImportSortOrder,
     SortConfiguration
 } from './models';
+import { CustomOrderRule } from './models/custom-order-rule';
 import { ImportElementSortResult } from './models/import-element-sort-result';
 
 const NEW_PERIOD_CHAR = String.fromCharCode(128);
@@ -28,8 +29,8 @@ export class ImportSorter {
         const joinedImportsResult = this.joinImportPaths(clonedElements);
         const duplicates = joinedImportsResult.duplicates;
         const sortedImportsExpr = this.sortNamedBindings(joinedImportsResult.joinedExpr);
-        const sortedByModuleExpr = this.sortModuleSpecifiers(sortedImportsExpr);
-        const sortedElementGroups = this.applyCustomSortingRules(sortedByModuleExpr);
+        const sortedElementGroups = this.applyCustomSortingRules(sortedImportsExpr);
+        this.sortModuleSpecifiers(sortedElementGroups);
         return {
             groups: sortedElementGroups,
             duplicates: duplicates
@@ -44,12 +45,18 @@ export class ImportSorter {
 
     private normalizePaths(imports: ImportElement[]) {
         return chain(imports).map(x => {
-            const isRelativePath = x.moduleSpecifierName.startsWith(`./`) || x.moduleSpecifierName.startsWith(`../`);
-            x.moduleSpecifierName = path
-                .normalize(x.moduleSpecifierName)
-                .replace(new RegExp('\\' + path.sep, 'g'), '/');
+            const isRelativePath =
+                x.moduleSpecifierName.startsWith(`.`)
+                || x.moduleSpecifierName.startsWith(`..`);
+            x.moduleSpecifierName = isRelativePath ? path.normalize(x.moduleSpecifierName).replace(new RegExp('\\' + path.sep, 'g'), '/') : x.moduleSpecifierName;
             if (isRelativePath && !x.moduleSpecifierName.startsWith(`./`) && !x.moduleSpecifierName.startsWith(`../`)) {
-                x.moduleSpecifierName = `./${x.moduleSpecifierName}`;
+                if (x.moduleSpecifierName === '.') {
+                    x.moduleSpecifierName = './';
+                } else if (x.moduleSpecifierName === '..') {
+                    x.moduleSpecifierName = '../';
+                } else {
+                    x.moduleSpecifierName = `./${x.moduleSpecifierName}`;
+                }
             }
             return x;
         });
@@ -69,9 +76,13 @@ export class ImportSorter {
         });
     }
 
-    private sortModuleSpecifiers(importsExpr: LoDashExplicitArrayWrapper<ImportElement>): LoDashExplicitArrayWrapper<ImportElement> {
+    private sortModuleSpecifiers(elementGroups: ImportElementGroup[]): void {
         const sortOrder = this.getSortOrderFunc(this.sortConfig.importPaths.order, true);
-        return importsExpr.orderBy((y: ImportElement) => sortOrder(y.moduleSpecifierName), [this.sortConfig.importPaths.direction]);
+        elementGroups.filter(gr => !gr.customOrderRule.disableSort).forEach(gr => {
+            gr.elements = chain(gr.elements)
+                .orderBy<ImportElement>(y => sortOrder(y.moduleSpecifierName), [this.sortConfig.importPaths.direction])
+                .value();
+        });
     }
 
     private joinImportPaths(imports: ImportElement[]): { joinedExpr: LoDashExplicitArrayWrapper<ImportElement>, duplicates: ImportElement[] } {
@@ -87,7 +98,7 @@ export class ImportSorter {
             .groupBy(x => x.moduleSpecifierName)
             .map((x: ImportElement[]) => {
                 if (x.length > 1) {
-                    const nameBindings = chain(x).flatMap(y => y.namedBindings).value();
+                    const nameBindings = chain(x).flatMap(y => y.namedBindings).uniqBy(y => y.name).value();
                     const defaultImportElement = x.find(y => !isNil(y.defaultImportName) && !(y.defaultImportName.trim() === ''));
                     const defaultImportName = defaultImportElement ? defaultImportElement.defaultImportName : null;
                     x[0].defaultImportName = defaultImportName;
@@ -116,34 +127,50 @@ export class ImportSorter {
         if (!this.sortConfig.customOrderingRules
             || !this.sortConfig.customOrderingRules.rules
             || this.sortConfig.customOrderingRules.rules.length === 0) {
+            const rules = this.sortConfig.customOrderingRules;
             return [{
                 elements: sortedImports.value(),
-                numberOfEmptyLinesAfterGroup: this.getDefaultLineNumber()
+                numberOfEmptyLinesAfterGroup: this.getDefaultLineNumber(),
+                customOrderRule: {
+                    disableSort: rules ? rules.disableDefaultOrderSort : false,
+                    numberOfEmptyLinesAfterGroup: rules ? rules.defaultNumberOfEmptyLinesAfterGroup : null,
+                    orderLevel: rules ? rules.defaultOrderLevel : null,
+                    regex: null
+                }
             }];
         }
         const rules = this.sortConfig
             .customOrderingRules
             .rules
             .map(x => ({
-                pos: x.orderLevel,
-                expr: x.regex,
+                orderLevel: x.orderLevel,
+                regex: x.regex,
                 type: x.type,
-                numberOfLines: isNil(x.numberOfEmptyLinesAfterGroup) ? this.getDefaultLineNumber() : x.numberOfEmptyLinesAfterGroup
+                disableSort: x.disableSort,
+                numberOfEmptyLinesAfterGroup: isNil(x.numberOfEmptyLinesAfterGroup) ? this.getDefaultLineNumber() : x.numberOfEmptyLinesAfterGroup
             }));
 
         const result: { [key: number]: ImportElementGroup } = {};
         sortedImports
             .forEach(x => {
-                const rule = rules.find(e => !e.type || e.type === 'path' ? x.moduleSpecifierName.match(e.expr) !== null : this.matchNameBindings(x, e.expr));
+                const rule = rules.find(e => !e.type || e.type === 'path' ? x.moduleSpecifierName.match(e.regex) !== null : this.matchNameBindings(x, e.regex));
                 if (!rule) {
                     this.addElement(
                         result,
-                        this.sortConfig.customOrderingRules.defaultOrderLevel,
-                        x,
-                        this.getDefaultLineNumber());
+                        {
+                            disableSort: this.sortConfig.customOrderingRules.disableDefaultOrderSort,
+                            numberOfEmptyLinesAfterGroup: this.getDefaultLineNumber(),
+                            orderLevel: this.sortConfig.customOrderingRules.defaultOrderLevel,
+                            regex: null
+                        },
+                        x);
                     return;
                 }
-                this.addElement(result, rule.pos, x, rule.numberOfLines);
+                this.addElement(
+                    result,
+                    rule,
+                    x
+                );
             })
             .value();
         const customSortedImports =
@@ -165,12 +192,12 @@ export class ImportSorter {
         return importElement.namedBindings.some(x => x.name.match(regex) !== null);
     }
 
-    private addElement(dictionary: { [key: number]: ImportElementGroup }, key: number, value: ImportElement, numberOfLines: number) {
-        if (isNil(dictionary[key])) {
-            dictionary[key] = { elements: [], numberOfEmptyLinesAfterGroup: numberOfLines };
-            dictionary[key].elements = [value];
+    private addElement(dictionary: { [key: number]: ImportElementGroup }, rule: CustomOrderRule, value: ImportElement) {
+        if (isNil(dictionary[rule.orderLevel])) {
+            dictionary[rule.orderLevel] = { elements: [], numberOfEmptyLinesAfterGroup: rule.numberOfEmptyLinesAfterGroup, customOrderRule: rule };
+            dictionary[rule.orderLevel].elements = [value];
         } else {
-            dictionary[key].elements.push(value);
+            dictionary[rule.orderLevel].elements.push(value);
         }
     }
 

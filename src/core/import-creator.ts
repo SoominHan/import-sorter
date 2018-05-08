@@ -26,7 +26,18 @@ export class ImportCreator {
 
     private createImportStrings(element: ImportElement[]): string[] {
         this.assertIsInitialised();
-        return element.map(x => this.createSingleImportString(x));
+        return element.map(x => {
+            const importString = this.createSingleImportString(x);
+
+            let leadingCommentText = x.importComment.leadingComments.map(comment => comment.text).join('\n');
+            leadingCommentText = leadingCommentText ? leadingCommentText + '\n' : leadingCommentText;
+
+            let trailingCommentText = x.importComment.trailingComments.map(comment => comment.text).join('\n');
+            trailingCommentText = trailingCommentText ? ' '  + trailingCommentText : trailingCommentText;
+
+            const importWithComments = leadingCommentText + importString + trailingCommentText;
+            return importWithComments;
+        });
     }
 
     private assertIsInitialised() {
@@ -87,7 +98,7 @@ export class ImportCreator {
         const spaceConfig = this.getSpaceConfig();
         const beforeCommaAndAfterPart = `${spaceConfig.beforeComma},${spaceConfig.afterComma}`;
         const nameBindingsResult = chain(nameBindings)
-            .chunk(maximumNumberOfWordsBeforeBreak)
+            .chunk(maximumNumberOfWordsBeforeBreak || 1)
             .map(x => x.join(beforeCommaAndAfterPart))
             .value();
 
@@ -120,7 +131,7 @@ export class ImportCreator {
         }
 
         if (this.importStringConfig.maximumNumberOfImportExpressionsPerLine.type === 'newLineEachExpressionAfterCountLimit') {
-            return this.createNameBindingChunksByWords(nameBindings, 1);
+            return this.createNameBindingChunksByWords(nameBindings, 0);
         }
 
         const result: string[][] = [];

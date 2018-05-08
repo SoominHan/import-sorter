@@ -42,9 +42,14 @@ suite('Import Creator Tests', () => {
                                 { name: 'B', aliasName: null },
                                 { name: 'a', aliasName: 'cc' },
                                 { name: 'ac', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
-                    numberOfEmptyLinesAfterGroup: 3
+                    numberOfEmptyLinesAfterGroup: 3,
+                    customOrderRule: null
                 }
             ],
             expected: "import t, {\n    B, a as cc, ac\n} from \'createString.ts\';"
@@ -69,9 +74,14 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import { ChangeDetectionStrategy, DebugElement } from '@angular/core';"
@@ -96,9 +106,14 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import {\n    ChangeDetectionStrategy, DebugElement\n} from \'@angular/core\';"
@@ -123,9 +138,14 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import { ChangeDetectionStrategy, DebugElement, } from '@angular/core';\n"
@@ -150,9 +170,14 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import {\n    ChangeDetectionStrategy, DebugElement,\n} from \'@angular/core\';\n"
@@ -177,9 +202,14 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import { ChangeDetectionStrategy, DebugElement } from '@angular/core';\n"
@@ -204,9 +234,14 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import {\n    ChangeDetectionStrategy, DebugElement,\n} from \'@angular/core\';\n"
@@ -231,9 +266,14 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import { ChangeDetectionStrategy, DebugElement } from '@angular/core'\n"
@@ -258,9 +298,14 @@ suite('Import Creator Tests', () => {
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import {\n    ChangeDetectionStrategy, DebugElement\n} from \'@angular/core\'\n"
@@ -286,9 +331,14 @@ suite('Import Creator Tests', () => {
                                 { name: 'a', aliasName: null },
                                 { name: 'b', aliasName: null },
                                 { name: 'c', aliasName: null }
-                            ]
+                            ],
+                            importComment: {
+                                leadingComments: [],
+                                trailingComments: []
+                            }
                         }],
-                    numberOfEmptyLinesAfterGroup: 0
+                    numberOfEmptyLinesAfterGroup: 0,
+                    customOrderRule: null
                 }
             ],
             expected: "import {\n    a, b,\n    c\n} from \'@angular/core\';"

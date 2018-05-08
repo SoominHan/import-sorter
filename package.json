@@ -3,7 +3,7 @@
     "displayName": "TypeScript Import Sorter",
     "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
     "icon": "assets/icons/import-sorter.png",
-    "version": "1.2.2",
+    "version": "2.0.0",
     "publisher": "mike-co",
     "engines": {
         "vscode": "^1.9.0"
@@ -134,17 +134,27 @@
                     "default": 1,
                     "description": "The default number of empty lines after any group. This has lesser priority then empty lines in rules"
                 },
+                "importSorter.sortConfiguration.customOrderingRules.disableDefaultOrderSort": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Disable sorting of path on the default group"
+                },
                 "importSorter.sortConfiguration.customOrderingRules.rules": {
                     "type": "array",
                     "default": [
                         {
-                            "regex": "^@angular",
-                            "orderLevel": 0,
-                            "numberOfEmptyLinesAfterGroup": 0
+                            "type": "importMember",
+                            "regex": "^$",
+                            "orderLevel": 5,
+                            "disableSort": true
+                        },
+                        {
+                            "regex": "^[^.@]",
+                            "orderLevel": 10
                         },
                         {
                             "regex": "^[@]",
-                            "orderLevel": 10
+                            "orderLevel": 15
                         },
                         {
                             "regex": "^[.]",
