@@ -1,4 +1,25 @@
 # [2.0.0]
+### Breaking changes
+* default sorting rules have been changed to:
+```json
+[
+    {
+        "type": "importMember",
+        "regex": "^$",
+        "orderLevel": 10,
+        "disableSort": true
+    },
+    {
+        "regex": "^[@]",
+        "orderLevel": 30
+    },
+    {
+        "regex": "^[.]",
+        "orderLevel": 40
+    }
+]
+```
+
 ### New features
 * added support of the comments blocks.
 * added `importSorter.sortConfiguration.customOrderingRules.disableDefaultOrderSort` and `importSorter.sortConfiguration.customOrderingRules.rules.disableSort` which allows to

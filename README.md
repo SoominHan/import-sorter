@@ -75,24 +75,20 @@ an example of default configuration is provided bellow. For available options ha
 
   // The default order level of everything which is not included into rules
   "importSorter.sortConfiguration.customOrderingRules.rules": [
-    {
-      "type": "importMember",
-      "regex": "^$",
-      "orderLevel": 5,
-      "disableSort": true
-    },
-    {
-      "regex": "^[^.@]",
-      "orderLevel": 10
-    },
-    {
-      "regex": "^[@]",
-      "orderLevel": 15
-    },
-    {
-      "regex": "^[.]",
-      "orderLevel": 30
-    }
+        {
+            "type": "importMember",
+            "regex": "^$",
+            "orderLevel": 10,
+            "disableSort": true
+        },
+        {
+            "regex": "^[@]",
+            "orderLevel": 30
+        },
+        {
+            "regex": "^[.]",
+            "orderLevel": 40
+        }
   ],
 
   // Sort Direction of names in curly brackets
@@ -149,28 +145,24 @@ As of now the default setting is
 ```json
 [
     {
-      "type": "importMember",
-      "regex": "^$",
-      "orderLevel": 5,
-      "disableSort": true
+        "type": "importMember",
+        "regex": "^$",
+        "orderLevel": 10,
+        "disableSort": true
     },
     {
-      "regex": "^[^.@]",
-      "orderLevel": 10
+        "regex": "^[@]",
+        "orderLevel": 30
     },
     {
-      "regex": "^[@]",
-      "orderLevel": 15
-    },
-    {
-      "regex": "^[.]",
-      "orderLevel": 30
+        "regex": "^[.]",
+        "orderLevel": 40
     }
 ]
 ```
-The `type` is an optional and defaults to `path`(another value is `importMember`). That setting says that we make any import which does not have `from` keyword `(possibly an import with side effect)` to have the highest order priority of `5`. The highest priority given to the lowest number. We also say that we do not want to apply sorting rules to that group of `disableSort: false`. Then anything which does not have `@` or `.` in the import path gets next priority of `10`. Then anything which does have `@` in the import path will get priority of `15`. The default priority for everything else is denoted by `importSorter.sortConfiguration.customOrderingRules.defaultOrderLevel` and default to `20`. The least priority is given to anything which starts from `.` in the path.
+The `type` is an optional and defaults to `path`(another value is `importMember`). That setting says that we make any import which does not have `from` keyword `(possibly an import with side effect)` to have the highest order priority of `10`. The highest priority given to the lowest number. We also say that we do not want to apply sorting rules to that group of `disableSort: false`. Then anything which does have `.` in the import path gets next priority of `40`. Everything else which is not included by those rules get a default priority of 20 denoted by `importSorter.sortConfiguration.customOrderingRules.defaultOrderLevel`.
 
-As a result we get `5` sort `groups`. Those groups are `individually` sorted by the rules applied in the settings unless `disableSort: true` which would preserve the order of imports.
+As a result we get `4` sort `groups`. Those groups are `individually` sorted by the rules applied in the settings unless `disableSort: true` which would preserve the order of imports.
 ******
 
 - `importSorter.importStringConfiguration.trailingComma` is an enum which can be `always`, `multiLine`, or `none`.

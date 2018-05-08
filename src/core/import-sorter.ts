@@ -98,7 +98,7 @@ export class ImportSorter {
             .groupBy(x => x.moduleSpecifierName)
             .map((x: ImportElement[]) => {
                 if (x.length > 1) {
-                    const nameBindings = chain(x).flatMap(y => y.namedBindings).value();
+                    const nameBindings = chain(x).flatMap(y => y.namedBindings).uniqBy(y => y.name).value();
                     const defaultImportElement = x.find(y => !isNil(y.defaultImportName) && !(y.defaultImportName.trim() === ''));
                     const defaultImportName = defaultImportElement ? defaultImportElement.defaultImportName : null;
                     x[0].defaultImportName = defaultImportName;
