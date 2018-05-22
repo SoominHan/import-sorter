@@ -1,30 +1,14 @@
 import * as fs from 'fs';
-import { chain, merge } from 'lodash';
+import { chain, cloneDeep, merge } from 'lodash';
 import { sep } from 'path';
 import {
-    Position,
-    Range,
-    StatusBarAlignment,
-    StatusBarItem,
-    TextDocument,
-    TextDocumentWillSaveEvent,
-    TextEdit,
-    TextEditorEdit,
-    TextLine,
-    window,
-    workspace
+    Position, Range, StatusBarAlignment, StatusBarItem, TextDocument, TextDocumentWillSaveEvent,
+    TextEdit, TextEditorEdit, TextLine, window, workspace
 } from 'vscode';
 
 import {
-    AstWalker,
-    defaultGeneralConfiguration,
-    GeneralConfiguration,
-    ImportCreator,
-    ImportElement,
-    ImportSorter,
-    ImportSorterConfiguration,
-    ImportStringConfiguration,
-    SortConfiguration
+    AstWalker, defaultGeneralConfiguration, GeneralConfiguration, ImportCreator, ImportElement,
+    ImportSorter, ImportSorterConfiguration, ImportStringConfiguration, SortConfiguration
 } from './core';
 
 const EXTENSION_CONFIGURATION_NAME = 'importSorter';
@@ -53,8 +37,8 @@ export class ImportSorterExtension {
     }
 
     public sortModifiedDocumentImportsFromOnBeforeSaveCommand(event: TextDocumentWillSaveEvent): void {
-        const isSortOnBeforeSaveEnabled =
-            workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<GeneralConfiguration>('generalConfiguration').sortOnBeforeSave;
+        const configuration = this.getConfiguration();
+        const isSortOnBeforeSaveEnabled = configuration.generalConfiguration.sortOnBeforeSave;
         if (!isSortOnBeforeSaveEnabled) {
             return;
         }
@@ -194,7 +178,10 @@ export class ImportSorterExtension {
     }
 
     private getConfiguration(): ImportSorterConfiguration {
-        const generalConfig = workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<GeneralConfiguration>('generalConfiguration');
+        const generalConfigProxy: GeneralConfiguration | ProxyHandler<GeneralConfiguration> =
+            workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<GeneralConfiguration>('generalConfiguration');
+        const generalConfig = cloneDeep(generalConfigProxy);
+
         const configPath = `${workspace.rootPath}${sep}${generalConfig.configurationFilePath}`;
         const isConfigExist = fs.existsSync(configPath);
 
@@ -204,12 +191,19 @@ export class ImportSorterExtension {
         }
 
         const fileConfigurationString = isConfigExist ? fs.readFileSync(configPath, 'utf8') : '{}';
-        const fileConfig = JSON.parse(fileConfigurationString);
-        const sortConfig = workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<SortConfiguration>('sortConfiguration');
-        const importStringConfig = workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<ImportStringConfiguration>('importStringConfiguration');
+        const fileConfig = JSON.parse(fileConfigurationString) as ImportSorterConfiguration;
+
+        const sortConfigProxy: SortConfiguration | ProxyHandler<SortConfiguration>
+            = workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<SortConfiguration>('sortConfiguration');
+        const sortConfig = cloneDeep(sortConfigProxy);
+
+        const importStringConfigProxy: ImportStringConfiguration | ProxyHandler<ImportStringConfiguration>
+            = workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<ImportStringConfiguration>('importStringConfiguration');
+        const importStringConfig = cloneDeep(importStringConfigProxy);
+
         const sortConfiguration = merge(sortConfig, fileConfig.sortConfiguration || {});
         const importStringConfiguration = merge(importStringConfig, fileConfig.importStringConfiguration || {});
-        const generalConfiguration = merge(generalConfig, fileConfig.generalConfig || {});
+        const generalConfiguration = merge(generalConfig, fileConfig.generalConfiguration || {});
         return {
             sortConfiguration,
             importStringConfiguration,
