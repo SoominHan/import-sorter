@@ -1,3 +1,7 @@
+# [2.0.2]
+### Bug fixes
+* fixing configuration as proxy. issue #16
+
 # [2.0.0]
 ### Breaking changes
 * default sorting rules have been changed to:
