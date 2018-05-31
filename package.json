@@ -24,7 +24,12 @@
         "sort imports"
     ],
     "activationEvents": [
-        "*"
+        "onLanguage:javascript",
+        "onLanguage:javascriptreact",
+        "onLanguage:typescript",
+        "onLanguage:typescriptreact",
+        "onCommand:extension.sortImports",
+        "onCommand:extension.sortImportsInDirectory"
     ],
     "main": "./out/src/extension",
     "scripts": {
@@ -43,6 +48,7 @@
         "@types/lodash": "4.14.108",
         "@types/mocha": "^2.2.32",
         "@types/node": "^6.0.40",
+        "vscode-nls": "^2.0.2",
         "expect.js": "^0.3.1",
         "mocha": "^2.3.3",
         "tslint": "^4.3.1",
@@ -52,7 +58,13 @@
         "commands": [
             {
                 "command": "extension.sortImports",
-                "title": "Sort Imports"
+                "title": "%command.sortImports%",
+                "category": "%commands.category%"
+            },
+            {
+                "command": "extension.sortImportsInDirectory",
+                "title": "%command.sortImportsInDirectory%",
+                "category": "%commands.category%"
             }
         ],
         "keybindings": [
@@ -62,14 +74,28 @@
                 "when": "editorTextFocus && !editorReadonly"
             }
         ],
+        "menus": {
+            "explorer/context": [
+              {
+                "command": "extension.sortImportsInDirectory",
+                "group": "1_modification",
+                "when": "explorerResourceIsFolder && config.importSorter.generalConfiguration.sortImportsInDirectory"
+              }
+            ]
+          },
         "configuration": {
             "type": "object",
-            "title": "Import Sorter configuration",
+            "title": "%configuration.title%",
             "properties": {
                 "importSorter.generalConfiguration.configurationFilePath": {
                     "type": "string",
                     "default": "./import-sorter.json",
                     "description": "Default file configuration name"
+                },
+                "importSorter.generalConfiguration.sortImportsInDirectory": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enables menu option for sorting in directory"
                 },
                 "importSorter.generalConfiguration.sortOnBeforeSave": {
                     "type": "boolean",

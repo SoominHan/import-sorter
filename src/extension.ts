@@ -1,9 +1,4 @@
-import {
-    commands,
-    Disposable,
-    ExtensionContext,
-    workspace
-} from 'vscode';
+import { commands, Disposable, ExtensionContext, workspace } from 'vscode';
 
 import { ImportSorterExtension } from './import-sorter-extension';
 
@@ -15,9 +10,14 @@ export const activate = (context: ExtensionContext) => {
         importSorterExtension.sortActiveDocumentImportsFromCommand();
     });
 
+    const sortImportsInDirectoryCommand: Disposable = commands.registerCommand('extension.sortImportsInDirectory', () => {
+        console.log('directory sort');
+    });
+
     const onWillSaveTextDocument = workspace.onWillSaveTextDocument(event => importSorterExtension.sortModifiedDocumentImportsFromOnBeforeSaveCommand(event));
 
     context.subscriptions.push(sortImportsCommand);
+    context.subscriptions.push(sortImportsInDirectoryCommand);
     context.subscriptions.push(importSorterExtension);
     context.subscriptions.push(onWillSaveTextDocument);
 };
