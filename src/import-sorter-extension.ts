@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { chain, cloneDeep, flatMap, merge } from 'lodash';
+import { chain, cloneDeep, merge } from 'lodash';
 import { sep } from 'path';
 import {
     Position, Range, StatusBarAlignment, StatusBarItem, TextDocument, TextDocumentWillSaveEvent,
@@ -7,23 +7,25 @@ import {
 } from 'vscode';
 
 import {
-    AstWalker, defaultGeneralConfiguration, GeneralConfiguration, ImportCreator, ImportElement,
-    ImportSorter, ImportSorterConfiguration, ImportStringConfiguration, SortConfiguration
+    AstWalker, defaultGeneralConfiguration, GeneralConfiguration, IAstWalker, IImportCreator,
+    IImportSorter, ImportCreator, ImportElement, ImportSorter, ImportSorterConfiguration,
+    ImportSortExecuter, ImportStringConfiguration, SortConfiguration
 } from './core';
-import * as io from './helpers/io';
 
 const EXTENSION_CONFIGURATION_NAME = 'importSorter';
 
 export class ImportSorterExtension {
     private statusBarItem: StatusBarItem;
-    private walker: AstWalker;
-    private sorter: ImportSorter;
-    private importCreator: ImportCreator;
+    private walker: IAstWalker;
+    private sorter: IImportSorter;
+    private importCreator: IImportCreator;
+    private importSortExecuter: ImportSortExecuter;
 
     public initialise() {
         this.walker = new AstWalker();
         this.sorter = new ImportSorter();
         this.importCreator = new ImportCreator();
+        this.importSortExecuter = new ImportSortExecuter(this.walker, this.sorter, this.importCreator);
         if (!this.statusBarItem) {
             //todo: consider using for stats
             this.statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
@@ -37,15 +39,22 @@ export class ImportSorterExtension {
         return this.sortActiveDocumentImports();
     }
 
-    public sortImportsInDirectories(uri: Uri): Promise<void[]> {
-        const directories = this.getAllFilePathsUnderThePath(uri);
-        return directories.then(filePaths => {
-            const documentImportSorts = filePaths.map(path =>
-                workspace.openTextDocument(path).then(document => this.sortActiveDocumentImports({ document: document } as any))
-            );
-            const results = Promise.all(documentImportSorts);
-            return results;
-        });
+    public sortImportsInDirectories(uri: Uri): Promise<void> {
+        this.setConfig();
+        return this.importSortExecuter.sortImportsInDirectory(uri.fsPath);
+        // const directories = this.getAllFilePathsUnderThePath(uri);
+        // return directories.then(filePaths => {
+        //     console.log(filePaths);
+        //     ([filePaths[0]]).forEach(filePath => {
+        //         this.importSortExecuter.writeImports(filePath, null, null);
+        //     });
+
+        //     // const documentImportSorts = filePaths.map(path =>
+        //     //     workspace.openTextDocument(path).then(document => this.sortActiveDocumentImports({ document: document } as any))
+        //     // );
+        //     //const results = Promise.all(documentImportSorts);
+        //     return null;
+        // });
     }
 
     public sortModifiedDocumentImportsFromOnBeforeSaveCommand(event: TextDocumentWillSaveEvent): void {
@@ -62,18 +71,6 @@ export class ImportSorterExtension {
 
     public dispose() {
         this.statusBarItem.dispose();
-    }
-
-    private getAllFilePathsUnderThePath(uri: Uri): Promise<string[]> {
-        const srcPath = uri.fsPath;
-        if (!uri) {
-            throw new Error('No directory selected in the sidebar explorer.');
-        }
-
-        const allFilesPatterns = ['**/*.ts', '**/*.tsx'];
-        const excludes = [];
-        const filesAsync = allFilesPatterns.map(pattern => io.getFiles(srcPath, pattern, excludes));
-        return Promise.all(filesAsync).then(files => flatMap(files));
     }
 
     private sortActiveDocumentImports(event?: TextDocumentWillSaveEvent): void {

@@ -7,7 +7,11 @@ import {
     ImportNode
 } from './models';
 
-export class AstWalker {
+export interface IAstWalker {
+    parseImports(fullFilePath: string, _sourceText?: string): ImportElement[];
+}
+
+export class AstWalker implements IAstWalker {
 
     public parseImports(fullFilePath: string, _sourceText?: string): ImportElement[] {
         if (_sourceText !== null && _sourceText !== undefined && _sourceText.trim() === '') {

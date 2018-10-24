@@ -6,7 +6,12 @@ import {
     ImportStringConfiguration
 } from './models';
 
-export class ImportCreator {
+export interface IImportCreator {
+    initialise(importStringConfig: ImportStringConfiguration);
+    createImportText(groups: ImportElementGroup[]): string;
+ }
+
+export class ImportCreator implements IImportCreator {
     private importStringConfig: ImportStringConfiguration;
 
     public initialise(importStringConfig: ImportStringConfiguration) {

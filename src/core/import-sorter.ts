@@ -16,7 +16,13 @@ import { CustomOrderRule } from './models/custom-order-rule';
 import { ImportElementSortResult } from './models/import-element-sort-result';
 
 const NEW_PERIOD_CHAR = String.fromCharCode(128);
-export class ImportSorter {
+
+export interface IImportSorter {
+    initialise(sortConfig: SortConfiguration);
+    sortImportElements(imports: ImportElement[]): ImportElementSortResult;
+}
+
+export class ImportSorter implements IImportSorter{
     private sortConfig: SortConfiguration;
 
     public initialise(sortConfig: SortConfiguration) {
