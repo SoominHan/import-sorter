@@ -5,8 +5,8 @@ import * as io from '../helpers/io';
 import { IAstWalker } from './ast-walker';
 import { IImportCreator } from './import-creator';
 import { IImportSorter } from './import-sorter';
-import { Observable, merge as mergeObservable, forkJoin as forkJoinObservable } from 'rxjs';
-import { switchMap as switchMapObservable, map as mapObservable, mergeAll, filter as filterObservable } from 'rxjs/operators';
+import { Observable, merge as mergeObservable, forkJoin as forkJoinObservable, empty as emptyObservable } from 'rxjs';
+import { switchMap as switchMapObservable, flatMap as flatMapObservable, map as mapObservable, mergeAll, filter as filterObservable, delay } from 'rxjs/operators';
 
 export class ImportSortExecuter {
     constructor(private walker: IAstWalker, private sorter: IImportSorter, private importCreator: IImportCreator) { }
@@ -16,16 +16,8 @@ export class ImportSortExecuter {
     // }
 
     public sortImportsInDirectory(filePath: string): Promise<void> {
-        const allUpdatedSourceFiles$ = this.allFilesUnderThePath$(filePath).pipe(mapObservable(data => {
-            const sortedSourceFile = this.getSortedSource(data.filePath, data.file);
-            return { filePath: data.filePath, sortedSourceFile: sortedSourceFile };
-        }));
-        const allWrites$ = allUpdatedSourceFiles$.pipe(
-            filterObservable(data => data && data.sortedSourceFile !== null),
-            switchMapObservable(data => io.writeFile$(data.filePath, data.sortedSourceFile))
-        );
-        const allFinishedWrites$ = forkJoinObservable(allWrites$).pipe(mapObservable(_ => { return; }));
-        return allFinishedWrites$.toPromise();
+        const sortAllImports$ = forkJoinObservable(this.sortAllImports$(filePath)).pipe(mapObservable(_ => void 0));
+        return sortAllImports$.toPromise();
     }
 
     private getSortedSource(filePath: string, fileSource: string): string {
@@ -38,16 +30,27 @@ export class ImportSortExecuter {
         return importText;
     }
 
-    private allFilesUnderThePath$(startingSourcePath: string): Observable<{ filePath: string, file: string }> {
+    private sortAllImports$(startingSourcePath: string) {
         const allFilePaths$ = this.allFilePathsUnderThePath$(startingSourcePath);
-        const fileData$ = allFilePaths$.pipe(
-            switchMapObservable(filePaths => {
-                const files$ = filePaths.map(path => io.readFile$(path).pipe(mapObservable(file => ({ filePath: path, file: file }))));
-                return files$;
-            }),
-            mergeAll()
+        const test = allFilePaths$.pipe(
+            mergeAll(),
+            flatMapObservable(path => this.sortFileImports$(path))
         );
-        return fileData$;
+        return test;
+    }
+
+    private sortFileImports$(fullFilePath: string): Observable<void> {
+        return io.readFile$(fullFilePath).pipe(
+            //delay(Math.random() * 1000),
+            mapObservable(file => this.getSortedSource(fullFilePath, file)),
+            switchMapObservable(sortedSourceFile => {
+                if (sortedSourceFile) {
+                    return io.writeFile$(fullFilePath, sortedSourceFile);
+                } else {
+                    return emptyObservable();
+                }
+            })
+        );
     }
 
     private allFilePathsUnderThePath$(startingSourcePath: string): Observable<string[]> {
