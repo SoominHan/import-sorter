@@ -22,7 +22,7 @@ export interface IImportSorter {
     sortImportElements(imports: ImportElement[]): ImportElementSortResult;
 }
 
-export class ImportSorter implements IImportSorter{
+export class ImportSorter implements IImportSorter {
     private sortConfig: SortConfiguration;
 
     public initialise(sortConfig: SortConfiguration) {
@@ -133,14 +133,14 @@ export class ImportSorter implements IImportSorter{
         if (!this.sortConfig.customOrderingRules
             || !this.sortConfig.customOrderingRules.rules
             || this.sortConfig.customOrderingRules.rules.length === 0) {
-            const rules = this.sortConfig.customOrderingRules;
+            const customRules = this.sortConfig.customOrderingRules;
             return [{
                 elements: sortedImports.value(),
                 numberOfEmptyLinesAfterGroup: this.getDefaultLineNumber(),
                 customOrderRule: {
-                    disableSort: rules ? rules.disableDefaultOrderSort : false,
-                    numberOfEmptyLinesAfterGroup: rules ? rules.defaultNumberOfEmptyLinesAfterGroup : null,
-                    orderLevel: rules ? rules.defaultOrderLevel : null,
+                    disableSort: customRules ? customRules.disableDefaultOrderSort : false,
+                    numberOfEmptyLinesAfterGroup: customRules ? customRules.defaultNumberOfEmptyLinesAfterGroup : null,
+                    orderLevel: customRules ? customRules.defaultOrderLevel : null,
                     regex: null
                 }
             }];
