@@ -11,7 +11,7 @@ import {
     ImportElementGroup,
     ImportSortOrder,
     SortConfiguration
-} from './models';
+} from './models/models-public';
 import { CustomOrderRule } from './models/custom-order-rule';
 import { ImportElementSortResult } from './models/import-element-sort-result';
 

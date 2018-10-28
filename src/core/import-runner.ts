@@ -6,11 +6,11 @@ import {
     flatMap as flatMapObservable, map as mapObservable, mergeAll, switchMap as switchMapObservable
 } from 'rxjs/operators';
 
-import * as io from '../helpers/io';
+import { io } from './helpers/helpers-public';
 import { AstParser } from './ast-parser';
 import { ImportCreator } from './import-creator';
 import { ImportSorter } from './import-sorter';
-import { ImportSorterConfiguration, LineRange, SortedImportData } from './models';
+import { ImportSorterConfiguration, LineRange, SortedImportData } from './models/models-public';
 import { ImportElementSortResult } from './models/import-element-sort-result';
 
 export interface ConfigurationProvider {

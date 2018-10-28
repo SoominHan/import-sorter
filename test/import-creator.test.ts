@@ -6,7 +6,7 @@ import {
     InMemoryImportCreator,
     ImportElementGroup,
     ImportStringConfiguration
-} from '../src/core';
+} from '../src/core/core-public';
 
 interface ImportCreatorTest {
     testName: string;

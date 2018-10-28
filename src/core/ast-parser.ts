@@ -5,7 +5,7 @@ import {
     Comment,
     ImportElement,
     ImportNode
-} from './models';
+} from './models/models-public';
 
 export interface AstParser {
     parseImports(fullFilePath: string, _sourceText?: string): ImportElement[];

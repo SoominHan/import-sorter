@@ -2,7 +2,7 @@ import * as expect from 'expect.js';
 import 'mocha';
 
 import { SimpleImportAstParser } from '../src/core/ast-parser';
-import { ImportElement } from '../src/core/index';
+import { ImportElement } from '../src/core/core-public';
 
 interface AstTest {
     testName: string;

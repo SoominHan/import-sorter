@@ -10,7 +10,7 @@ import {
     defaultGeneralConfiguration, GeneralConfiguration, ImportRunner, ImportSorterConfiguration,
     ImportStringConfiguration, InMemoryImportCreator, InMemoryImportSorter, SimpleImportAstParser,
     SimpleImportRunner, SortConfiguration
-} from './core';
+} from './core/core-public';
 import { ConfigurationProvider } from './core/import-runner';
 
 const EXTENSION_CONFIGURATION_NAME = 'importSorter';
@@ -123,10 +123,7 @@ export class ImportSorterExtension {
             if (!importData.isSortRequired) {
                 return;
             }
-            // const lastRange = rangesToDelete[rangesToDelete.length - 1];
-            // if (!lastRange) {
-            //     return;
-            // }
+
             const deleteEdits = importData.rangesToDelete.map(x => TextEdit.delete(
                 new Range(new Position(x.startLine, x.startCharacter), new Position(x.endLine, x.endCharacter)))
             );

@@ -4,7 +4,7 @@ import {
     ImportElement,
     ImportElementGroup,
     ImportStringConfiguration
-} from './models';
+} from './models/models-public';
 
 export interface ImportCreator {
     initialise(importStringConfig: ImportStringConfiguration);

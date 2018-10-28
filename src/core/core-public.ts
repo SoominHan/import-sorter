@@ -1,4 +1,4 @@
-export * from './models';
+export * from './models/models-public';
 export * from './ast-parser';
 export * from './import-creator';
 export * from './import-sorter';
