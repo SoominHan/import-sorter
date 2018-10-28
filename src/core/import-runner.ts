@@ -1,76 +1,84 @@
-import { ImportElementSortResult } from './models/import-element-sort-result';
-//import { flatMap } from 'lodash';
-//import { Range } from 'vscode';
+import { chain } from 'lodash';
+import {
+    empty as emptyObservable, forkJoin as forkJoinObservable, merge as mergeObservable, Observable
+} from 'rxjs';
+import {
+    flatMap as flatMapObservable, map as mapObservable, mergeAll, switchMap as switchMapObservable
+} from 'rxjs/operators';
 
 import * as io from '../helpers/io';
-import { IAstWalker } from './ast-walker';
-import { IImportCreator } from './import-creator';
-import { IImportSorter } from './import-sorter';
-import { Observable, merge as mergeObservable, forkJoin as forkJoinObservable, empty as emptyObservable } from 'rxjs';
-import { switchMap as switchMapObservable, flatMap as flatMapObservable, map as mapObservable, mergeAll } from 'rxjs/operators';
-import { chain } from 'lodash';
+import { AstParser } from './ast-parser';
+import { ImportCreator } from './import-creator';
+import { ImportSorter } from './import-sorter';
+import { ImportSorterConfiguration, LineRange, SortedImportData } from './models';
+import { ImportElementSortResult } from './models/import-element-sort-result';
 
-class LineRange {
-    public startLine: number;
-    public startCharacter: number;
-    public endLine: number;
-    public endCharacter: number;
-    public isLineIntersecting(range: LineRange): boolean {
-        //line comparison
-        const min = this.startLine < range.startLine ? this : range;
-        const max = min === this ? range : this;
-        //lines do not intersect
-        if (min.endLine < max.startLine) {
-            return false;
-        }
-        return true;
-    }
-    public union(range: LineRange): LineRange {
-        const min = this.startLine < range.startLine ? this : range;
-        const max = min === this ? range : this;
-
-        return new LineRange({
-            startLine: min.startLine,
-            startCharacter: min.startCharacter,
-            endLine: max.endLine,
-            endCharacter: max.endCharacter
-        });
-    }
-    constructor(json: Pick<LineRange, 'startLine' | 'startCharacter' | 'endLine' | 'endCharacter'>) {
-        Object.assign(this, json);
-    }
+export interface ConfigurationProvider {
+    getConfiguration(): ImportSorterConfiguration;
 }
 
-export class ImportSortExecuter {
-    constructor(private walker: IAstWalker, private sorter: IImportSorter, private importCreator: IImportCreator) { }
+export interface ImportRunner {
+    sortImportsInDirectory(directoryPath: string): Observable<void>;
+    getSortImportData(filePath: string, fileSource: string): SortedImportData;
+}
 
-    // public sortImport(filePath: string, _importText: string, _rangesToDelete: Range[]) {
-    //     io.readFile(filePath).then(buffer => console.log(buffer));
-    // }
+export class SimpleImportRunner implements ImportRunner {
+    constructor(
+        private parser: AstParser,
+        private sorter: ImportSorter,
+        private importCreator: ImportCreator,
+        private configurationProvider: ConfigurationProvider
+    ) { }
 
-    public sortImportsInDirectory(filePath: string): Promise<void> {
-        const sortAllImports$ = forkJoinObservable(this.sortAllImports$(filePath)).pipe(mapObservable(_ => void 0));
-        return sortAllImports$.toPromise();
+    public getSortImportData(filePath: string, fileSource: string): SortedImportData {
+        this.resetConfiguration();
+        return this.getSortedData(filePath, fileSource);
     }
 
-    private getSortedSource(filePath: string, fileSource: string): string {
-        const imports = this.walker.parseImports(filePath, fileSource);
+    public sortImportsInDirectory(directoryPath: string): Observable<void> {
+        this.resetConfiguration();
+        const sortAllImports$ = forkJoinObservable(this.sortAllImports$(directoryPath)).pipe(mapObservable(_ => void 0));
+        return sortAllImports$;
+    }
+
+    private resetConfiguration(): void {
+        const configuration = this.configurationProvider.getConfiguration();
+        this.sorter.initialise(configuration.sortConfiguration);
+        this.importCreator.initialise(configuration.importStringConfiguration);
+    }
+
+    private getSortedData(filePath: string, fileSource: string): SortedImportData {
+        const imports = this.parser.parseImports(filePath, fileSource);
         if (!imports.length) {
-            return null;
+            return {
+                isSortRequired: false,
+                sortedImportsText: null,
+                rangesToDelete: null
+            };
         }
         const sortedImports = this.sorter.sortImportElements(imports);
-        const importText = this.importCreator.createImportText(sortedImports.groups);
+        const sortedImportsText = this.importCreator.createImportText(sortedImports.groups);
         const fileSourceArray = fileSource.split('\n');
-        const importTextArray = importText.split('\n');
-        const isSorted = this.isSourceAlreadySorted({ data: importTextArray, text: importText }, { data: fileSourceArray, text: fileSource });
+        const importTextArray = sortedImportsText.split('\n');
+        const isSorted = this.isSourceAlreadySorted(
+            { data: importTextArray, text: sortedImportsText },
+            { data: fileSourceArray, text: fileSource }
+        );
         if (isSorted) {
-            return null;
+            return {
+                isSortRequired: false,
+                sortedImportsText,
+                rangesToDelete: null
+            };
         }
 
         const rangesToDelete = this.getRangesToDelete(sortedImports, fileSourceArray, fileSource);
-        console.log(rangesToDelete);
 
-        return importText;
+        return {
+            isSortRequired: true,
+            sortedImportsText,
+            rangesToDelete
+        };
     }
 
     private sortAllImports$(startingSourcePath: string) {
@@ -84,9 +92,9 @@ export class ImportSortExecuter {
 
     private sortFileImports$(fullFilePath: string): Observable<void> {
         return io.readFile$(fullFilePath).pipe(
-            mapObservable(file => this.getSortedSource(fullFilePath, file)),
-            switchMapObservable(sortedSourceFile => {
-                if (sortedSourceFile) {
+            mapObservable(file => this.getSortedData(fullFilePath, file)),
+            switchMapObservable(sortedData => {
+                if (sortedData.isSortRequired) {
                     emptyObservable();
                     //return io.writeFile$(fullFilePath, sortedSourceFile);
                 } else {
@@ -209,7 +217,15 @@ export class ImportSortExecuter {
                         endCharacter: lastLine.length
                     });
                 }
-
+                if (!nextNonEmptyLine) {
+                    const lastLine = fileSourceArray[fileSourceArray.length - 1];
+                    currentRange = new LineRange({
+                        startLine: currentRange.startLine,
+                        startCharacter: currentRange.startCharacter,
+                        endLine: fileSourceArray.length - 1,
+                        endCharacter: lastLine.length
+                    });
+                }
                 if (!previousRange) {
                     rangesToDelete.push(currentRange);
                     return;

@@ -6,12 +6,12 @@ import {
     ImportStringConfiguration
 } from './models';
 
-export interface IImportCreator {
+export interface ImportCreator {
     initialise(importStringConfig: ImportStringConfiguration);
     createImportText(groups: ImportElementGroup[]): string;
  }
 
-export class ImportCreator implements IImportCreator {
+export class InMemoryImportCreator implements ImportCreator {
     private importStringConfig: ImportStringConfiguration;
 
     public initialise(importStringConfig: ImportStringConfiguration) {
@@ -188,6 +188,7 @@ export class ImportCreator implements IImportCreator {
             return isSingleLine
                 // tslint:disable-next-line:max-line-length
                 ? `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}{${spaceConfig.afterStartingBracket}${namedBindingString}${spaceConfig.beforeEndingBracket}} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`
+                // tslint:disable-next-line:max-line-length
                 : `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}{\n${namedBindingString}\n} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
 
         }

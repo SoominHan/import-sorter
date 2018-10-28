@@ -17,12 +17,12 @@ import { ImportElementSortResult } from './models/import-element-sort-result';
 
 const NEW_PERIOD_CHAR = String.fromCharCode(128);
 
-export interface IImportSorter {
+export interface ImportSorter {
     initialise(sortConfig: SortConfiguration);
     sortImportElements(imports: ImportElement[]): ImportElementSortResult;
 }
 
-export class ImportSorter implements IImportSorter {
+export class InMemoryImportSorter implements ImportSorter {
     private sortConfig: SortConfiguration;
 
     public initialise(sortConfig: SortConfiguration) {

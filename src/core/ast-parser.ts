@@ -7,11 +7,11 @@ import {
     ImportNode
 } from './models';
 
-export interface IAstWalker {
+export interface AstParser {
     parseImports(fullFilePath: string, _sourceText?: string): ImportElement[];
 }
 
-export class AstWalker implements IAstWalker {
+export class SimpleImportAstParser implements AstParser {
 
     public parseImports(fullFilePath: string, _sourceText?: string): ImportElement[] {
         if (_sourceText !== null && _sourceText !== undefined && _sourceText.trim() === '') {
@@ -49,7 +49,7 @@ export class AstWalker implements IAstWalker {
         };
         delintNode(sourceFile);
         return importNodes;
-    };
+    }
 
     private getComments(sourceFileText: string, node: ts.Node) {
         const leadingComments = (ts.getLeadingCommentRanges(sourceFileText, node.getFullStart()) || [])
