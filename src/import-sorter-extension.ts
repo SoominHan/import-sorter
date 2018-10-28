@@ -3,7 +3,7 @@ import { cloneDeep, merge } from 'lodash';
 import { sep } from 'path';
 import {
     Position, Range, StatusBarAlignment, StatusBarItem, TextDocument, TextDocumentWillSaveEvent,
-    TextEdit, TextEditorEdit, Uri, window, workspace
+    TextEdit, TextEditorEdit, Uri, window, workspace, ProgressLocation
 } from 'vscode';
 
 import {
@@ -12,6 +12,7 @@ import {
     SimpleImportRunner, SortConfiguration
 } from './core/core-public';
 import { ConfigurationProvider } from './core/import-runner';
+import { tap } from 'rxjs/operators';
 
 const EXTENSION_CONFIGURATION_NAME = 'importSorter';
 
@@ -86,10 +87,20 @@ export class ImportSorterExtension {
         return this.sortActiveDocumentImports();
     }
 
-    public sortImportsInDirectories(uri: Uri): Promise<void> {
+    public sortImportsInDirectories(uri: Uri): Thenable<void> {
         this.configurationProvider.resetConfiguration();
         const sortImports$ = this.importRunner.sortImportsInDirectory(uri.fsPath);
-        return sortImports$.toPromise();
+        return window.withProgress(
+            {
+                location: ProgressLocation.Notification,
+                title: 'Import sorter: sorting...',
+                cancellable: false
+            },
+            (progress, _token) => {
+                progress.report({ increment: 0 });
+                return sortImports$.pipe(tap(_ => progress.report({ increment: 100 }))).toPromise();
+            }
+        );
     }
 
     public sortModifiedDocumentImportsFromOnBeforeSaveCommand(event: TextDocumentWillSaveEvent): void {

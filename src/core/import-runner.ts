@@ -1,4 +1,4 @@
-import { chain } from 'lodash';
+import { chain, range as rangeLodash } from 'lodash';
 import {
     empty as emptyObservable, forkJoin as forkJoinObservable, merge as mergeObservable, Observable
 } from 'rxjs';
@@ -92,16 +92,30 @@ export class SimpleImportRunner implements ImportRunner {
 
     private sortFileImports$(fullFilePath: string): Observable<void> {
         return io.readFile$(fullFilePath).pipe(
-            mapObservable(file => this.getSortedData(fullFilePath, file)),
-            switchMapObservable(sortedData => {
+            switchMapObservable(file => {
+                const sortedData = this.getSortedData(fullFilePath, file);
                 if (sortedData.isSortRequired) {
-                    emptyObservable();
-                    //return io.writeFile$(fullFilePath, sortedSourceFile);
+                    const sortedFullFileSource = this.getFullSortedSourceFile(file, sortedData);
+                    return io.writeFile$(fullFilePath, sortedFullFileSource);
                 } else {
                     return emptyObservable();
                 }
             })
         );
+    }
+
+    private getFullSortedSourceFile(sourceText: string, sortedData: SortedImportData): string {
+        let fileSourceArray = sourceText.split('\n');
+        const linesToDelete = chain(sortedData.rangesToDelete.map(range => rangeLodash(range.startLine, range.endLine)))
+            .flatMap(ranges => ranges)
+            .value();
+
+        for (let i = linesToDelete.length - 1; i >= 0; i--) {
+            fileSourceArray.splice(linesToDelete[i], 1);
+        }
+        const textWithoutRanges = fileSourceArray.join('\n');
+        const sortedText = `${sortedData.sortedImportsText}\n${textWithoutRanges}`;
+        return sortedText;
     }
 
     private allFilePathsUnderThePath$(startingSourcePath: string): Observable<string[]> {
