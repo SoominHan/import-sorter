@@ -179,7 +179,7 @@ export class SimpleImportRunner implements ImportRunner {
             return { lineNumber: nextLineIndex - 1, isLast: true };
         }
         const nextLine = fileSourceArray[nextLineIndex];
-        if (!nextLine) {
+        if (nextLine === undefined) {
             return null;
         } else if (!this.isLineEmptyOrWhiteSpace(nextLine)) {
             return { lineNumber: nextLineIndex, isLast: false };
@@ -222,16 +222,7 @@ export class SimpleImportRunner implements ImportRunner {
                     });
                 }
 
-                if (nextNonEmptyLine && nextNonEmptyLine.isLast) {
-                    const lastLine = fileSourceArray[fileSourceArray.length - 1];
-                    currentRange = new LineRange({
-                        startLine: currentRange.startLine,
-                        startCharacter: currentRange.startCharacter,
-                        endLine: fileSourceArray.length - 1,
-                        endCharacter: lastLine.length
-                    });
-                }
-                if (!nextNonEmptyLine) {
+                if (!nextNonEmptyLine || (nextNonEmptyLine && nextNonEmptyLine.isLast)) {
                     const lastLine = fileSourceArray[fileSourceArray.length - 1];
                     currentRange = new LineRange({
                         startLine: currentRange.startLine,
