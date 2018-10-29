@@ -3,9 +3,9 @@ import * as glob from 'glob';
 import * as path from 'path';
 import { Observable, Observer } from 'rxjs';
 
-export function readFile$(path: string, encoding: string = 'utf-8'): Observable<string> {
+export function readFile$(filePath: string, encoding: string = 'utf-8'): Observable<string> {
     return Observable.create((observer: Observer<string>) => {
-        fs.readFile(path, encoding, (error, data) => {
+        fs.readFile(filePath, encoding, (error, data) => {
             if (error) {
                 observer.error(error);
             } else {
@@ -16,12 +16,13 @@ export function readFile$(path: string, encoding: string = 'utf-8'): Observable<
     });
 }
 
-export function writeFile$(path: string, data: string): Observable<void> {
+export function writeFile$(filePath: string, data: string): Observable<void> {
     return Observable.create((observer: Observer<void>) => {
-        fs.writeFile(path, data, (error) => {
+        fs.writeFile(filePath, data, (error) => {
             if (error) {
                 observer.error(error);
             } else {
+                observer.next(void 0);
                 observer.complete();
             }
         });
@@ -52,30 +53,3 @@ export function filePaths$(startingSourcePath: string, pattern: string, ignore: 
         });
     });
 }
-
-// export function getFiles(srcPath: string, pattern: string, ignore: string | string[]): Promise<string[]> {
-//     const results = new Promise<string[]>((resolve, reject) => {
-//         glob(
-//             pattern,
-//             {
-//                 cwd: srcPath,
-//                 ignore,
-//                 nodir: true
-//             },
-//             (error, matches) => error ? reject(error) : resolve(matches)
-//         );
-//     });
-//     return results.then(filePaths => filePaths.map(filePath => getFullPath(srcPath, filePath)));
-// }
-
-// export function readFile(filePath: string, encoding: string = 'utf-8'): Promise<string> {
-//     return new Promise<string>((resolve, reject) => {
-//         fs.readFile(filePath, encoding, (error, data) => error ? reject(error) : resolve(data));
-//     });
-// }
-
-// export function writeFile(filePath: string, data: string): Promise<void> {
-//     return new Promise<void>((resolve, reject) => {
-//         fs.writeFile(filePath, data, (error) => error ? reject(error) : resolve());
-//     });
-// }

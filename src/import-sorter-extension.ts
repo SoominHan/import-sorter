@@ -12,7 +12,7 @@ import {
     SimpleImportRunner, SortConfiguration
 } from './core/core-public';
 import { ConfigurationProvider } from './core/import-runner';
-import { tap } from 'rxjs/operators';
+import { map as mapObservable, scan } from 'rxjs/operators';
 
 const EXTENSION_CONFIGURATION_NAME = 'importSorter';
 
@@ -97,8 +97,14 @@ export class ImportSorterExtension {
                 cancellable: false
             },
             (progress, _token) => {
-                progress.report({ increment: 0 });
-                return sortImports$.pipe(tap(_ => progress.report({ increment: 100 }))).toPromise();
+                progress.report({ increment: 0, message: 'bla' });
+                return sortImports$
+                    .pipe(
+                        mapObservable(_ => 1),
+                        scan((acc, curr) => acc + curr, 0),
+                        mapObservable(fileCount => progress.report({ message: `${fileCount} - sorted` }))
+                    )
+                    .toPromise();
             }
         );
     }

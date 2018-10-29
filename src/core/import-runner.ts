@@ -1,9 +1,9 @@
 import { chain, range as rangeLodash } from 'lodash';
 import {
-    empty as emptyObservable, forkJoin as forkJoinObservable, merge as mergeObservable, Observable
+    empty as emptyObservable, merge as mergeObservable, Observable
 } from 'rxjs';
 import {
-    flatMap as flatMapObservable, map as mapObservable, mergeAll, switchMap as switchMapObservable
+    flatMap as flatMapObservable, mergeAll, switchMap as switchMapObservable
 } from 'rxjs/operators';
 
 import { io } from './helpers/helpers-public';
@@ -37,8 +37,7 @@ export class SimpleImportRunner implements ImportRunner {
 
     public sortImportsInDirectory(directoryPath: string): Observable<void> {
         this.resetConfiguration();
-        const sortAllImports$ = forkJoinObservable(this.sortAllImports$(directoryPath)).pipe(mapObservable(_ => void 0));
-        return sortAllImports$;
+        return this.sortAllImports$(directoryPath);
     }
 
     private resetConfiguration(): void {
@@ -81,13 +80,12 @@ export class SimpleImportRunner implements ImportRunner {
         };
     }
 
-    private sortAllImports$(startingSourcePath: string) {
+    private sortAllImports$(startingSourcePath: string): Observable<void> {
         const allFilePaths$ = this.allFilePathsUnderThePath$(startingSourcePath);
-        const test = allFilePaths$.pipe(
+        return allFilePaths$.pipe(
             mergeAll(),
-            flatMapObservable(path => this.sortFileImports$(path))
+            flatMapObservable(path => this.sortFileImports$(path), 3)
         );
-        return test;
     }
 
     private sortFileImports$(fullFilePath: string): Observable<void> {
