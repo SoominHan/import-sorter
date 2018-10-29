@@ -12,6 +12,7 @@ import { ImportCreator } from './import-creator';
 import { ImportSorter } from './import-sorter';
 import { ImportSorterConfiguration, LineRange, SortedImportData } from './models/models-public';
 import { ImportElementSortResult } from './models/import-element-sort-result';
+import { sep } from 'path';
 
 export interface ConfigurationProvider {
     getConfiguration(): ImportSorterConfiguration;
@@ -47,6 +48,14 @@ export class SimpleImportRunner implements ImportRunner {
     }
 
     private getSortedData(filePath: string, fileSource: string): SortedImportData {
+        const isFileExcluded = this.isFileExcludedFromSorting(filePath);
+        if (isFileExcluded) {
+            return {
+                isSortRequired: false,
+                sortedImportsText: null,
+                rangesToDelete: null
+            };
+        }
         const imports = this.parser.parseImports(filePath, fileSource);
         if (!imports.length) {
             return {
@@ -243,5 +252,15 @@ export class SimpleImportRunner implements ImportRunner {
             })
             .value();
         return rangesToDelete;
+    }
+
+    private isFileExcludedFromSorting(selectedPath: string) {
+        const excludedFiles = this.configurationProvider.getConfiguration().generalConfiguration.exclude || [];
+        if (!excludedFiles.length) {
+            return false;
+        }
+        const filePath = selectedPath.replace(new RegExp('\\' + sep, 'g'), '/');
+        const isExcluded = excludedFiles.some(fileToExclude => filePath.match(fileToExclude) !== null);
+        return isExcluded;
     }
 }

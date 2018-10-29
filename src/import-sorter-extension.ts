@@ -12,7 +12,7 @@ import {
     SimpleImportRunner, SortConfiguration
 } from './core/core-public';
 import { ConfigurationProvider } from './core/import-runner';
-import { map as mapObservable, scan } from 'rxjs/operators';
+import { map as mapObservable, scan, delay } from 'rxjs/operators';
 
 const EXTENSION_CONFIGURATION_NAME = 'importSorter';
 
@@ -97,12 +97,13 @@ export class ImportSorterExtension {
                 cancellable: false
             },
             (progress, _token) => {
-                progress.report({ increment: 0, message: 'bla' });
+                progress.report({ increment: 0 });
                 return sortImports$
                     .pipe(
                         mapObservable(_ => 1),
                         scan((acc, curr) => acc + curr, 0),
-                        mapObservable(fileCount => progress.report({ message: `${fileCount} - sorted` }))
+                        mapObservable(fileCount => progress.report({ message: `${fileCount} - sorted` })),
+                        delay(1000)
                     )
                     .toPromise();
             }
@@ -130,11 +131,6 @@ export class ImportSorterExtension {
         try {
 
             const doc: TextDocument = event ? event.document : window.activeTextEditor.document;
-            const configuration = this.configurationProvider.getConfiguration();
-            if (this.isFileExcludedFromSorting(configuration.generalConfiguration, doc)) {
-                return;
-            }
-
             const text = doc.getText();
             const importData = this.importRunner.getSortImportData(doc.uri.fsPath, text);
             if (!importData.isSortRequired) {
@@ -177,15 +173,5 @@ export class ImportSorterExtension {
 
         window.showErrorMessage('Import Sorter currently only supports typescript (.ts) or typescriptreact (.tsx) language files');
         return false;
-    }
-
-    private isFileExcludedFromSorting(generalConfiguration: GeneralConfiguration, doc: TextDocument) {
-        const excludedFiles = generalConfiguration.exclude || [];
-        if (!excludedFiles.length) {
-            return false;
-        }
-        const filePath = doc.uri.fsPath.replace(new RegExp('\\' + sep, 'g'), '/');
-        const isExcluded = excludedFiles.some(fileToExclude => filePath.match(fileToExclude) !== null);
-        return isExcluded;
     }
 }
