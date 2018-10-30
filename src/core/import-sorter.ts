@@ -81,7 +81,6 @@ export class InMemoryImportSorter implements ImportSorter {
             return x;
         });
     }
-
     private sortModuleSpecifiers(elementGroups: ImportElementGroup[]): void {
         const sortOrder = this.getSortOrderFunc(this.sortConfig.importPaths.order, true);
         elementGroups.filter(gr => !gr.customOrderRule.disableSort).forEach(gr => {

@@ -62,7 +62,6 @@ export class VSCodeConfigurationProvider implements ConfigurationProvider {
 }
 
 export class ImportSorterExtension {
-    private statusBarItem: StatusBarItem;
     private importRunner: ImportRunner;
     private configurationProvider: VSCodeConfigurationProvider;
     public initialise() {
@@ -73,10 +72,6 @@ export class ImportSorterExtension {
             new InMemoryImportCreator(),
             this.configurationProvider
         );
-        if (!this.statusBarItem) {
-            //todo: consider using for stats
-            this.statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left);
-        }
     }
 
     public sortActiveDocumentImportsFromCommand(): void {
@@ -121,10 +116,6 @@ export class ImportSorterExtension {
             return;
         }
         return this.sortActiveDocumentImports(event);
-    }
-
-    public dispose() {
-        this.statusBarItem.dispose();
     }
 
     private sortActiveDocumentImports(event?: TextDocumentWillSaveEvent): void {
