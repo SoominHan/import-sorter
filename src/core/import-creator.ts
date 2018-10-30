@@ -1,10 +1,6 @@
 import { chain, LoDashExplicitArrayWrapper } from 'lodash';
 
-import {
-    ImportElement,
-    ImportElementGroup,
-    ImportStringConfiguration
-} from './models/models-public';
+import { ImportElement, ImportElementGroup, ImportStringConfiguration } from './models/models-public';
 
 export interface ImportCreator {
     initialise(importStringConfig: ImportStringConfiguration);
@@ -60,16 +56,27 @@ export class InMemoryImportCreator implements ImportCreator {
         if (element.namedBindings && element.namedBindings.length > 0) {
             const isStarImport = element.namedBindings.some(x => x.name === '*');
             if (isStarImport) {
-                return `import ${element.namedBindings[0].name} as ${element.namedBindings[0].aliasName} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
+                return this.createStarImport(element);
             }
             const curlyBracketElement = this.createCurlyBracketElement(element);
             return this.createImportWithCurlyBracket(element, curlyBracketElement.line, curlyBracketElement.isSingleLine);
         }
         if (element.defaultImportName) {
             return `import ${element.defaultImportName} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
+        } else {
+            return `import {} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
         }
-        console.warn('unknown string import', element);
-        return null;
+    }
+
+    private createStarImport(element: ImportElement) {
+        const qMark = this.getQuoteMark();
+        const spaceConfig = this.getSpaceConfig();
+        if (element.defaultImportName) {
+            // tslint:disable-next-line:max-line-length
+            return `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}${element.namedBindings[0].name} as ${element.namedBindings[0].aliasName} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
+        } else {
+            return `import ${element.namedBindings[0].name} as ${element.namedBindings[0].aliasName} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
+        }
     }
 
     private createCurlyBracketElement(element: ImportElement) {
