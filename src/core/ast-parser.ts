@@ -5,9 +5,13 @@ import {
     Comment,
     ImportElement,
     ImportNode
-} from './models';
+} from './models/models-public';
 
-export class AstWalker {
+export interface AstParser {
+    parseImports(fullFilePath: string, _sourceText?: string): ImportElement[];
+}
+
+export class SimpleImportAstParser implements AstParser {
 
     public parseImports(fullFilePath: string, _sourceText?: string): ImportElement[] {
         if (_sourceText !== null && _sourceText !== undefined && _sourceText.trim() === '') {
@@ -45,7 +49,7 @@ export class AstWalker {
         };
         delintNode(sourceFile);
         return importNodes;
-    };
+    }
 
     private getComments(sourceFileText: string, node: ts.Node) {
         const leadingComments = (ts.getLeadingCommentRanges(sourceFileText, node.getFullStart()) || [])

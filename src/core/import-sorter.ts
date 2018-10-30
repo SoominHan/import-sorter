@@ -11,12 +11,18 @@ import {
     ImportElementGroup,
     ImportSortOrder,
     SortConfiguration
-} from './models';
+} from './models/models-public';
 import { CustomOrderRule } from './models/custom-order-rule';
 import { ImportElementSortResult } from './models/import-element-sort-result';
 
 const NEW_PERIOD_CHAR = String.fromCharCode(128);
-export class ImportSorter {
+
+export interface ImportSorter {
+    initialise(sortConfig: SortConfiguration);
+    sortImportElements(imports: ImportElement[]): ImportElementSortResult;
+}
+
+export class InMemoryImportSorter implements ImportSorter {
     private sortConfig: SortConfiguration;
 
     public initialise(sortConfig: SortConfiguration) {
@@ -75,7 +81,6 @@ export class ImportSorter {
             return x;
         });
     }
-
     private sortModuleSpecifiers(elementGroups: ImportElementGroup[]): void {
         const sortOrder = this.getSortOrderFunc(this.sortConfig.importPaths.order, true);
         elementGroups.filter(gr => !gr.customOrderRule.disableSort).forEach(gr => {
@@ -127,14 +132,14 @@ export class ImportSorter {
         if (!this.sortConfig.customOrderingRules
             || !this.sortConfig.customOrderingRules.rules
             || this.sortConfig.customOrderingRules.rules.length === 0) {
-            const rules = this.sortConfig.customOrderingRules;
+            const customRules = this.sortConfig.customOrderingRules;
             return [{
                 elements: sortedImports.value(),
                 numberOfEmptyLinesAfterGroup: this.getDefaultLineNumber(),
                 customOrderRule: {
-                    disableSort: rules ? rules.disableDefaultOrderSort : false,
-                    numberOfEmptyLinesAfterGroup: rules ? rules.defaultNumberOfEmptyLinesAfterGroup : null,
-                    orderLevel: rules ? rules.defaultOrderLevel : null,
+                    disableSort: customRules ? customRules.disableDefaultOrderSort : false,
+                    numberOfEmptyLinesAfterGroup: customRules ? customRules.defaultNumberOfEmptyLinesAfterGroup : null,
+                    orderLevel: customRules ? customRules.defaultOrderLevel : null,
                     regex: null
                 }
             }];
