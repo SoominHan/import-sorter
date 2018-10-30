@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { cloneDeep, merge } from 'lodash';
 import { sep } from 'path';
 import {
-    Position, Range, StatusBarAlignment, StatusBarItem, TextDocument, TextDocumentWillSaveEvent,
+    Position, Range, TextDocument, TextDocumentWillSaveEvent,
     TextEdit, TextEditorEdit, Uri, window, workspace, ProgressLocation
 } from 'vscode';
 
@@ -72,6 +72,10 @@ export class ImportSorterExtension {
             new InMemoryImportCreator(),
             this.configurationProvider
         );
+    }
+
+    public dispose() {
+        return;
     }
 
     public sortActiveDocumentImportsFromCommand(): void {
