@@ -7,6 +7,8 @@ Different sort types in file:
 ![alt text](./assets/import-sorter-example-1.gif "Import Sorter")
 Deep directory sort:
 ![alt text](./assets/import-sorter-example-2.gif "Import Sorter Directory")
+Sort on before safe `(off by default)`:
+![alt text](./assets/import-sorter-example-3.gif "Sort on safe")
 ## Features
 For now sorting supports only typescript language.
 
