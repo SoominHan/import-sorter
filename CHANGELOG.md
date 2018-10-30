@@ -1,3 +1,13 @@
+# [3.0.0]
+### Breaking changes
+* The core of the import sorter uses fs package to read files. It also uses fs to write when directory sort is performed.
+### New features
+* Import sorter adds a way to sort in directories, so that you could perform the sort for the whole code base (feature request #17). Do make sure that the project is managed by some version control system before performing the global source code sort.
+### Bug fixes
+* fixing issue #21 with null
+* fixing issue #19 with length count
+* fixing other minor issues
+
 # [2.0.2]
 ### Bug fixes
 * fixing configuration as proxy. issue #16

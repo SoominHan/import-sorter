@@ -3,10 +3,10 @@
     "displayName": "TypeScript Import Sorter",
     "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
     "icon": "assets/icons/import-sorter.png",
-    "version": "2.0.4",
+    "version": "3.0.0",
     "publisher": "mike-co",
     "engines": {
-        "vscode": "^1.9.0"
+        "vscode": "^1.28.0"
     },
     "repository": {
         "type": "git",
@@ -24,7 +24,12 @@
         "sort imports"
     ],
     "activationEvents": [
-        "*"
+        "onLanguage:javascript",
+        "onLanguage:javascriptreact",
+        "onLanguage:typescript",
+        "onLanguage:typescriptreact",
+        "onCommand:extension.sortImports",
+        "onCommand:extension.sortImportsInDirectory"
     ],
     "main": "./out/src/extension",
     "scripts": {
@@ -36,23 +41,33 @@
         "lint": "tslint src/**/*.ts"
     },
     "dependencies": {
-        "typescript": "^2.1.5",
-        "lodash": "4.17.4"
+        "glob": "^7.1.2",
+        "typescript": "^2.6.1",
+        "lodash": "4.17.4",
+        "rxjs": "6.3.3"
     },
     "devDependencies": {
-        "@types/lodash": "4.14.108",
-        "@types/mocha": "^2.2.32",
-        "@types/node": "^6.0.40",
+        "@types/lodash": "4.14.117",
+        "@types/mocha": "^2.2.42",
+        "@types/node": "^8.10.25",
+        "@types/glob": "^5.0.30",
+        "vscode-nls": "^2.0.2",
         "expect.js": "^0.3.1",
         "mocha": "^2.3.3",
-        "tslint": "^4.3.1",
-        "vscode": "^1.0.0"
+        "tslint": "^5.8.0",
+        "vscode": "^1.1.21"
     },
     "contributes": {
         "commands": [
             {
                 "command": "extension.sortImports",
-                "title": "Sort Imports"
+                "title": "%command.sortImports%",
+                "category": "%commands.category%"
+            },
+            {
+                "command": "extension.sortImportsInDirectory",
+                "title": "%command.sortImportsInDirectory%",
+                "category": "%commands.category%"
             }
         ],
         "keybindings": [
@@ -62,14 +77,28 @@
                 "when": "editorTextFocus && !editorReadonly"
             }
         ],
+        "menus": {
+            "explorer/context": [
+                {
+                    "command": "extension.sortImportsInDirectory",
+                    "group": "1_modification",
+                    "when": "explorerResourceIsFolder && config.importSorter.generalConfiguration.sortImportsInDirectory"
+                }
+            ]
+        },
         "configuration": {
             "type": "object",
-            "title": "Import Sorter configuration",
+            "title": "%configuration.title%",
             "properties": {
                 "importSorter.generalConfiguration.configurationFilePath": {
                     "type": "string",
                     "default": "./import-sorter.json",
                     "description": "Default file configuration name"
+                },
+                "importSorter.generalConfiguration.sortImportsInDirectory": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enables menu option for sorting in directory"
                 },
                 "importSorter.generalConfiguration.sortOnBeforeSave": {
                     "type": "boolean",

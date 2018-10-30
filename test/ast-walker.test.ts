@@ -1,8 +1,8 @@
 import * as expect from 'expect.js';
 import 'mocha';
 
-import { AstWalker } from '../src/core/ast-walker';
-import { ImportElement } from '../src/core/index';
+import { SimpleImportAstParser } from '../src/core/ast-parser';
+import { ImportElement } from '../src/core/core-public';
 
 interface AstTest {
     testName: string;
@@ -140,7 +140,7 @@ suite('AstWalker tests', () => {
     ];
 
     const getImports = (text: string) => {
-        const walker = new AstWalker();
+        const walker = new SimpleImportAstParser();
         const imports = walker.parseImports('nonExistentFile', text);
         return imports;
     };

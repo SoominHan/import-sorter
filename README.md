@@ -3,8 +3,12 @@ Extension which sorts TypeScript imports according to the configuration provided
 Configuration supports regex functions to set sorting priority and rules
 
 ## Examples
+Different sort types in file:
 ![alt text](./assets/import-sorter-example-1.gif "Import Sorter")
-
+Deep directory sort:
+![alt text](./assets/import-sorter-example-2.gif "Import Sorter Directory")
+Sort on before safe `(off by default)`:
+![alt text](./assets/import-sorter-example-3.gif "Sort on safe")
 ## Features
 For now sorting supports only typescript language.
 
@@ -15,6 +19,9 @@ Alternatively, you can set `importSorter.generalConfiguration.sortOnBeforeSave` 
 trigger sorting before each save operation.
 
 Also you could use/redefine keybindings. The default one is `ctrl + alt + o`.
+
+You can also do the `sort in deep on the directory level`. The feature is accessible from the `resource explorer`. To run right click and select: `Sort imports (Directory deep)`.
+`!!!Do make sure that the project is managed by some version control system` before performing the global source code sort. The sorter will sort and rewrite the sources without any prompt for the action confirmation.
 
 ## Extension Settings
 an example of default configuration is provided bellow. For available options have a look at vs code settings(it should show available settings when you search for importSorter)

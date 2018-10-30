@@ -3,10 +3,10 @@ import 'mocha';
 
 import {
     defaultImportStringConfiguration,
-    ImportCreator,
+    InMemoryImportCreator,
     ImportElementGroup,
     ImportStringConfiguration
-} from '../src/core';
+} from '../src/core/core-public';
 
 interface ImportCreatorTest {
     testName: string;
@@ -346,7 +346,7 @@ suite('Import Creator Tests', () => {
     ];
 
     const getImportText = (groups: ImportElementGroup[], config: ImportStringConfiguration) => {
-        const creator = new ImportCreator();
+        const creator = new InMemoryImportCreator();
         creator.initialise(config);
         return creator.createImportText(groups);
     };

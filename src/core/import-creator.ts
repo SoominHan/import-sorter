@@ -1,12 +1,13 @@
 import { chain, LoDashExplicitArrayWrapper } from 'lodash';
 
-import {
-    ImportElement,
-    ImportElementGroup,
-    ImportStringConfiguration
-} from './models';
+import { ImportElement, ImportElementGroup, ImportStringConfiguration } from './models/models-public';
 
-export class ImportCreator {
+export interface ImportCreator {
+    initialise(importStringConfig: ImportStringConfiguration);
+    createImportText(groups: ImportElementGroup[]): string;
+}
+
+export class InMemoryImportCreator implements ImportCreator {
     private importStringConfig: ImportStringConfiguration;
 
     public initialise(importStringConfig: ImportStringConfiguration) {
@@ -33,7 +34,7 @@ export class ImportCreator {
             leadingCommentText = leadingCommentText ? leadingCommentText + '\n' : leadingCommentText;
 
             let trailingCommentText = x.importComment.trailingComments.map(comment => comment.text).join('\n');
-            trailingCommentText = trailingCommentText ? ' '  + trailingCommentText : trailingCommentText;
+            trailingCommentText = trailingCommentText ? ' ' + trailingCommentText : trailingCommentText;
 
             const importWithComments = leadingCommentText + importString + trailingCommentText;
             return importWithComments;
@@ -55,16 +56,27 @@ export class ImportCreator {
         if (element.namedBindings && element.namedBindings.length > 0) {
             const isStarImport = element.namedBindings.some(x => x.name === '*');
             if (isStarImport) {
-                return `import ${element.namedBindings[0].name} as ${element.namedBindings[0].aliasName} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
+                return this.createStarImport(element);
             }
             const curlyBracketElement = this.createCurlyBracketElement(element);
             return this.createImportWithCurlyBracket(element, curlyBracketElement.line, curlyBracketElement.isSingleLine);
         }
         if (element.defaultImportName) {
             return `import ${element.defaultImportName} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
+        } else {
+            return `import {} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
         }
-        console.warn('unknown string import', element);
-        return null;
+    }
+
+    private createStarImport(element: ImportElement) {
+        const qMark = this.getQuoteMark();
+        const spaceConfig = this.getSpaceConfig();
+        if (element.defaultImportName) {
+            // tslint:disable-next-line:max-line-length
+            return `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}${element.namedBindings[0].name} as ${element.namedBindings[0].aliasName} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
+        } else {
+            return `import ${element.namedBindings[0].name} as ${element.namedBindings[0].aliasName} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
+        }
     }
 
     private createCurlyBracketElement(element: ImportElement) {
@@ -141,24 +153,29 @@ export class ImportCreator {
         this.appendTrailingComma(nameBindings, false);
         nameBindings
             .forEach((x, ind) => {
-                const xLength = ind !== nameBindings.length - 1
-                    ? x.length + this.importStringConfig.spacingPerImportExpression.beforeComma + 1 // 1 for comma
-                    : x.length; //last element, so we remove comma and space before comma
-                currentTotalLength += xLength;
+                const isLastNameBinding = ind === nameBindings.length - 1;
+
+                const xLength = isLastNameBinding
+                    ? x.length //last element, so we remove comma and space before comma
+                    : x.length + this.importStringConfig.spacingPerImportExpression.beforeComma + 1; // 1 for comma
+
+                //if we have first element in chunk then we need to consider after comma spaces
+                currentTotalLength = result[resultIndex]
+                    ? xLength + currentTotalLength + this.importStringConfig.spacingPerImportExpression.afterComma
+                    : xLength + currentTotalLength;
+
                 if (currentTotalLength <= maxLineLength) {
                     result[resultIndex] ? result[resultIndex].push(x) : result[resultIndex] = [x];
-                    currentTotalLength += this.importStringConfig.spacingPerImportExpression.afterComma;
                     return;
                 } else {
-                    if (result[resultIndex]) {
-                        resultIndex++;
-                    }
+                    resultIndex = result[resultIndex] ? resultIndex + 1 : resultIndex;
                     result[resultIndex] = [x];
                     if (xLength < maxLineLength) {
                         currentTotalLength = xLength;
-                        return;
+                    } else {
+                        currentTotalLength = 0;
+                        resultIndex++;
                     }
-                    currentTotalLength = 0;
                 }
             });
         return {
@@ -183,6 +200,7 @@ export class ImportCreator {
             return isSingleLine
                 // tslint:disable-next-line:max-line-length
                 ? `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}{${spaceConfig.afterStartingBracket}${namedBindingString}${spaceConfig.beforeEndingBracket}} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`
+                // tslint:disable-next-line:max-line-length
                 : `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}{\n${namedBindingString}\n} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
 
         }
