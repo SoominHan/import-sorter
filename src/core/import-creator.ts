@@ -1,6 +1,8 @@
 import { chain, LoDashExplicitArrayWrapper } from 'lodash';
 
-import { ImportElement, ImportElementGroup, ImportStringConfiguration } from './models/models-public';
+import {
+    ImportElement, ImportElementGroup, ImportStringConfiguration
+} from './models/models-public';
 
 export interface ImportCreator {
     initialise(importStringConfig: ImportStringConfiguration);

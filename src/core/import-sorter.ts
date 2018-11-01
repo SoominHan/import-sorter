@@ -1,19 +1,11 @@
-import {
-    chain,
-    cloneDeep,
-    isNil,
-    LoDashExplicitArrayWrapper
-} from 'lodash';
+import { chain, cloneDeep, isNil, LoDashExplicitArrayWrapper } from 'lodash';
 import * as path from 'path';
 
-import {
-    ImportElement,
-    ImportElementGroup,
-    ImportSortOrder,
-    SortConfiguration
-} from './models/models-public';
 import { CustomOrderRule } from './models/custom-order-rule';
 import { ImportElementSortResult } from './models/import-element-sort-result';
+import {
+    ImportElement, ImportElementGroup, ImportSortOrder, SortConfiguration
+} from './models/models-public';
 
 const NEW_PERIOD_CHAR = String.fromCharCode(128);
 
