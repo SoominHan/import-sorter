@@ -1,3 +1,8 @@
+# [3.1.0]
+### New features
+* Adding `maximumNumberOfImportExpressionsPerLine.type: newLineEachExpressionAfterCountLimitExceptIfOnlyOne`, to be able to integrate with behavior of prettier. This is done to address
+[GitHub Prettier Issues #1954](https://github.com/prettier/prettier/issues/1954)
+
 # [3.0.0]
 ### Breaking changes
 * The core of the import sorter uses fs package to read files. It also uses fs to write when directory sort is performed.

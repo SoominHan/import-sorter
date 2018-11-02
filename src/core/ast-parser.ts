@@ -1,11 +1,7 @@
 import * as fs from 'fs';
 import * as ts from 'typescript';
 
-import {
-    Comment,
-    ImportElement,
-    ImportNode
-} from './models/models-public';
+import { Comment, ImportElement, ImportNode } from './models/models-public';
 
 export interface AstParser {
     parseImports(fullFilePath: string, _sourceText?: string): ImportElement[];

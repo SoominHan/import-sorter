@@ -1,18 +1,16 @@
 import { chain, range as rangeLodash } from 'lodash';
-import {
-    empty as emptyObservable, merge as mergeObservable, Observable
-} from 'rxjs';
+import { sep } from 'path';
+import { empty as emptyObservable, merge as mergeObservable, Observable } from 'rxjs';
 import {
     flatMap as flatMapObservable, mergeAll, switchMap as switchMapObservable
 } from 'rxjs/operators';
 
-import { io } from './helpers/helpers-public';
 import { AstParser } from './ast-parser';
+import { io } from './helpers/helpers-public';
 import { ImportCreator } from './import-creator';
 import { ImportSorter } from './import-sorter';
-import { ImportSorterConfiguration, LineRange, SortedImportData } from './models/models-public';
 import { ImportElementSortResult } from './models/import-element-sort-result';
-import { sep } from 'path';
+import { ImportSorterConfiguration, LineRange, SortedImportData } from './models/models-public';
 
 export interface ConfigurationProvider {
     getConfiguration(): ImportSorterConfiguration;
