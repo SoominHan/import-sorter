@@ -1,9 +1,10 @@
 import * as fs from 'fs';
 import { cloneDeep, merge } from 'lodash';
 import { sep } from 'path';
+import { delay, map as mapObservable, scan } from 'rxjs/operators';
 import {
-    Position, Range, TextDocument, TextDocumentWillSaveEvent,
-    TextEdit, TextEditorEdit, Uri, window, workspace, ProgressLocation
+    Position, ProgressLocation, Range, TextDocument, TextDocumentWillSaveEvent, TextEdit,
+    TextEditorEdit, Uri, window, workspace
 } from 'vscode';
 
 import {
@@ -12,7 +13,6 @@ import {
     SimpleImportRunner, SortConfiguration
 } from './core/core-public';
 import { ConfigurationProvider } from './core/import-runner';
-import { map as mapObservable, scan, delay } from 'rxjs/operators';
 
 const EXTENSION_CONFIGURATION_NAME = 'importSorter';
 
