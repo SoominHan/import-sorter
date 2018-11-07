@@ -129,9 +129,11 @@ an example of default configuration is provided bellow. For available options ha
 ## Some settings in more details:
 
 - `importSorter.generalConfiguration.configurationFilePath` adds an option to read configuration from file. The setting represents a relative path to the root of the open vscode workspace.
-  The default value is `./import-sorter.json`. Bellow is a example of the configuration:
+  The default value is `./import-sorter.json`. The path search is relative to the open workspace(`usually where package.json is located`). Bellow is a example of the configuration:
 
 ```json
+import-sorter.json
+
 {
   "importStringConfiguration": {
     "trailingComma": "multiLine",
@@ -145,6 +147,28 @@ an example of default configuration is provided bellow. For available options ha
       "defaultNumberOfEmptyLinesAfterGroup": 2
     }
   }
+}
+```
+Alternatively you can set configuration as in visual studio code
+```json
+import-sorter.json
+
+{
+    "importStringConfiguration.trailingComma": "multiLine",
+    "importStringConfiguration.tabSize": 4,
+    "importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": 50,
+    "sortConfiguration.customOrderingRules.defaultNumberOfEmptyLinesAfterGroup": 2
+}
+```
+Or
+```json
+import-sorter.json
+
+{
+    "importSorter.importStringConfiguration.trailingComma": "multiLine",
+    "importSorter.importStringConfiguration.tabSize": 4,
+    "importSorter.importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": 50,
+    "importSorter.sortConfiguration.customOrderingRules.defaultNumberOfEmptyLinesAfterGroup": 2
 }
 ```
 
@@ -228,7 +252,18 @@ At the time of writing this documentation, the following are the settings which 
   "importSorter.importStringConfiguration.quoteMark": "double"
 }
 ```
+Alternatively you can set `import-sorter.json` configuration file with the following content
+```json
+import-sorter.json
 
+{
+    "generalConfiguration.sortOnBeforeSave": true,
+    "importStringConfiguration.maximumNumberOfImportExpressionsPerLine.type": "newLineEachExpressionAfterCountLimitExceptIfOnlyOne",
+    "importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": 80,
+    "importStringConfiguration.tabSize": 2,
+    "importStringConfiguration.quoteMark": "double"
+}
+```
 ## Future roadmap
 
 - Handle external dependencies based on the most external dependencies being at the top and group based on those. Sorting will be done within those groups.

@@ -40,8 +40,25 @@ export class VSCodeConfigurationProvider implements ConfigurationProvider {
         }
 
         const fileConfigurationString = isConfigExist ? fs.readFileSync(configPath, 'utf8') : '{}';
-        const fileConfig = JSON.parse(fileConfigurationString) as ImportSorterConfiguration;
-
+        const fileConfigJsonObj = JSON.parse(fileConfigurationString);
+        const fileConfigMerged = Object.keys(fileConfigJsonObj)
+            .map(key => {
+                const total = {};
+                const keys = key.split('.').filter(str => str !== 'importSorter');
+                keys.reduce(
+                    (sum, currentKey, index) => {
+                        if (index === keys.length - 1) {
+                            sum[currentKey] = fileConfigJsonObj[key];
+                        } else {
+                            sum[currentKey] = {};
+                        }
+                        return sum[currentKey];
+                    },
+                    total);
+                return total;
+            })
+            .reduce((sum, currentObj) => merge(sum, currentObj), {});
+        const fileConfig = fileConfigMerged as ImportSorterConfiguration;
         const sortConfigProxy: SortConfiguration | ProxyHandler<SortConfiguration>
             = workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<SortConfiguration>('sortConfiguration');
         const sortConfig = cloneDeep(sortConfigProxy);

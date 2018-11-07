@@ -1,3 +1,7 @@
+# [3.2.0]
+### New features
+* Configuration file now supports the same format as vs code settings.
+
 # [3.1.0]
 ### New features
 * Adding `maximumNumberOfImportExpressionsPerLine.type: newLineEachExpressionAfterCountLimitExceptIfOnlyOne`, to be able to integrate with behavior of prettier. This is done to address
