@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { cloneDeep, merge } from 'lodash';
-import { sep } from 'path';
+import { resolve } from 'path';
 import { delay, map as mapObservable, scan } from 'rxjs/operators';
 import {
     Position, ProgressLocation, Range, TextDocument, TextDocumentWillSaveEvent, TextEdit,
@@ -31,7 +31,8 @@ export class VSCodeConfigurationProvider implements ConfigurationProvider {
             workspace.getConfiguration(EXTENSION_CONFIGURATION_NAME).get<GeneralConfiguration>('generalConfiguration');
         const generalConfig = cloneDeep(generalConfigProxy);
 
-        const configPath = `${workspace.rootPath}${sep}${generalConfig.configurationFilePath}`;
+        const expandedConfigPath = expandVSCodeEnvVariables(generalConfig.configurationFilePath);
+        const configPath = resolve(workspace.rootPath, expandedConfigPath);
         const isConfigExist = fs.existsSync(configPath);
 
         if (!isConfigExist && generalConfig.configurationFilePath !== defaultGeneralConfiguration.configurationFilePath) {
@@ -186,4 +187,9 @@ export class ImportSorterExtension {
         window.showErrorMessage('Import Sorter currently only supports typescript (.ts) or typescriptreact (.tsx) language files');
         return false;
     }
+}
+
+function expandVSCodeEnvVariables(str: string): string {
+    const envRegex = /\$\{env:(varName)\}/g;
+    return str.replace(envRegex, (_, varName: string) => process.env[varName]);
 }
