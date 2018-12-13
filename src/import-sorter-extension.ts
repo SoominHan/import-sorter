@@ -190,6 +190,6 @@ export class ImportSorterExtension {
 }
 
 function expandVSCodeEnvVariables(str: string): string {
-    const envRegex = /\$\{env:(varName)\}/g;
-    return str.replace(envRegex, (_, varName: string) => process.env[varName]);
+    const envRegex = /\$\{env:(\w+)\}/g;
+    return str.replace(envRegex, (_, varName: string) => process.env[varName] || '');
 }
