@@ -10,7 +10,7 @@ import { io } from './helpers/helpers-public';
 import { ImportCreator } from './import-creator';
 import { ImportSorter } from './import-sorter';
 import { ImportElementSortResult } from './models/import-element-sort-result';
-import { ImportSorterConfiguration, LineRange, SortedImportData } from './models/models-public';
+import { ImportSorterConfiguration, LineRange, SortedImportData, ImportElement } from './models/models-public';
 
 export interface ConfigurationProvider {
     getConfiguration(): ImportSorterConfiguration;
@@ -55,14 +55,16 @@ export class SimpleImportRunner implements ImportRunner {
             };
         }
         const imports = this.parser.parseImports(filePath, fileSource);
-        if (!imports.length) {
+        if (!imports.importElements.length) {
             return {
                 isSortRequired: false,
                 sortedImportsText: null,
                 rangesToDelete: null
             };
         }
-        const sortedImports = this.sorter.sortImportElements(imports);
+        const sortedImports = this.sorter.sortImportElements(imports.importElements);
+        const unusedImports = this.findUnusedImports(sortedImports, imports.usedTypeReferences);
+        console.log(unusedImports);
         const sortedImportsText = this.importCreator.createImportText(sortedImports.groups);
         const fileSourceArray = fileSource.split('\n');
         const importTextArray = sortedImportsText.split('\n');
@@ -85,6 +87,21 @@ export class SimpleImportRunner implements ImportRunner {
             sortedImportsText,
             rangesToDelete
         };
+    }
+
+    private findUnusedImports(sortResult: ImportElementSortResult, usedTypeReferences: string[]): ImportElement[] {
+        if (!usedTypeReferences || !usedTypeReferences.length) {
+            return [];
+        }
+        const importElementsToSearch = chain(sortResult.groups).flatMap(gr => gr.elements.map(el => el)).value();
+        importElementsToSearch.forEach(el => {
+            el.namedBindings.forEach(nameBinding => {
+                if (nameBinding.name !== '*' && !usedTypeReferences.some(reference => reference === (nameBinding.aliasName || nameBinding.name))) {
+                    console.log(nameBinding.aliasName || nameBinding.name);
+                }
+            });
+        });
+        return [];
     }
 
     private sortAllImports$(startingSourcePath: string): Observable<void> {

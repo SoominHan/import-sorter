@@ -4,30 +4,42 @@ import * as ts from 'typescript';
 import { Comment, ImportElement, ImportNode } from './models/models-public';
 
 export interface AstParser {
-    parseImports(fullFilePath: string, _sourceText?: string): ImportElement[];
+    parseImports(fullFilePath: string, _sourceText?: string): { importElements: ImportElement[]; usedTypeReferences: string[] };
 }
 
 export class SimpleImportAstParser implements AstParser {
 
-    public parseImports(fullFilePath: string, _sourceText?: string): ImportElement[] {
+    public parseImports(fullFilePath: string, _sourceText?: string): { importElements: ImportElement[]; usedTypeReferences: string[] } {
         if (_sourceText !== null && _sourceText !== undefined && _sourceText.trim() === '') {
-            return [];
+            return { importElements: [], usedTypeReferences: [] };
         }
         const sourceText = _sourceText || fs.readFileSync(fullFilePath).toString();
         const sourceFile = this.createSourceFile(fullFilePath, sourceText);
-        const imports = this.delintImports(sourceFile, sourceText);
-        return imports.map(x => this.parseImport(x, sourceFile)).filter(x => x !== null);
+        const importsAndTypes = this.delintImportsAndTypes(sourceFile, sourceText);
+        console.log(importsAndTypes.usedTypeReferences);
+        return {
+            importElements: importsAndTypes.importNodes.map(x => this.parseImport(x, sourceFile)).filter(x => x !== null),
+            usedTypeReferences: importsAndTypes.usedTypeReferences
+        };
     }
 
     private createSourceFile(fullFilePath: string, sourceText: string) {
         return ts.createSourceFile(fullFilePath, sourceText, ts.ScriptTarget.ES2016, false);
     }
 
-    private delintImports(sourceFile: ts.SourceFile, sourceText?: string) {
+    private delintImportsAndTypes(sourceFile: ts.SourceFile, sourceText?: string): { importNodes: ImportNode[], usedTypeReferences: string[] } {
         const importNodes: ImportNode[] = [];
+        const usedTypeReferences: string[] = [];
         const sourceFileText = sourceText || sourceFile.getText();
         const delintNode = (node: ts.Node) => {
+            console.log(node.kind, node.getText(sourceFile));
+            if (ts.isTypeNode(node)) {
+                usedTypeReferences.push((node as ts.TypeNode).getText(sourceFile));
+            }
             switch (node.kind) {
+                // case ts.SyntaxKind.TypeReference:
+                //     usedTypeReferences.push((node as ts.TypeReferenceNode).typeName.getText(sourceFile));
+                //     break;
                 case ts.SyntaxKind.ImportDeclaration:
                     const lines = this.getCodeLineNumbers(node, sourceFile);
                     importNodes.push({
@@ -44,7 +56,7 @@ export class SimpleImportAstParser implements AstParser {
             ts.forEachChild(node, delintNode);
         };
         delintNode(sourceFile);
-        return importNodes;
+        return { importNodes, usedTypeReferences };
     }
 
     private getComments(sourceFileText: string, node: ts.Node) {

@@ -148,8 +148,8 @@ suite('AstWalker tests', () => {
     const astWalkerTest = (testName, text, expected) => {
         test(`AstWalker:  ${testName} produces correct result`, () => {
             const imports = getImports(text);
-            expect(imports.length).to.be(1);
-            expect(imports[0]).to.eql(expected);
+            expect(imports.importElements.length).to.be(1);
+            expect(imports.importElements[0]).to.eql(expected);
         });
     };
 
