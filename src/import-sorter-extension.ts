@@ -4,7 +4,7 @@ import { sep } from 'path';
 import { delay, map as mapObservable, scan } from 'rxjs/operators';
 import {
     Position, ProgressLocation, Range, TextDocument, TextDocumentWillSaveEvent, TextEdit,
-    TextEditorEdit, Uri, window, workspace
+    TextEditorEdit, Uri, window, workspace, commands, TextEditor, Selection
 } from 'vscode';
 
 import {
@@ -81,6 +81,7 @@ export class VSCodeConfigurationProvider implements ConfigurationProvider {
 export class ImportSorterExtension {
     private importRunner: ImportRunner;
     private configurationProvider: VSCodeConfigurationProvider;
+    private parser = new SimpleImportAstParser();
     public initialise() {
         this.configurationProvider = new VSCodeConfigurationProvider();
         this.importRunner = new SimpleImportRunner(
@@ -124,6 +125,33 @@ export class ImportSorterExtension {
                     .toPromise();
             }
         );
+    }
+
+    public collapseImports(): void {
+        // setTimeout is hack for prevent window.activeTextEditor to be undefined
+        setTimeout(async () => {
+
+            const textEditor: TextEditor = window.activeTextEditor;
+            if (!textEditor) {
+                return;
+            }
+
+            const doc: TextDocument = textEditor.document;
+            if (!doc) {
+                return;
+            }
+
+            const imports = this.parser.parseImports(doc.fileName, doc.getText());
+            if (!imports || !imports.length) {
+                return;
+            }
+
+            const selection = new Selection(imports[0].startPosition.line, 0, imports[imports.length - 1].endPosition.line + 1, 0);
+            textEditor.selection = selection;
+
+            commands.executeCommand('editor.fold');
+            textEditor.selection = new Selection(0, 0, 0, 0);
+        },         0);
     }
 
     public sortModifiedDocumentImportsFromOnBeforeSaveCommand(event: TextDocumentWillSaveEvent): void {

@@ -14,6 +14,13 @@ export const activate = (context: ExtensionContext) => {
         importSorterExtension.sortImportsInDirectories(uri);
     });
 
+    workspace.onDidOpenTextDocument((e) => {
+        if (['typescript', 'javascript'].indexOf(e.languageId) === -1) {
+            return;
+        }
+        importSorterExtension.collapseImports();
+    });
+
     const onWillSaveTextDocument = workspace.onWillSaveTextDocument(event => importSorterExtension.sortModifiedDocumentImportsFromOnBeforeSaveCommand(event));
 
     context.subscriptions.push(sortImportsCommand);
