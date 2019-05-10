@@ -128,8 +128,7 @@ export class ImportSorterExtension {
     }
 
     public foldImports(): void {
-        this.configurationProvider.resetConfiguration();
-        const configuration = this.configurationProvider.getConfiguration();
+        const configuration = this.getConfiguration();
 
         if (!configuration.generalConfiguration.foldImports) {
             return;
@@ -167,8 +166,7 @@ export class ImportSorterExtension {
     }
 
     public sortModifiedDocumentImportsFromOnBeforeSaveCommand(event: TextDocumentWillSaveEvent): void {
-        this.configurationProvider.resetConfiguration();
-        const configuration = this.configurationProvider.getConfiguration();
+        const configuration = this.getConfiguration();
         const isSortOnBeforeSaveEnabled = configuration.generalConfiguration.sortOnBeforeSave;
         if (!isSortOnBeforeSaveEnabled) {
             return;
@@ -225,5 +223,10 @@ export class ImportSorterExtension {
 
         window.showErrorMessage('Import Sorter currently only supports typescript (.ts) or typescriptreact (.tsx) language files');
         return false;
+    }
+
+    private getConfiguration(): ImportSorterConfiguration {
+        this.configurationProvider.resetConfiguration();
+        return this.configurationProvider.getConfiguration();
     }
 }
