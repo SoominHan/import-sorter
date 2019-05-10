@@ -113,6 +113,11 @@
                     },
                     "description": "Excludes sorting for files which match given regex expression. Regex considers the whole file path. The file path separator is normalized to /"
                 },
+                "importSorter.generalConfiguration.foldImports": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enables folding imports on file open"
+                },
                 "importSorter.sortConfiguration.importMembers.order": {
                     "enum": [
                         "caseInsensitive",

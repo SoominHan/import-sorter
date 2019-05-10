@@ -127,7 +127,14 @@ export class ImportSorterExtension {
         );
     }
 
-    public collapseImports(): void {
+    public foldImports(): void {
+        this.configurationProvider.resetConfiguration();
+        const configuration = this.configurationProvider.getConfiguration();
+
+        if (!configuration.generalConfiguration.foldImports) {
+            return;
+        }
+
         // setTimeout is hack for prevent window.activeTextEditor to be undefined
         setTimeout(async () => {
 
@@ -146,7 +153,12 @@ export class ImportSorterExtension {
                 return;
             }
 
-            const selection = new Selection(imports[0].startPosition.line, 0, imports[imports.length - 1].endPosition.line + 1, 0);
+            const selection = new Selection(
+                imports[0].startPosition.line,
+                0,
+                imports[imports.length - 1].endPosition.line + 1,
+                0
+            );
             textEditor.selection = selection;
 
             commands.executeCommand('editor.fold');

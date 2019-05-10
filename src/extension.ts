@@ -18,7 +18,7 @@ export const activate = (context: ExtensionContext) => {
         if (['typescript', 'javascript'].indexOf(e.languageId) === -1) {
             return;
         }
-        importSorterExtension.collapseImports();
+        importSorterExtension.foldImports();
     });
 
     const onWillSaveTextDocument = workspace.onWillSaveTextDocument(event => importSorterExtension.sortModifiedDocumentImportsFromOnBeforeSaveCommand(event));
