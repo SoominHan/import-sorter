@@ -1,3 +1,7 @@
+# [3.3.0]
+### New features
+* Added imports folding on file open.
+
 # [3.2.0]
 ### New features
 * Configuration file now supports the same format as vs code settings.

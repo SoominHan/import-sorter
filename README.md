@@ -47,6 +47,9 @@ an example of default configuration is provided bellow. For available options ha
   // Enables sort before each save of the document
   "importSorter.generalConfiguration.sortOnBeforeSave": false,
 
+  // Enables folding imports on file open
+  "importSorter.generalConfiguration.foldImports": false,
+
   // If true then the import string has a semicolon at the end, otherwise it will not be appended. Default is true
   "importSorter.importStringConfiguration.hasSemicolon": true,
 
