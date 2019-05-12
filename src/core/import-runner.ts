@@ -1,4 +1,4 @@
-import { chain, range as rangeLodash, cloneDeep } from 'lodash';
+import { chain, cloneDeep, range as rangeLodash } from 'lodash';
 import { sep } from 'path';
 import { empty as emptyObservable, merge as mergeObservable, Observable } from 'rxjs';
 import {
@@ -11,7 +11,7 @@ import { ImportCreator } from './import-creator';
 import { ImportSorter } from './import-sorter';
 import { ImportElementSortResult } from './models/import-element-sort-result';
 import {
-    ImportElement, ImportSorterConfiguration, LineRange, SortedImportData, ImportElementGroup
+    ImportElement, ImportElementGroup, ImportSorterConfiguration, LineRange, SortedImportData
 } from './models/models-public';
 
 export interface ConfigurationProvider {

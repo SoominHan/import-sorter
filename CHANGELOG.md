@@ -1,3 +1,7 @@
+# [3.3.0]
+### New features
+* Added option to remove unused non side effect imports. Resolves issue #22.
+
 # [3.2.0]
 ### New features
 * Configuration file now supports the same format as vs code settings.

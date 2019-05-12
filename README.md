@@ -124,6 +124,9 @@ an example of default configuration is provided bellow. For available options ha
 
   // Combine imports with the same path
   "importSorter.sortConfiguration.joinImportPaths": true
+
+  // Combine imports with the same path
+  "importSorter.sortConfiguration.removeUnusedImports": true
 ```
 
 ## Some settings in more details:
