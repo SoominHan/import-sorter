@@ -158,7 +158,7 @@
         "importSorter.sortConfiguration.removeUnusedImports": {
             "type": "boolean",
             "default": true,
-            "description": "Removes not used imports"
+            "description": "Removes not used imports where we do not have explicit side effects"
           },
         "importSorter.sortConfiguration.customOrderingRules.defaultOrderLevel": {
           "type": "number",

@@ -115,10 +115,20 @@ export class SimpleImportRunner implements ImportRunner {
         const unusedImportElements: ImportElement[] = [];
         sortResultClonned.groups.forEach(gr => {
             gr.elements = gr.elements.filter(el => {
+                //side effect import
+                if (!el.hasFromKeyWord) {
+                    return true;
+                }
+                //filtering name bindings
                 el.namedBindings = el.namedBindings.filter(nameBinding => {
-                    const isUnusedNameBinding = nameBinding.name !== '*' && !usedTypeReferences.some(reference => reference === (nameBinding.aliasName || nameBinding.name));
+                    const isUnusedNameBinding = !usedTypeReferences.some(reference => reference === (nameBinding.aliasName || nameBinding.name));
                     return !isUnusedNameBinding;
                 });
+                //also checking the default import
+                if (usedTypeReferences.some(reference => reference === el.defaultImportName)) {
+                    return true;
+                }
+                //if not default import and not side effect, then check name bindings
                 if (!el.namedBindings.length) {
                     unusedImportElements.push(el);
                     return false;
