@@ -16,7 +16,6 @@ export class SimpleImportAstParser implements AstParser {
         const sourceText = _sourceText || fs.readFileSync(fullFilePath).toString();
         const sourceFile = this.createSourceFile(fullFilePath, sourceText);
         const importsAndTypes = this.delintImportsAndTypes(sourceFile, sourceText);
-        console.log(importsAndTypes.usedTypeReferences);
         return {
             importElements: importsAndTypes.importNodes.map(x => this.parseImport(x, sourceFile)).filter(x => x !== null),
             usedTypeReferences: importsAndTypes.usedTypeReferences
@@ -24,7 +23,7 @@ export class SimpleImportAstParser implements AstParser {
     }
 
     private createSourceFile(fullFilePath: string, sourceText: string) {
-        return ts.createSourceFile(fullFilePath, sourceText, ts.ScriptTarget.ES2016, false);
+        return ts.createSourceFile(fullFilePath, sourceText, ts.ScriptTarget.Latest, false);
     }
 
     private delintImportsAndTypes(sourceFile: ts.SourceFile, sourceText?: string): { importNodes: ImportNode[], usedTypeReferences: string[] } {
@@ -32,14 +31,8 @@ export class SimpleImportAstParser implements AstParser {
         const usedTypeReferences: string[] = [];
         const sourceFileText = sourceText || sourceFile.getText();
         const delintNode = (node: ts.Node) => {
-            console.log(node.kind, node.getText(sourceFile));
-            if (ts.isTypeNode(node)) {
-                usedTypeReferences.push((node as ts.TypeNode).getText(sourceFile));
-            }
+            let isSkipChildNode = false;
             switch (node.kind) {
-                // case ts.SyntaxKind.TypeReference:
-                //     usedTypeReferences.push((node as ts.TypeReferenceNode).typeName.getText(sourceFile));
-                //     break;
                 case ts.SyntaxKind.ImportDeclaration:
                     const lines = this.getCodeLineNumbers(node, sourceFile);
                     importNodes.push({
@@ -49,11 +42,19 @@ export class SimpleImportAstParser implements AstParser {
                         importComment: this.getComments(sourceFileText, node)
                     });
                     this.getCodeLineNumbers(node, sourceFile);
+                    //if we get import declaration then we do not want to do further delinting on the children of the node
+                    isSkipChildNode = true;
+                    break;
+                case ts.SyntaxKind.Identifier:
+                    //adding all identifiers(except from the ImportDeclarations). This is quite verbose, but seems to do the trick.
+                    usedTypeReferences.push((node as ts.Identifier).getText(sourceFile));
                     break;
                 default:
                     break;
             }
-            ts.forEachChild(node, delintNode);
+            if (!isSkipChildNode) {
+                ts.forEachChild(node, delintNode);
+            }
         };
         delintNode(sourceFile);
         return { importNodes, usedTypeReferences };

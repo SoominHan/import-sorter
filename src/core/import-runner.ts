@@ -1,4 +1,4 @@
-import { chain, range as rangeLodash } from 'lodash';
+import { chain, range as rangeLodash, cloneDeep } from 'lodash';
 import { sep } from 'path';
 import { empty as emptyObservable, merge as mergeObservable, Observable } from 'rxjs';
 import {
@@ -10,7 +10,9 @@ import { io } from './helpers/helpers-public';
 import { ImportCreator } from './import-creator';
 import { ImportSorter } from './import-sorter';
 import { ImportElementSortResult } from './models/import-element-sort-result';
-import { ImportSorterConfiguration, LineRange, SortedImportData, ImportElement } from './models/models-public';
+import {
+    ImportElement, ImportSorterConfiguration, LineRange, SortedImportData, ImportElementGroup
+} from './models/models-public';
 
 export interface ConfigurationProvider {
     getConfiguration(): ImportSorterConfiguration;
@@ -19,6 +21,11 @@ export interface ConfigurationProvider {
 export interface ImportRunner {
     sortImportsInDirectory(directoryPath: string): Observable<void>;
     getSortImportData(filePath: string, fileSource: string): SortedImportData;
+}
+
+export interface ImportElementExcludeUnusedResult {
+    groups: ImportElementGroup[];
+    toRemove: ImportElement[];
 }
 
 export class SimpleImportRunner implements ImportRunner {
@@ -63,9 +70,8 @@ export class SimpleImportRunner implements ImportRunner {
             };
         }
         const sortedImports = this.sorter.sortImportElements(imports.importElements);
-        const unusedImports = this.findUnusedImports(sortedImports, imports.usedTypeReferences);
-        console.log(unusedImports);
-        const sortedImportsText = this.importCreator.createImportText(sortedImports.groups);
+        const sortedImportsWithExcludedImports = this.getExcludeUnusedImports(sortedImports, imports.usedTypeReferences);
+        const sortedImportsText = this.importCreator.createImportText(sortedImportsWithExcludedImports.groups);
         const fileSourceArray = fileSource.split('\n');
         const importTextArray = sortedImportsText.split('\n');
         const isSorted = this.isSourceAlreadySorted(
@@ -80,7 +86,7 @@ export class SimpleImportRunner implements ImportRunner {
             };
         }
 
-        const rangesToDelete = this.getRangesToDelete(sortedImports, fileSourceArray, fileSource);
+        const rangesToDelete = this.getRangesToDelete(sortedImportsWithExcludedImports, fileSourceArray, fileSource);
 
         return {
             isSortRequired: true,
@@ -89,19 +95,42 @@ export class SimpleImportRunner implements ImportRunner {
         };
     }
 
-    private findUnusedImports(sortResult: ImportElementSortResult, usedTypeReferences: string[]): ImportElement[] {
-        if (!usedTypeReferences || !usedTypeReferences.length) {
-            return [];
+    private getExcludeUnusedImports(sortResult: ImportElementSortResult, usedTypeReferences: string[]): ImportElementExcludeUnusedResult {
+        const isRemoveUnusedImports = this.configurationProvider.getConfiguration().sortConfiguration.removeUnusedImports;
+        if (!isRemoveUnusedImports) {
+            return {
+                groups: sortResult.groups,
+                toRemove: sortResult.duplicates
+            };
         }
-        const importElementsToSearch = chain(sortResult.groups).flatMap(gr => gr.elements.map(el => el)).value();
-        importElementsToSearch.forEach(el => {
-            el.namedBindings.forEach(nameBinding => {
-                if (nameBinding.name !== '*' && !usedTypeReferences.some(reference => reference === (nameBinding.aliasName || nameBinding.name))) {
-                    console.log(nameBinding.aliasName || nameBinding.name);
+        const sortResultClonned = cloneDeep(sortResult);
+        if (!usedTypeReferences || !usedTypeReferences.length) {
+            const importElementsToSearch = chain(sortResultClonned.groups).flatMap(gr => gr.elements.map(el => el)).value();
+            return {
+                groups: [],
+                toRemove: [...importElementsToSearch, ...sortResultClonned.duplicates]
+            };
+        }
+
+        const unusedImportElements: ImportElement[] = [];
+        sortResultClonned.groups.forEach(gr => {
+            gr.elements = gr.elements.filter(el => {
+                el.namedBindings = el.namedBindings.filter(nameBinding => {
+                    const isUnusedNameBinding = nameBinding.name !== '*' && !usedTypeReferences.some(reference => reference === (nameBinding.aliasName || nameBinding.name));
+                    return !isUnusedNameBinding;
+                });
+                if (!el.namedBindings.length) {
+                    unusedImportElements.push(el);
+                    return false;
                 }
+                return true;
             });
+            return !gr.elements.length;
         });
-        return [];
+        return {
+            groups: sortResultClonned.groups,
+            toRemove: [...unusedImportElements, ...sortResultClonned.duplicates]
+        };
     }
 
     private sortAllImports$(startingSourcePath: string): Observable<void> {
@@ -210,13 +239,13 @@ export class SimpleImportRunner implements ImportRunner {
         }
     }
 
-    private getRangesToDelete(sortedImportsResult: ImportElementSortResult, fileSourceArray: string[], fileSourceText: string): LineRange[] {
+    private getRangesToDelete(sortedImportsResult: ImportElementExcludeUnusedResult, fileSourceArray: string[], fileSourceText: string): LineRange[] {
         const sortedImports = chain(sortedImportsResult.groups).flatMap(x => x.elements).value();
 
         const rangesToDelete: LineRange[] = [];
 
         chain(sortedImports)
-            .concat(sortedImportsResult.duplicates)
+            .concat(sortedImportsResult.toRemove)
             .sortBy(x => x.startPosition.line)
             .forEach(x => {
                 const previousRange = rangesToDelete[rangesToDelete.length - 1];
