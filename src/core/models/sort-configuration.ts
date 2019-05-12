@@ -13,6 +13,7 @@ export interface SortConfiguration {
         direction: ImportSortOrderDirection;
     };
     joinImportPaths?: boolean;
+    removeUnusedImports?: boolean;
     customOrderingRules?: {
         defaultOrderLevel: number;
         disableDefaultOrderSort?: boolean;
@@ -31,6 +32,7 @@ export const defaultSortConfiguration: SortConfiguration = {
         direction: 'asc'
     },
     joinImportPaths: true,
+    removeUnusedImports: false,
     customOrderingRules: {
         defaultOrderLevel: 20,
         defaultNumberOfEmptyLinesAfterGroup: 1,

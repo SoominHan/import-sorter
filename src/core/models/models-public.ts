@@ -1,5 +1,6 @@
 export * from './comment';
 export * from './import-element';
+export * from './parsed-import-values';
 export * from './import-node';
 export * from './line-range';
 export * from './sorted-import-data';

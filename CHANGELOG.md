@@ -1,3 +1,9 @@
+# [3.3.0]
+### New features
+* Added option to remove unused non side effect imports. Resolves issue #22.
+### Bug fixes
+* fixing issue #28, so the triple slash directives are placed to the top of the document
+
 # [3.2.0]
 ### New features
 * Configuration file now supports the same format as vs code settings.
