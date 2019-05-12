@@ -1,32 +1,37 @@
 import * as fs from 'fs';
 import * as ts from 'typescript';
 
-import { Comment, ImportElement, ImportNode } from './models/models-public';
+import { Comment, ImportElement, ImportNode, ParsedImportValues } from './models/models-public';
 
 export interface AstParser {
-    parseImports(fullFilePath: string, _sourceText?: string): ImportElement[];
+    parseImports(fullFilePath: string, _sourceText?: string): ParsedImportValues;
 }
 
 export class SimpleImportAstParser implements AstParser {
 
-    public parseImports(fullFilePath: string, _sourceText?: string): ImportElement[] {
+    public parseImports(fullFilePath: string, _sourceText?: string): ParsedImportValues {
         if (_sourceText !== null && _sourceText !== undefined && _sourceText.trim() === '') {
-            return [];
+            return { importElements: [], usedTypeReferences: [] };
         }
         const sourceText = _sourceText || fs.readFileSync(fullFilePath).toString();
         const sourceFile = this.createSourceFile(fullFilePath, sourceText);
-        const imports = this.delintImports(sourceFile, sourceText);
-        return imports.map(x => this.parseImport(x, sourceFile)).filter(x => x !== null);
+        const importsAndTypes = this.delintImportsAndTypes(sourceFile, sourceText);
+        return {
+            importElements: importsAndTypes.importNodes.map(x => this.parseImport(x, sourceFile)).filter(x => x !== null),
+            usedTypeReferences: importsAndTypes.usedTypeReferences
+        };
     }
 
     private createSourceFile(fullFilePath: string, sourceText: string) {
-        return ts.createSourceFile(fullFilePath, sourceText, ts.ScriptTarget.ES2016, false);
+        return ts.createSourceFile(fullFilePath, sourceText, ts.ScriptTarget.Latest, false);
     }
 
-    private delintImports(sourceFile: ts.SourceFile, sourceText?: string) {
+    private delintImportsAndTypes(sourceFile: ts.SourceFile, sourceText?: string): { importNodes: ImportNode[], usedTypeReferences: string[] } {
         const importNodes: ImportNode[] = [];
+        const usedTypeReferences: string[] = [];
         const sourceFileText = sourceText || sourceFile.getText();
         const delintNode = (node: ts.Node) => {
+            let isSkipChildNode = false;
             switch (node.kind) {
                 case ts.SyntaxKind.ImportDeclaration:
                     const lines = this.getCodeLineNumbers(node, sourceFile);
@@ -37,14 +42,22 @@ export class SimpleImportAstParser implements AstParser {
                         importComment: this.getComments(sourceFileText, node)
                     });
                     this.getCodeLineNumbers(node, sourceFile);
+                    //if we get import declaration then we do not want to do further delinting on the children of the node
+                    isSkipChildNode = true;
+                    break;
+                case ts.SyntaxKind.Identifier:
+                    //adding all identifiers(except from the ImportDeclarations). This is quite verbose, but seems to do the trick.
+                    usedTypeReferences.push((node as ts.Identifier).getText(sourceFile));
                     break;
                 default:
                     break;
             }
-            ts.forEachChild(node, delintNode);
+            if (!isSkipChildNode) {
+                ts.forEachChild(node, delintNode);
+            }
         };
         delintNode(sourceFile);
-        return importNodes;
+        return { importNodes, usedTypeReferences };
     }
 
     private getComments(sourceFileText: string, node: ts.Node) {
@@ -56,9 +69,11 @@ export class SimpleImportAstParser implements AstParser {
     }
 
     private getComment(range: ts.CommentRange, sourceFileText: string) {
+        const text = sourceFileText.slice(range.pos, range.end).replace(/\r/g, '');
         const comment: Comment = {
             range,
-            text: sourceFileText.slice(range.pos, range.end).replace(/\r/g, '')
+            text,
+            isTripleSlashDirective: text.match(/\/\/\/\s?</g) != null
         };
         return comment;
     }

@@ -59,7 +59,8 @@ suite('AstWalker tests', () => {
                             kind: 2,
                             hasTrailingNewLine: true
                         },
-                        text: '//comment'
+                        text: '//comment',
+                        isTripleSlashDirective: false
                     }],
                     trailingComments: []
                 }
@@ -112,7 +113,8 @@ suite('AstWalker tests', () => {
                             kind: 3,
                             hasTrailingNewLine: true
                         },
-                        text: '/* leadingComment1 */'
+                        text: '/* leadingComment1 */',
+                        isTripleSlashDirective: false
                     },
                     {
                         range: {
@@ -121,7 +123,8 @@ suite('AstWalker tests', () => {
                             kind: 2,
                             pos: 34
                         },
-                        text: '//leadingComment2'
+                        text: '//leadingComment2',
+                        isTripleSlashDirective: false
                     }],
                     trailingComments: [
                         {
@@ -131,7 +134,8 @@ suite('AstWalker tests', () => {
                                 kind: 2,
                                 pos: 164
                             },
-                            text: '//trailingComment'
+                            text: '//trailingComment',
+                            isTripleSlashDirective: false
                         }
                     ]
                 }
@@ -148,8 +152,8 @@ suite('AstWalker tests', () => {
     const astWalkerTest = (testName, text, expected) => {
         test(`AstWalker:  ${testName} produces correct result`, () => {
             const imports = getImports(text);
-            expect(imports.length).to.be(1);
-            expect(imports[0]).to.eql(expected);
+            expect(imports.importElements.length).to.be(1);
+            expect(imports.importElements[0]).to.eql(expected);
         });
     };
 
