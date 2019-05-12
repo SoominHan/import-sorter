@@ -18,32 +18,50 @@ export class InMemoryImportCreator implements ImportCreator {
 
     public createImportText(groups: ImportElementGroup[]): string {
         this.assertIsInitialised();
-        return (
-            groups
-                .map((x, i, data) => {
-                    return (
-                        this.createImportStrings(x.elements).join('\n') +
-                        this.repeatString('\n', i !== data.length - 1 ? x.numberOfEmptyLinesAfterGroup : 0)
-                    );
-                })
-                .join('\n') + this.repeatString('\n', this.importStringConfig.numberOfEmptyLinesAfterAllImports)
-        );
+        const importLines: string[] = [];
+        groups
+            .forEach((x, i, data) => {
+                const importStrings = this.createImportStrings(x.elements);
+                const line = importStrings.imports.join('\n') +
+                    this.repeatString('\n', i !== data.length - 1 ? x.numberOfEmptyLinesAfterGroup : 0);
+                importLines.push(line);
+                importLines.unshift(...importStrings.tripleSlashDirectives);
+            });
+        return importLines.join('\n') + this.repeatString('\n', this.importStringConfig.numberOfEmptyLinesAfterAllImports);
     }
 
-    private createImportStrings(element: ImportElement[]): string[] {
+    private createImportStrings(element: ImportElement[]): { imports: string[], tripleSlashDirectives: string[] } {
         this.assertIsInitialised();
-        return element.map(x => {
+        const tripleSlashDirectives: string[] = [];
+        const imports =  element.map(x => {
             const importString = this.createSingleImportString(x);
 
-            let leadingCommentText = x.importComment.leadingComments.map(comment => comment.text).join('\n');
+            const leadingComments: string[] = [];
+            x.importComment.leadingComments.forEach(comment => {
+                if (!comment.isTripleSlashDirective) {
+                    leadingComments.push(comment.text);
+                } else {
+                    tripleSlashDirectives.push(comment.text);
+                }
+            });
+            let leadingCommentText = leadingComments.join('\n');
             leadingCommentText = leadingCommentText ? leadingCommentText + '\n' : leadingCommentText;
 
-            let trailingCommentText = x.importComment.trailingComments.map(comment => comment.text).join('\n');
+            const trailingComments: string[] = [];
+            x.importComment.trailingComments.forEach(comment => {
+                if (!comment.isTripleSlashDirective) {
+                    trailingComments.push(comment.text);
+                } else {
+                    tripleSlashDirectives.push(comment.text);
+                }
+            });
+            let trailingCommentText = trailingComments.join('\n');
             trailingCommentText = trailingCommentText ? ' ' + trailingCommentText : trailingCommentText;
 
             const importWithComments = leadingCommentText + importString + trailingCommentText;
             return importWithComments;
         });
+        return ({ imports, tripleSlashDirectives });
     }
 
     private assertIsInitialised() {
@@ -73,7 +91,7 @@ export class InMemoryImportCreator implements ImportCreator {
         if (element.defaultImportName) {
             return `import ${element.defaultImportName} from ${qMark}${element.moduleSpecifierName}${qMark}${
                 this.semicolonChar
-            }`;
+                }`;
         } else {
             return `import {} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
         }
@@ -86,13 +104,13 @@ export class InMemoryImportCreator implements ImportCreator {
             // tslint:disable-next-line:max-line-length
             return `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}${
                 element.namedBindings[0].name
-            } as ${element.namedBindings[0].aliasName} from ${qMark}${element.moduleSpecifierName}${qMark}${
+                } as ${element.namedBindings[0].aliasName} from ${qMark}${element.moduleSpecifierName}${qMark}${
                 this.semicolonChar
-            }`;
+                }`;
         } else {
             return `import ${element.namedBindings[0].name} as ${element.namedBindings[0].aliasName} from ${qMark}${
                 element.moduleSpecifierName
-            }${qMark}${this.semicolonChar}`;
+                }${qMark}${this.semicolonChar}`;
         }
     }
 
@@ -105,11 +123,11 @@ export class InMemoryImportCreator implements ImportCreator {
         return resultingChunks.isSingleLine
             ? { line: `${resultingChunks.nameBindings[0]}`, isSingleLine: true }
             : {
-                  line: `${spaceConfig.tabSequence}${resultingChunks.nameBindings.join(
-                      `,\n${spaceConfig.tabSequence}`
-                  )}`,
-                  isSingleLine: false
-              };
+                line: `${spaceConfig.tabSequence}${resultingChunks.nameBindings.join(
+                    `,\n${spaceConfig.tabSequence}`
+                )}`,
+                isSingleLine: false
+            };
     }
 
     private createNameBindingChunks(
@@ -249,26 +267,26 @@ export class InMemoryImportCreator implements ImportCreator {
         if (element.defaultImportName) {
             return isSingleLine
                 ? // tslint:disable-next-line:max-line-length
-                  `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}{${
-                      spaceConfig.afterStartingBracket
-                  }${namedBindingString}${spaceConfig.beforeEndingBracket}} from ${qMark}${
-                      element.moduleSpecifierName
-                  }${qMark}${this.semicolonChar}`
+                `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}{${
+                spaceConfig.afterStartingBracket
+                }${namedBindingString}${spaceConfig.beforeEndingBracket}} from ${qMark}${
+                element.moduleSpecifierName
+                }${qMark}${this.semicolonChar}`
                 : // tslint:disable-next-line:max-line-length
-                  `import ${element.defaultImportName}${spaceConfig.beforeComma},${
-                      spaceConfig.afterComma
-                  }{\n${namedBindingString}\n} from ${qMark}${element.moduleSpecifierName}${qMark}${
-                      this.semicolonChar
-                  }`;
+                `import ${element.defaultImportName}${spaceConfig.beforeComma},${
+                spaceConfig.afterComma
+                }{\n${namedBindingString}\n} from ${qMark}${element.moduleSpecifierName}${qMark}${
+                this.semicolonChar
+                }`;
         }
         return isSingleLine
             ? // tslint:disable-next-line:max-line-length
-              `import {${spaceConfig.afterStartingBracket}${namedBindingString}${
-                  spaceConfig.beforeEndingBracket
-              }} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`
+            `import {${spaceConfig.afterStartingBracket}${namedBindingString}${
+            spaceConfig.beforeEndingBracket
+            }} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`
             : `import {\n${namedBindingString}\n} from ${qMark}${element.moduleSpecifierName}${qMark}${
-                  this.semicolonChar
-              }`;
+            this.semicolonChar
+            }`;
     }
 
     private getSpaceConfig() {

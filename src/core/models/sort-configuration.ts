@@ -32,7 +32,7 @@ export const defaultSortConfiguration: SortConfiguration = {
         direction: 'asc'
     },
     joinImportPaths: true,
-    removeUnusedImports: true,
+    removeUnusedImports: false,
     customOrderingRules: {
         defaultOrderLevel: 20,
         defaultNumberOfEmptyLinesAfterGroup: 1,

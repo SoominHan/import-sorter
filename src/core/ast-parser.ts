@@ -1,15 +1,15 @@
 import * as fs from 'fs';
 import * as ts from 'typescript';
 
-import { Comment, ImportElement, ImportNode } from './models/models-public';
+import { Comment, ImportElement, ImportNode, ParsedImportValues } from './models/models-public';
 
 export interface AstParser {
-    parseImports(fullFilePath: string, _sourceText?: string): { importElements: ImportElement[]; usedTypeReferences: string[] };
+    parseImports(fullFilePath: string, _sourceText?: string): ParsedImportValues;
 }
 
 export class SimpleImportAstParser implements AstParser {
 
-    public parseImports(fullFilePath: string, _sourceText?: string): { importElements: ImportElement[]; usedTypeReferences: string[] } {
+    public parseImports(fullFilePath: string, _sourceText?: string): ParsedImportValues {
         if (_sourceText !== null && _sourceText !== undefined && _sourceText.trim() === '') {
             return { importElements: [], usedTypeReferences: [] };
         }
@@ -69,9 +69,11 @@ export class SimpleImportAstParser implements AstParser {
     }
 
     private getComment(range: ts.CommentRange, sourceFileText: string) {
+        const text = sourceFileText.slice(range.pos, range.end).replace(/\r/g, '');
         const comment: Comment = {
             range,
-            text: sourceFileText.slice(range.pos, range.end).replace(/\r/g, '')
+            text,
+            isTripleSlashDirective: text.match(/\/\/\/\s?</g) != null
         };
         return comment;
     }
