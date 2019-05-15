@@ -13,6 +13,7 @@ import { ImportElementSortResult } from './models/import-element-sort-result';
 import {
     ImportElement, ImportElementGroup, ImportSorterConfiguration, LineRange, SortedImportData
 } from './models/models-public';
+import { textProcessing } from './helpers/helpers-public';
 
 export interface ConfigurationProvider {
     getConfiguration(): ImportSorterConfiguration;
@@ -58,7 +59,8 @@ export class SimpleImportRunner implements ImportRunner {
             return {
                 isSortRequired: false,
                 sortedImportsText: null,
-                rangesToDelete: null
+                rangesToDelete: null,
+                firstLineNumberToInsertText: null
             };
         }
         const imports = this.parser.parseImports(filePath, fileSource);
@@ -66,7 +68,8 @@ export class SimpleImportRunner implements ImportRunner {
             return {
                 isSortRequired: false,
                 sortedImportsText: null,
-                rangesToDelete: null
+                rangesToDelete: null,
+                firstLineNumberToInsertText: null
             };
         }
         const sortedImports = this.sorter.sortImportElements(imports.importElements);
@@ -76,13 +79,15 @@ export class SimpleImportRunner implements ImportRunner {
         const importTextArray = sortedImportsText.split('\n');
         const isSorted = this.isSourceAlreadySorted(
             { data: importTextArray, text: sortedImportsText },
-            { data: fileSourceArray, text: fileSource }
+            { data: fileSourceArray, text: fileSource },
+            imports.firstImportLineNumber
         );
         if (isSorted) {
             return {
                 isSortRequired: false,
                 sortedImportsText,
-                rangesToDelete: null
+                rangesToDelete: null,
+                firstLineNumberToInsertText: imports.firstImportLineNumber
             };
         }
 
@@ -91,7 +96,8 @@ export class SimpleImportRunner implements ImportRunner {
         return {
             isSortRequired: true,
             sortedImportsText,
-            rangesToDelete
+            rangesToDelete,
+            firstLineNumberToInsertText: imports.firstImportLineNumber
         };
     }
 
@@ -199,7 +205,7 @@ export class SimpleImportRunner implements ImportRunner {
         return trimmedLine === '';
     }
 
-    private isSourceAlreadySorted(sortedImport: { data: string[], text: string }, source: { data: string[], text: string }): boolean {
+    private isSourceAlreadySorted(sortedImport: { data: string[], text: string }, source: { data: string[], text: string }, numberOfLinesToSkipFromSource: number): boolean {
         if (source.data.length >= sortedImport.data.length &&
             this.isLineEmptyOrWhiteSpace(source.data[sortedImport.data.length - 1]) &&
             (
@@ -211,23 +217,6 @@ export class SimpleImportRunner implements ImportRunner {
             return true;
         }
         return false;
-    }
-
-    private getPositionByOffset(offset: number, text: string) {
-        const before = text.slice(0, offset);
-        const newLines = before.match(/\n/g);
-        const line = newLines ? newLines.length : 0;
-        const preCharacters = before.match(/(\n|^).*$/g);
-        let character: number = 0;
-        if (line !== 0) {
-            character = preCharacters && preCharacters[0].length ? preCharacters[0].length - 1 : 0;
-        } else {
-            character = preCharacters ? preCharacters[0].length : 0;
-        }
-        return {
-            line,
-            character
-        };
     }
 
     private getNextNonEmptyLine(startLineIndex: number, fileSourceArray: string[]): { lineNumber: number, isLast: boolean } {
@@ -262,8 +251,8 @@ export class SimpleImportRunner implements ImportRunner {
                 const firstLeadingComment = x.importComment.leadingComments[0];
                 const lastTrailingComment = x.importComment.trailingComments.reverse()[0];
 
-                const startPosition = firstLeadingComment ? this.getPositionByOffset(firstLeadingComment.range.pos, fileSourceText) : x.startPosition;
-                const endPosition = lastTrailingComment ? this.getPositionByOffset(lastTrailingComment.range.end, fileSourceText) : x.endPosition;
+                const startPosition = firstLeadingComment ? textProcessing.getPositionByOffset(firstLeadingComment.range.pos, fileSourceText) : x.startPosition;
+                const endPosition = lastTrailingComment ? textProcessing.getPositionByOffset(lastTrailingComment.range.end, fileSourceText) : x.endPosition;
 
                 let currentRange = new LineRange({
                     startLine: startPosition.line,

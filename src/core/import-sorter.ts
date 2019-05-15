@@ -1,6 +1,5 @@
 import { chain, cloneDeep, isNil, LoDashExplicitArrayWrapper } from 'lodash';
 import * as path from 'path';
-
 import { CustomOrderRule } from './models/custom-order-rule';
 import { ImportElementSortResult } from './models/import-element-sort-result';
 import {
@@ -193,6 +192,7 @@ export class InMemoryImportSorter implements ImportSorter {
         }
         return importElement.namedBindings.some(x => x.name.match(regex) !== null);
     }
+
 
     private addElement(dictionary: { [key: number]: ImportElementGroup }, rule: CustomOrderRule, value: ImportElement) {
         if (isNil(dictionary[rule.orderLevel])) {

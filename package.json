@@ -156,10 +156,10 @@
           "description": "Combine imports with the same path"
         },
         "importSorter.sortConfiguration.removeUnusedImports": {
-            "type": "boolean",
-            "default": false,
-            "description": "Removes not used imports where we do not have explicit side effects"
-          },
+          "type": "boolean",
+          "default": false,
+          "description": "Removes not used imports where we do not have explicit side effects"
+        },
         "importSorter.sortConfiguration.customOrderingRules.defaultOrderLevel": {
           "type": "number",
           "default": 20,
