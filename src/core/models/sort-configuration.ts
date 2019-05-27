@@ -14,6 +14,7 @@ export interface SortConfiguration {
     };
     joinImportPaths?: boolean;
     removeUnusedImports?: boolean;
+    ignoredUnusedImportPaths?: string[];
     customOrderingRules?: {
         defaultOrderLevel: number;
         disableDefaultOrderSort?: boolean;
@@ -33,6 +34,7 @@ export const defaultSortConfiguration: SortConfiguration = {
     },
     joinImportPaths: true,
     removeUnusedImports: false,
+    ignoredUnusedImportPaths: [],
     customOrderingRules: {
         defaultOrderLevel: 20,
         defaultNumberOfEmptyLinesAfterGroup: 1,

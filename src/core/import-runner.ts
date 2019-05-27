@@ -1,8 +1,14 @@
 import { chain, cloneDeep, range as rangeLodash } from 'lodash';
 import { sep } from 'path';
-import { empty as emptyObservable, merge as mergeObservable, Observable } from 'rxjs';
 import {
-    flatMap as flatMapObservable, mergeAll, switchMap as switchMapObservable
+  empty as emptyObservable,
+  merge as mergeObservable,
+  Observable
+} from 'rxjs';
+import {
+  flatMap as flatMapObservable,
+  mergeAll,
+  switchMap as switchMapObservable
 } from 'rxjs/operators';
 
 import { AstParser } from './ast-parser';
@@ -11,7 +17,11 @@ import { ImportCreator } from './import-creator';
 import { ImportSorter } from './import-sorter';
 import { ImportElementSortResult } from './models/import-element-sort-result';
 import {
-    ImportElement, ImportElementGroup, ImportSorterConfiguration, LineRange, SortedImportData
+  ImportElement,
+  ImportElementGroup,
+  ImportSorterConfiguration,
+  LineRange,
+  SortedImportData
 } from './models/models-public';
 
 export interface ConfigurationProvider {
@@ -105,7 +115,7 @@ export class SimpleImportRunner implements ImportRunner {
         }
         const sortResultClonned = cloneDeep(sortResult);
         if (!usedTypeReferences || !usedTypeReferences.length) {
-            const importElementsToSearch = chain(sortResultClonned.groups).flatMap(gr => gr.elements.map(el => el)).value();
+            const importElementsToSearch = chain(sortResultClonned.groups).flatMap((gr) => gr.elements.map((el) => el)).value();
             return {
                 groups: [],
                 toRemove: [...importElementsToSearch, ...sortResultClonned.duplicates]
@@ -113,22 +123,28 @@ export class SimpleImportRunner implements ImportRunner {
         }
 
         const unusedImportElements: ImportElement[] = [];
-        sortResultClonned.groups.forEach(gr => {
-            gr.elements = gr.elements.filter(el => {
-                //side effect import
+        sortResultClonned.groups.forEach((gr) => {
+            gr.elements = gr.elements.filter((el) => {
+                // is in ignore list
+                const ignoredUnusedImportPaths = this.configurationProvider.getConfiguration().sortConfiguration.ignoredUnusedImportPaths || [];
+                const isIgnoredUnusedImportPath = !!ignoredUnusedImportPaths.some((ignoredEl) => ignoredEl === el.moduleSpecifierName);
+                if (isIgnoredUnusedImportPath) {
+                    return true;
+                }
+                // side effect import
                 if (!el.hasFromKeyWord) {
                     return true;
                 }
-                //filtering name bindings
-                el.namedBindings = el.namedBindings.filter(nameBinding => {
-                    const isUnusedNameBinding = !usedTypeReferences.some(reference => reference === (nameBinding.aliasName || nameBinding.name));
+                // filtering name bindings
+                el.namedBindings = el.namedBindings.filter((nameBinding) => {
+                    const isUnusedNameBinding = !usedTypeReferences.some((reference) => reference === (nameBinding.aliasName || nameBinding.name));
                     return !isUnusedNameBinding;
                 });
-                //also checking the default import
-                if (usedTypeReferences.some(reference => reference === el.defaultImportName)) {
+                // also checking the default import
+                if (usedTypeReferences.some((reference) => reference === el.defaultImportName)) {
                     return true;
                 }
-                //if not default import and not side effect, then check name bindings
+                // if not default import and not side effect, then check name bindings
                 if (!el.namedBindings.length) {
                     unusedImportElements.push(el);
                     return false;
@@ -147,13 +163,13 @@ export class SimpleImportRunner implements ImportRunner {
         const allFilePaths$ = this.allFilePathsUnderThePath$(startingSourcePath);
         return allFilePaths$.pipe(
             mergeAll(),
-            flatMapObservable(path => this.sortFileImports$(path), 3)
+            flatMapObservable((path) => this.sortFileImports$(path), 3)
         );
     }
 
     private sortFileImports$(fullFilePath: string): Observable<void> {
         return io.readFile$(fullFilePath).pipe(
-            switchMapObservable(file => {
+            switchMapObservable((file) => {
                 const sortedData = this.getSortedData(fullFilePath, file);
                 if (sortedData.isSortRequired) {
                     const sortedFullFileSource = this.getFullSortedSourceFile(file, sortedData);
@@ -166,9 +182,9 @@ export class SimpleImportRunner implements ImportRunner {
     }
 
     private getFullSortedSourceFile(sourceText: string, sortedData: SortedImportData): string {
-        let fileSourceArray = sourceText.split('\n');
-        const linesToDelete = chain(sortedData.rangesToDelete.map(range => rangeLodash(range.startLine, range.endLine)))
-            .flatMap(ranges => ranges)
+        const fileSourceArray = sourceText.split('\n');
+        const linesToDelete = chain(sortedData.rangesToDelete.map((range) => rangeLodash(range.startLine, range.endLine)))
+            .flatMap((ranges) => ranges)
             .value();
 
         for (let i = linesToDelete.length - 1; i >= 0; i--) {
@@ -186,7 +202,7 @@ export class SimpleImportRunner implements ImportRunner {
 
         const allFilesPatterns = ['**/*.ts', '**/*.tsx'];
         const ignore = [];
-        const filesPaths$ = allFilesPatterns.map(pattern => io.filePaths$(startingSourcePath, pattern, ignore));
+        const filesPaths$ = allFilesPatterns.map((pattern) => io.filePaths$(startingSourcePath, pattern, ignore));
         return mergeObservable(...filesPaths$);
     }
 
@@ -250,14 +266,14 @@ export class SimpleImportRunner implements ImportRunner {
     }
 
     private getRangesToDelete(sortedImportsResult: ImportElementExcludeUnusedResult, fileSourceArray: string[], fileSourceText: string): LineRange[] {
-        const sortedImports = chain(sortedImportsResult.groups).flatMap(x => x.elements).value();
+        const sortedImports = chain(sortedImportsResult.groups).flatMap((x) => x.elements).value();
 
         const rangesToDelete: LineRange[] = [];
 
         chain(sortedImports)
             .concat(sortedImportsResult.toRemove)
-            .sortBy(x => x.startPosition.line)
-            .forEach(x => {
+            .sortBy((x) => x.startPosition.line)
+            .forEach((x) => {
                 const previousRange = rangesToDelete[rangesToDelete.length - 1];
                 const firstLeadingComment = x.importComment.leadingComments[0];
                 const lastTrailingComment = x.importComment.trailingComments.reverse()[0];
@@ -314,7 +330,7 @@ export class SimpleImportRunner implements ImportRunner {
             return false;
         }
         const filePath = selectedPath.replace(new RegExp('\\' + sep, 'g'), '/');
-        const isExcluded = excludedFiles.some(fileToExclude => filePath.match(fileToExclude) !== null);
+        const isExcluded = excludedFiles.some((fileToExclude) => filePath.match(fileToExclude) !== null);
         return isExcluded;
     }
 }
