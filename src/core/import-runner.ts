@@ -114,14 +114,6 @@ export class SimpleImportRunner implements ImportRunner {
         }
         const isRemoveUnusedDefaultImports = this.configurationProvider.getConfiguration().sortConfiguration.removeUnusedDefaultImports;
         const sortResultClonned = cloneDeep(sortResult);
-        if (!usedTypeReferences || !usedTypeReferences.length) {
-            const importElementsToSearch = chain(sortResultClonned.groups).flatMap(gr => gr.elements.map(el => el)).value();
-            return {
-                groups: [],
-                toRemove: [...importElementsToSearch, ...sortResultClonned.duplicates]
-            };
-        }
-
         const unusedImportElements: ImportElement[] = [];
         sortResultClonned.groups.forEach(gr => {
             gr.elements = gr.elements.filter(el => {
