@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as ts from 'typescript';
-
+import { textProcessing } from './helpers/helpers-public';
 import { Comment, ImportElement, ImportNode, ParsedImportValues } from './models/models-public';
 
 export interface AstParser {
@@ -11,15 +11,54 @@ export class SimpleImportAstParser implements AstParser {
 
     public parseImports(fullFilePath: string, _sourceText?: string): ParsedImportValues {
         if (_sourceText !== null && _sourceText !== undefined && _sourceText.trim() === '') {
-            return { importElements: [], usedTypeReferences: [] };
+            return { importElements: [], usedTypeReferences: [], firstImportLineNumber: null };
         }
         const sourceText = _sourceText || fs.readFileSync(fullFilePath).toString();
         const sourceFile = this.createSourceFile(fullFilePath, sourceText);
         const importsAndTypes = this.delintImportsAndTypes(sourceFile, sourceText);
+        this.updateFirstNodeLeadingComments(importsAndTypes.importNodes, sourceText);
         return {
             importElements: importsAndTypes.importNodes.map(x => this.parseImport(x, sourceFile)).filter(x => x !== null),
-            usedTypeReferences: importsAndTypes.usedTypeReferences
+            usedTypeReferences: importsAndTypes.usedTypeReferences,
+            firstImportLineNumber: this.firstImportLineNumber(importsAndTypes.importNodes[0], sourceText)
         };
+    }
+
+    private updateFirstNodeLeadingComments(importNodes: ImportNode[], text: string) {
+        const firstNode = importNodes[0];
+        if (!firstNode) {
+            return;
+        }
+        if (!firstNode.importComment.leadingComments.length) {
+            return;
+        }
+        const lastLeadingComment = this.getLastLeadingComment(firstNode);
+        const leadingCommentNextLine = textProcessing.getPositionByOffset(lastLeadingComment.range.end, text).line + 1;
+        if (firstNode.start.line - leadingCommentNextLine >= 1) {
+            //if we have leading comments, and there is at least one line which separates them from import, then we do not consider it
+            //to be a leading comment belonging to node
+            firstNode.importComment.leadingComments = [];
+        } else {
+            //if we have leading comments then only take the last one;
+            firstNode.importComment.leadingComments = [lastLeadingComment];
+        }
+
+    }
+
+    private firstImportLineNumber(importNode: ImportNode, text: string) {
+        if (!importNode) { return null; }
+
+        const leadingComments = this.getLastLeadingComment(importNode);
+        if (leadingComments) {
+            return textProcessing.getPositionByOffset(leadingComments.range.pos, text).line;
+        }
+        return importNode.start.line;
+    }
+
+    private getLastLeadingComment(importNode: ImportNode): Comment {
+        if (!importNode) { return null; }
+        return importNode.importComment.leadingComments && importNode.importComment.leadingComments.length ?
+            importNode.importComment.leadingComments[importNode.importComment.leadingComments.length - 1] : null;
     }
 
     private createSourceFile(fullFilePath: string, sourceText: string) {

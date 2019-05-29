@@ -13,6 +13,7 @@ import { ImportElementSortResult } from './models/import-element-sort-result';
 import {
     ImportElement, ImportElementGroup, ImportSorterConfiguration, LineRange, SortedImportData
 } from './models/models-public';
+import { textProcessing } from './helpers/helpers-public';
 
 export interface ConfigurationProvider {
     getConfiguration(): ImportSorterConfiguration;
@@ -58,7 +59,8 @@ export class SimpleImportRunner implements ImportRunner {
             return {
                 isSortRequired: false,
                 sortedImportsText: null,
-                rangesToDelete: null
+                rangesToDelete: null,
+                firstLineNumberToInsertText: null
             };
         }
         const imports = this.parser.parseImports(filePath, fileSource);
@@ -66,23 +68,29 @@ export class SimpleImportRunner implements ImportRunner {
             return {
                 isSortRequired: false,
                 sortedImportsText: null,
-                rangesToDelete: null
+                rangesToDelete: null,
+                firstLineNumberToInsertText: null
             };
         }
         const sortedImports = this.sorter.sortImportElements(imports.importElements);
         const sortedImportsWithExcludedImports = this.getExcludeUnusedImports(sortedImports, imports.usedTypeReferences);
         const sortedImportsText = this.importCreator.createImportText(sortedImportsWithExcludedImports.groups);
+
+        //normalize imports by skipping lines which should not be touched
+        const fileSourceWithSkippedLineShiftArray = fileSource.split('\n').slice(imports.firstImportLineNumber);
+        const fileSourceWithSkippedLineShift = fileSourceWithSkippedLineShiftArray.join('\n');
         const fileSourceArray = fileSource.split('\n');
         const importTextArray = sortedImportsText.split('\n');
         const isSorted = this.isSourceAlreadySorted(
             { data: importTextArray, text: sortedImportsText },
-            { data: fileSourceArray, text: fileSource }
+            { data: fileSourceWithSkippedLineShiftArray, text: fileSourceWithSkippedLineShift }
         );
         if (isSorted) {
             return {
                 isSortRequired: false,
                 sortedImportsText,
-                rangesToDelete: null
+                rangesToDelete: null,
+                firstLineNumberToInsertText: imports.firstImportLineNumber
             };
         }
 
@@ -91,7 +99,8 @@ export class SimpleImportRunner implements ImportRunner {
         return {
             isSortRequired: true,
             sortedImportsText,
-            rangesToDelete
+            rangesToDelete,
+            firstLineNumberToInsertText: imports.firstImportLineNumber
         };
     }
 
@@ -103,15 +112,8 @@ export class SimpleImportRunner implements ImportRunner {
                 toRemove: sortResult.duplicates
             };
         }
+        const isRemoveUnusedDefaultImports = this.configurationProvider.getConfiguration().sortConfiguration.removeUnusedDefaultImports;
         const sortResultClonned = cloneDeep(sortResult);
-        if (!usedTypeReferences || !usedTypeReferences.length) {
-            const importElementsToSearch = chain(sortResultClonned.groups).flatMap(gr => gr.elements.map(el => el)).value();
-            return {
-                groups: [],
-                toRemove: [...importElementsToSearch, ...sortResultClonned.duplicates]
-            };
-        }
-
         const unusedImportElements: ImportElement[] = [];
         sortResultClonned.groups.forEach(gr => {
             gr.elements = gr.elements.filter(el => {
@@ -124,8 +126,12 @@ export class SimpleImportRunner implements ImportRunner {
                     const isUnusedNameBinding = !usedTypeReferences.some(reference => reference === (nameBinding.aliasName || nameBinding.name));
                     return !isUnusedNameBinding;
                 });
-                //also checking the default import
-                if (usedTypeReferences.some(reference => reference === el.defaultImportName)) {
+
+                if (!isRemoveUnusedDefaultImports && el.defaultImportName) {
+                    return true;
+                }
+
+                if (isRemoveUnusedDefaultImports && usedTypeReferences.some(reference => reference === el.defaultImportName)) {
                     return true;
                 }
                 //if not default import and not side effect, then check name bindings
@@ -172,10 +178,13 @@ export class SimpleImportRunner implements ImportRunner {
             .value();
 
         for (let i = linesToDelete.length - 1; i >= 0; i--) {
-            fileSourceArray.splice(linesToDelete[i], 1);
+            if (i === 0) {
+                fileSourceArray.splice(linesToDelete[i], 1, sortedData.sortedImportsText);
+            } else {
+                fileSourceArray.splice(linesToDelete[i], 1);
+            }
         }
-        const textWithoutRanges = fileSourceArray.join('\n');
-        const sortedText = `${sortedData.sortedImportsText}\n${textWithoutRanges}`;
+        const sortedText = fileSourceArray.join('\n');
         return sortedText;
     }
 
@@ -213,23 +222,6 @@ export class SimpleImportRunner implements ImportRunner {
         return false;
     }
 
-    private getPositionByOffset(offset: number, text: string) {
-        const before = text.slice(0, offset);
-        const newLines = before.match(/\n/g);
-        const line = newLines ? newLines.length : 0;
-        const preCharacters = before.match(/(\n|^).*$/g);
-        let character: number = 0;
-        if (line !== 0) {
-            character = preCharacters && preCharacters[0].length ? preCharacters[0].length - 1 : 0;
-        } else {
-            character = preCharacters ? preCharacters[0].length : 0;
-        }
-        return {
-            line,
-            character
-        };
-    }
-
     private getNextNonEmptyLine(startLineIndex: number, fileSourceArray: string[]): { lineNumber: number, isLast: boolean } {
 
         const nextLineIndex = startLineIndex + 1;
@@ -262,8 +254,8 @@ export class SimpleImportRunner implements ImportRunner {
                 const firstLeadingComment = x.importComment.leadingComments[0];
                 const lastTrailingComment = x.importComment.trailingComments.reverse()[0];
 
-                const startPosition = firstLeadingComment ? this.getPositionByOffset(firstLeadingComment.range.pos, fileSourceText) : x.startPosition;
-                const endPosition = lastTrailingComment ? this.getPositionByOffset(lastTrailingComment.range.end, fileSourceText) : x.endPosition;
+                const startPosition = firstLeadingComment ? textProcessing.getPositionByOffset(firstLeadingComment.range.pos, fileSourceText) : x.startPosition;
+                const endPosition = lastTrailingComment ? textProcessing.getPositionByOffset(lastTrailingComment.range.end, fileSourceText) : x.endPosition;
 
                 let currentRange = new LineRange({
                     startLine: startPosition.line,

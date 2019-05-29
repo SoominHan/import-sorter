@@ -154,7 +154,7 @@ export class ImportSorterExtension {
             );
 
             if (event) {
-                const insertEdit = TextEdit.insert(new Position(0, 0), importData.sortedImportsText + '\n');
+                const insertEdit = TextEdit.insert(new Position(importData.firstLineNumberToInsertText, 0), importData.sortedImportsText + '\n');
                 event.waitUntil(Promise.resolve([...deleteEdits, insertEdit]));
             } else {
                 window.activeTextEditor
@@ -162,7 +162,7 @@ export class ImportSorterExtension {
                         deleteEdits.forEach(x => {
                             editBuilder.delete(x.range);
                         });
-                        editBuilder.insert(new Position(0, 0), importData.sortedImportsText + '\n');
+                        editBuilder.insert(new Position(importData.firstLineNumberToInsertText, 0), importData.sortedImportsText + '\n');
                     });
             }
         } catch (error) {

@@ -3,7 +3,7 @@
   "displayName": "TypeScript Import Sorter",
   "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
   "icon": "assets/icons/import-sorter.png",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "publisher": "mike-co",
   "engines": {
     "vscode": "^1.33.0"
@@ -156,10 +156,15 @@
           "description": "Combine imports with the same path"
         },
         "importSorter.sortConfiguration.removeUnusedImports": {
-            "type": "boolean",
-            "default": false,
-            "description": "Removes not used imports where we do not have explicit side effects"
-          },
+          "type": "boolean",
+          "default": false,
+          "description": "Removes not used imports where we do not have explicit side effects"
+        },
+        "importSorter.sortConfiguration.removeUnusedDefaultImports": {
+          "type": "boolean",
+          "default": false,
+          "description": "Works only if removeUnusedImports enabled. This option will remove default imports if they are not explicitly used in the source code."
+        },
         "importSorter.sortConfiguration.customOrderingRules.defaultOrderLevel": {
           "type": "number",
           "default": 20,

@@ -106,16 +106,7 @@ suite('AstWalker tests', () => {
                     { name: 'b', aliasName: null }
                 ],
                 importComment: {
-                    leadingComments: [{
-                        range: {
-                            end: 21,
-                            pos: 0,
-                            kind: 3,
-                            hasTrailingNewLine: true
-                        },
-                        text: '/* leadingComment1 */',
-                        isTripleSlashDirective: false
-                    },
+                    leadingComments: [
                     {
                         range: {
                             end: 51,
