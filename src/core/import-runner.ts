@@ -75,12 +75,15 @@ export class SimpleImportRunner implements ImportRunner {
         const sortedImports = this.sorter.sortImportElements(imports.importElements);
         const sortedImportsWithExcludedImports = this.getExcludeUnusedImports(sortedImports, imports.usedTypeReferences);
         const sortedImportsText = this.importCreator.createImportText(sortedImportsWithExcludedImports.groups);
+
+        //normalize imports by skipping lines which should not be touched
+        const fileSourceWithSkippedLineShiftArray = fileSource.split('\n').slice(imports.firstImportLineNumber);
+        const fileSourceWithSkippedLineShift = fileSourceWithSkippedLineShiftArray.join('\n');
         const fileSourceArray = fileSource.split('\n');
         const importTextArray = sortedImportsText.split('\n');
         const isSorted = this.isSourceAlreadySorted(
             { data: importTextArray, text: sortedImportsText },
-            { data: fileSourceArray, text: fileSource },
-            imports.firstImportLineNumber
+            { data: fileSourceWithSkippedLineShiftArray, text: fileSourceWithSkippedLineShift }
         );
         if (isSorted) {
             return {
@@ -109,6 +112,7 @@ export class SimpleImportRunner implements ImportRunner {
                 toRemove: sortResult.duplicates
             };
         }
+        const isRemoveUnusedDefaultImports = this.configurationProvider.getConfiguration().sortConfiguration.removeUnusedDefaultImports;
         const sortResultClonned = cloneDeep(sortResult);
         if (!usedTypeReferences || !usedTypeReferences.length) {
             const importElementsToSearch = chain(sortResultClonned.groups).flatMap(gr => gr.elements.map(el => el)).value();
@@ -130,8 +134,12 @@ export class SimpleImportRunner implements ImportRunner {
                     const isUnusedNameBinding = !usedTypeReferences.some(reference => reference === (nameBinding.aliasName || nameBinding.name));
                     return !isUnusedNameBinding;
                 });
-                //also checking the default import
-                if (usedTypeReferences.some(reference => reference === el.defaultImportName)) {
+
+                if (!isRemoveUnusedDefaultImports && el.defaultImportName) {
+                    return true;
+                }
+
+                if (isRemoveUnusedDefaultImports && usedTypeReferences.some(reference => reference === el.defaultImportName)) {
                     return true;
                 }
                 //if not default import and not side effect, then check name bindings
@@ -178,10 +186,13 @@ export class SimpleImportRunner implements ImportRunner {
             .value();
 
         for (let i = linesToDelete.length - 1; i >= 0; i--) {
-            fileSourceArray.splice(linesToDelete[i], 1);
+            if (i === 0) {
+                fileSourceArray.splice(linesToDelete[i], 1, sortedData.sortedImportsText);
+            } else {
+                fileSourceArray.splice(linesToDelete[i], 1);
+            }
         }
-        const textWithoutRanges = fileSourceArray.join('\n');
-        const sortedText = `${sortedData.sortedImportsText}\n${textWithoutRanges}`;
+        const sortedText = fileSourceArray.join('\n');
         return sortedText;
     }
 
@@ -205,7 +216,7 @@ export class SimpleImportRunner implements ImportRunner {
         return trimmedLine === '';
     }
 
-    private isSourceAlreadySorted(sortedImport: { data: string[], text: string }, source: { data: string[], text: string }, numberOfLinesToSkipFromSource: number): boolean {
+    private isSourceAlreadySorted(sortedImport: { data: string[], text: string }, source: { data: string[], text: string }): boolean {
         if (source.data.length >= sortedImport.data.length &&
             this.isLineEmptyOrWhiteSpace(source.data[sortedImport.data.length - 1]) &&
             (
