@@ -1,3 +1,3 @@
 import * as io from './io';
-
-export { io };
+import * as textProcessing from './text-processing';
+export { io, textProcessing };

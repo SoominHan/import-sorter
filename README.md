@@ -127,6 +127,9 @@ an example of default configuration is provided bellow. For available options ha
 
   // Removes not used imports where we do not have explicit side effects
   "importSorter.sortConfiguration.removeUnusedImports": false
+
+  // Works only if removeUnusedImports enabled. This option will remove default imports if they are not explicitly used in the source code.
+  "importSorter.sortConfiguration.removeUnusedDefaultImports": false
 ```
 
 ## Some settings in more details:
