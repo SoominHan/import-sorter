@@ -5,6 +5,7 @@ export interface ImportElement {
     startPosition: { line: number; character: number };
     endPosition: { line: number; character: number };
     hasFromKeyWord: boolean;
+    isTypeOnly: boolean;
     defaultImportName?: string;
     namedBindings?: {
         aliasName: string;

@@ -1,6 +1,5 @@
 import * as expect from 'expect.js';
 import 'mocha';
-
 import { SimpleImportAstParser } from '../src/core/ast-parser';
 import { ImportElement } from '../src/core/core-public';
 
@@ -20,6 +19,7 @@ suite('AstWalker tests', () => {
                 endPosition: { line: 0, character: 40 },
                 moduleSpecifierName: 'test.js',
                 hasFromKeyWord: true,
+                isTypeOnly: false,
                 namedBindings: [
                     { name: 'a', aliasName: null },
                     { name: 'c', aliasName: 'cc' },
@@ -46,6 +46,7 @@ suite('AstWalker tests', () => {
                 startPosition: { line: 1, character: 12 },
                 endPosition: { line: 4, character: 31 },
                 hasFromKeyWord: true,
+                isTypeOnly: false,
                 namedBindings: [
                     { name: 'a', aliasName: null },
                     { name: 'c', aliasName: 'cc' },
@@ -73,6 +74,7 @@ suite('AstWalker tests', () => {
                 endPosition: { line: 0, character: 39 },
                 moduleSpecifierName: 'test.js',
                 hasFromKeyWord: true,
+                isTypeOnly: false,
                 namedBindings: [
                     { name: 'a', aliasName: null },
                     { name: 'c', aliasName: 'cc' },
@@ -100,6 +102,7 @@ suite('AstWalker tests', () => {
                 startPosition: { line: 2, character: 12 },
                 endPosition: { line: 5, character: 31 },
                 hasFromKeyWord: true,
+                isTypeOnly: false,
                 namedBindings: [
                     { name: 'a', aliasName: null },
                     { name: 'c', aliasName: 'cc' },
@@ -131,7 +134,26 @@ suite('AstWalker tests', () => {
                     ]
                 }
             }
-        }
+        },
+        {
+            testName: 'test1e',
+            text: `import type { a, b } from "test.js"`,
+            expected: {
+                endPosition: { line: 0, character: 35 },
+                moduleSpecifierName: 'test.js',
+                hasFromKeyWord: true,
+                isTypeOnly: true,
+                namedBindings: [
+                    { name: 'a', aliasName: null },
+                    { name: 'b', aliasName: null }
+                ],
+                startPosition: { line: 0, character: 0 },
+                importComment: {
+                    leadingComments: [],
+                    trailingComments: []
+                }
+            }
+        },
     ];
 
     const getImports = (text: string) => {
