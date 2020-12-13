@@ -1,11 +1,10 @@
 import * as expect from 'expect.js';
 import 'mocha';
-
 import {
-    defaultImportStringConfiguration,
-    InMemoryImportCreator,
-    ImportElementGroup,
-    ImportStringConfiguration
+  defaultImportStringConfiguration,
+  ImportElementGroup,
+  ImportStringConfiguration,
+  InMemoryImportCreator,
 } from '../src/core/core-public';
 
 interface ImportCreatorTest {
@@ -37,6 +36,7 @@ suite('Import Creator Tests', () => {
                             startPosition: { line: 0, character: 0 },
                             endPosition: { line: 0, character: 53 },
                             hasFromKeyWord: true,
+                            isTypeOnly: false,
                             defaultImportName: 't',
                             namedBindings: [
                                 { name: 'B', aliasName: null },
@@ -71,6 +71,7 @@ suite('Import Creator Tests', () => {
                             startPosition: { line: 0, character: 0 },
                             endPosition: { line: 0, character: 70 },
                             hasFromKeyWord: true,
+                            isTypeOnly: false,
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
@@ -103,6 +104,7 @@ suite('Import Creator Tests', () => {
                             startPosition: { line: 0, character: 0 },
                             endPosition: { line: 0, character: 70 },
                             hasFromKeyWord: true,
+                            isTypeOnly: false,
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
@@ -135,6 +137,7 @@ suite('Import Creator Tests', () => {
                             startPosition: { line: 0, character: 0 },
                             endPosition: { line: 0, character: 70 },
                             hasFromKeyWord: true,
+                            isTypeOnly: false,
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
@@ -167,6 +170,7 @@ suite('Import Creator Tests', () => {
                             startPosition: { line: 0, character: 0 },
                             endPosition: { line: 0, character: 70 },
                             hasFromKeyWord: true,
+                            isTypeOnly: false,
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
@@ -199,6 +203,7 @@ suite('Import Creator Tests', () => {
                             startPosition: { line: 0, character: 0 },
                             endPosition: { line: 0, character: 70 },
                             hasFromKeyWord: true,
+                            isTypeOnly: false,
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
@@ -231,6 +236,7 @@ suite('Import Creator Tests', () => {
                             startPosition: { line: 0, character: 0 },
                             endPosition: { line: 0, character: 70 },
                             hasFromKeyWord: true,
+                            isTypeOnly: false,
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
@@ -263,6 +269,7 @@ suite('Import Creator Tests', () => {
                             startPosition: { line: 0, character: 0 },
                             endPosition: { line: 0, character: 70 },
                             hasFromKeyWord: true,
+                            isTypeOnly: false,
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
@@ -295,6 +302,7 @@ suite('Import Creator Tests', () => {
                             startPosition: { line: 0, character: 0 },
                             endPosition: { line: 0, character: 69 },
                             hasFromKeyWord: true,
+                            isTypeOnly: false,
                             namedBindings: [
                                 { name: 'ChangeDetectionStrategy', aliasName: null },
                                 { name: 'DebugElement', aliasName: null }
@@ -327,6 +335,7 @@ suite('Import Creator Tests', () => {
                             startPosition: { line: 0, character: 0 },
                             endPosition: { line: 0, character: 40 },
                             hasFromKeyWord: true,
+                            isTypeOnly: false,
                             namedBindings: [
                                 { name: 'a', aliasName: null },
                                 { name: 'b', aliasName: null },
@@ -342,7 +351,34 @@ suite('Import Creator Tests', () => {
                 }
             ],
             expected: "import {\n    a, b,\n    c\n} from \'@angular/core\';"
-        }
+        },
+        {
+          testName: 'test10 - import string is type only',
+          config: createConfiguration({} as ImportStringConfiguration),
+          elementGroups: [
+              {
+                  elements: [
+                      {
+                          moduleSpecifierName: 'foo',
+                          startPosition: { line: 0, character: 0 },
+                          endPosition: { line: 0, character: 40 },
+                          hasFromKeyWord: true,
+                          isTypeOnly: true,
+                          namedBindings: [
+                              { name: 'a', aliasName: null },
+                              { name: 'b', aliasName: null },
+                          ],
+                          importComment: {
+                              leadingComments: [],
+                              trailingComments: []
+                          }
+                      }],
+                  numberOfEmptyLinesAfterGroup: 0,
+                  customOrderRule: null
+              }
+          ],
+          expected: "import type { a, b } from \'foo\';"
+      }
     ];
 
     const getImportText = (groups: ImportElementGroup[], config: ImportStringConfiguration) => {

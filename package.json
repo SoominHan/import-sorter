@@ -3,7 +3,7 @@
   "displayName": "TypeScript Import Sorter",
   "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
   "icon": "assets/icons/import-sorter.png",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "publisher": "mike-co",
   "engines": {
     "vscode": "^1.33.0"
@@ -43,20 +43,20 @@
   },
   "dependencies": {
     "glob": "^7.1.2",
-    "typescript": "^2.6.1",
     "lodash": "4.17.4",
-    "rxjs": "6.3.3"
+    "rxjs": "6.3.3",
+    "typescript": "^3.8.1"
   },
   "devDependencies": {
+    "@types/glob": "^5.0.30",
     "@types/lodash": "4.14.117",
     "@types/mocha": "^2.2.42",
-    "@types/node": "^8.10.25",
-    "@types/glob": "^5.0.30",
-    "vscode-nls": "^2.0.2",
+    "@types/node": "^14.14.13",
     "expect.js": "^0.3.1",
     "mocha": "^2.3.3",
     "tslint": "^5.8.0",
-    "vscode": "^1.1.21"
+    "vscode": "^1.1.21",
+    "vscode-nls": "^2.0.2"
   },
   "contributes": {
     "commands": [

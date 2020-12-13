@@ -1,7 +1,8 @@
 import { chain, LoDashExplicitArrayWrapper } from 'lodash';
-
 import {
-    ImportElement, ImportElementGroup, ImportStringConfiguration
+  ImportElement,
+  ImportElementGroup,
+  ImportStringConfiguration,
 } from './models/models-public';
 
 export interface ImportCreator {
@@ -72,8 +73,9 @@ export class InMemoryImportCreator implements ImportCreator {
 
     private createSingleImportString(element: ImportElement) {
         const qMark = this.getQuoteMark();
+        const typeOnly = element.isTypeOnly ? 'type ' : '';
         if (!element.hasFromKeyWord) {
-            return `import ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
+            return `import ${typeOnly}${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
         }
 
         if (element.namedBindings && element.namedBindings.length > 0) {
@@ -89,26 +91,27 @@ export class InMemoryImportCreator implements ImportCreator {
             );
         }
         if (element.defaultImportName) {
-            return `import ${element.defaultImportName} from ${qMark}${element.moduleSpecifierName}${qMark}${
+            return `import ${typeOnly}${element.defaultImportName} from ${qMark}${element.moduleSpecifierName}${qMark}${
                 this.semicolonChar
                 }`;
         } else {
-            return `import {} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
+            return `import ${typeOnly}{} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`;
         }
     }
 
     private createStarImport(element: ImportElement) {
         const qMark = this.getQuoteMark();
         const spaceConfig = this.getSpaceConfig();
+        const typeOnly = element.isTypeOnly ? 'type ' : '';
         if (element.defaultImportName) {
             // tslint:disable-next-line:max-line-length
-            return `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}${
+            return `import ${typeOnly}${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}${
                 element.namedBindings[0].name
                 } as ${element.namedBindings[0].aliasName} from ${qMark}${element.moduleSpecifierName}${qMark}${
                 this.semicolonChar
                 }`;
         } else {
-            return `import ${element.namedBindings[0].name} as ${element.namedBindings[0].aliasName} from ${qMark}${
+            return `import ${typeOnly}${element.namedBindings[0].name} as ${element.namedBindings[0].aliasName} from ${qMark}${
                 element.moduleSpecifierName
                 }${qMark}${this.semicolonChar}`;
         }
@@ -264,16 +267,17 @@ export class InMemoryImportCreator implements ImportCreator {
     private createImportWithCurlyBracket(element: ImportElement, namedBindingString: string, isSingleLine: boolean) {
         const qMark = this.getQuoteMark();
         const spaceConfig = this.getSpaceConfig();
+        const typeOnly = element.isTypeOnly ? 'type ' : '';
         if (element.defaultImportName) {
             return isSingleLine
                 ? // tslint:disable-next-line:max-line-length
-                `import ${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}{${
+                `import ${typeOnly}${element.defaultImportName}${spaceConfig.beforeComma},${spaceConfig.afterComma}{${
                 spaceConfig.afterStartingBracket
                 }${namedBindingString}${spaceConfig.beforeEndingBracket}} from ${qMark}${
                 element.moduleSpecifierName
                 }${qMark}${this.semicolonChar}`
                 : // tslint:disable-next-line:max-line-length
-                `import ${element.defaultImportName}${spaceConfig.beforeComma},${
+                `import ${typeOnly}${element.defaultImportName}${spaceConfig.beforeComma},${
                 spaceConfig.afterComma
                 }{\n${namedBindingString}\n} from ${qMark}${element.moduleSpecifierName}${qMark}${
                 this.semicolonChar
@@ -281,10 +285,10 @@ export class InMemoryImportCreator implements ImportCreator {
         }
         return isSingleLine
             ? // tslint:disable-next-line:max-line-length
-            `import {${spaceConfig.afterStartingBracket}${namedBindingString}${
+            `import ${typeOnly}{${spaceConfig.afterStartingBracket}${namedBindingString}${
             spaceConfig.beforeEndingBracket
             }} from ${qMark}${element.moduleSpecifierName}${qMark}${this.semicolonChar}`
-            : `import {\n${namedBindingString}\n} from ${qMark}${element.moduleSpecifierName}${qMark}${
+            : `import ${typeOnly}{\n${namedBindingString}\n} from ${qMark}${element.moduleSpecifierName}${qMark}${
             this.semicolonChar
             }`;
     }
