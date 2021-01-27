@@ -14,6 +14,7 @@ import {
     ImportElement, ImportElementGroup, ImportSorterConfiguration, LineRange, SortedImportData
 } from './models/models-public';
 import { textProcessing } from './helpers/helpers-public';
+import { allowedLanguages } from './allowed-languages';
 
 export interface ConfigurationProvider {
     getConfiguration(): ImportSorterConfiguration;
@@ -193,7 +194,7 @@ export class SimpleImportRunner implements ImportRunner {
             throw new Error('No directory selected.');
         }
 
-        const allFilesPatterns = ['**/*.ts', '**/*.tsx'];
+        const allFilesPatterns = allowedLanguages.map(({ fileExtension }) => `**/*.${fileExtension}`);
         const ignore = [];
         const filesPaths$ = allFilesPatterns.map(pattern => io.filePaths$(startingSourcePath, pattern, ignore));
         return mergeObservable(...filesPaths$);
