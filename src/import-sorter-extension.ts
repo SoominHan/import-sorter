@@ -10,8 +10,10 @@ import {
 import {
     defaultGeneralConfiguration, GeneralConfiguration, ImportRunner, ImportSorterConfiguration,
     ImportStringConfiguration, InMemoryImportCreator, InMemoryImportSorter, SimpleImportAstParser,
-    SimpleImportRunner, SortConfiguration
+    SimpleImportRunner, SortConfiguration,
+    allowedLanguages
 } from './core/core-public';
+import { forbiddenLanguageError } from './core/helpers/helpers-public';
 import { ConfigurationProvider } from './core/import-runner';
 
 const EXTENSION_CONFIGURATION_NAME = 'importSorter';
@@ -175,7 +177,7 @@ export class ImportSorterExtension {
             return false;
         }
 
-        if ((document.languageId === 'typescript') || (document.languageId === 'typescriptreact')) {
+        if(allowedLanguages.some(({ fileExtension }) => document.languageId === fileExtension)) {
             return true;
         }
 
@@ -183,7 +185,7 @@ export class ImportSorterExtension {
             return false;
         }
 
-        window.showErrorMessage('Import Sorter currently only supports typescript (.ts) or typescriptreact (.tsx) language files');
+        window.showErrorMessage(forbiddenLanguageError);
         return false;
     }
 }

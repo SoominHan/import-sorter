@@ -10,3 +10,4 @@ export * from './sort-configuration';
 export * from './import-element-group';
 export * from './import-element-sort-result';
 export * from './import-sorter-configuration';
+export * from './allowed-language';
