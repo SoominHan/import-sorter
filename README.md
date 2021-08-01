@@ -6,16 +6,16 @@ Configuration supports regex functions to set sorting priority and rules. The ex
 ## Examples
 
 Different sort types in file:
-![alt text](./assets/import-sorter-example-1.gif "Import Sorter")
+![Import Sorter](./assets/import-sorter-example-1.gif "Import Sorter")
 
 Deep directory sort:
-![alt text](./assets/import-sorter-example-2.gif "Import Sorter Directory")
+![Import Sorter Directory](./assets/import-sorter-example-2.gif "Import Sorter Directory")
 
-Sort on before safe `(off by default)`:
-![alt text](./assets/import-sorter-example-3.gif "Sort on safe")
+Sort on save `(off by default)`:
+![Sort on save](./assets/import-sorter-example-3.gif "Sort on save")
 
 Prettier integration:
-![alt text](./assets/import-sorter-example-4.gif "Prettier integration")
+![Prettier integration](./assets/import-sorter-example-4.gif "Prettier integration")
 
 ## Features
 
@@ -35,7 +35,7 @@ You can also do the `sort in deep on the directory level`. The feature is access
 
 ## Extension Settings
 
-an example of default configuration is provided bellow. For available options have a look at vs code settings(it should show available settings when you search for importSorter)
+An example of default configuration is provided below. For available options have a look at vs code settings (it should show available settings when you search for importSorter)
 
 ```json
   // Default file configuration name
