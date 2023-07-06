@@ -3,7 +3,7 @@
   "displayName": "TypeScript Import Sorter",
   "description": "Extension sorts TypeScript imports according to the configuration provided. The configuration defaults follow ESLint sort-imports rule",
   "icon": "assets/icons/import-sorter.png",
-  "version": "3.3.1",
+  "version": "3.4.0",
   "publisher": "mike-co",
   "engines": {
     "vscode": "^1.33.0"
@@ -27,9 +27,7 @@
     "onLanguage:javascript",
     "onLanguage:javascriptreact",
     "onLanguage:typescript",
-    "onLanguage:typescriptreact",
-    "onCommand:extension.sortImports",
-    "onCommand:extension.sortImportsInDirectory"
+    "onLanguage:typescriptreact"
   ],
   "main": "./out/src/extension",
   "scripts": {
@@ -43,20 +41,20 @@
   },
   "dependencies": {
     "glob": "^7.1.2",
-    "typescript": "^2.6.1",
     "lodash": "4.17.4",
-    "rxjs": "6.3.3"
+    "rxjs": "6.3.3",
+    "typescript": "^5.1.6"
   },
   "devDependencies": {
+    "@types/glob": "^5.0.30",
     "@types/lodash": "4.14.117",
     "@types/mocha": "^2.2.42",
     "@types/node": "^8.10.25",
-    "@types/glob": "^5.0.30",
-    "vscode-nls": "^2.0.2",
     "expect.js": "^0.3.1",
     "mocha": "^2.3.3",
     "tslint": "^5.8.0",
-    "vscode": "^1.1.21"
+    "vscode": "^1.1.21",
+    "vscode-nls": "^2.0.2"
   },
   "contributes": {
     "commands": [
@@ -113,6 +111,10 @@
             "type": "string"
           },
           "description": "Excludes sorting for files which match given regex expression. Regex considers the whole file path. The file path separator is normalized to /"
+        },
+        "importSorter.generalConfiguration.excludeMarker": {
+          "type": "string",
+          "description": "In addition to `exclude`, this option allows to exclude files where the content matches the given regex."
         },
         "importSorter.sortConfiguration.importMembers.order": {
           "enum": [

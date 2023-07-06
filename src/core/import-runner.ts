@@ -54,7 +54,7 @@ export class SimpleImportRunner implements ImportRunner {
     }
 
     private getSortedData(filePath: string, fileSource: string): SortedImportData {
-        const isFileExcluded = this.isFileExcludedFromSorting(filePath);
+        const isFileExcluded = this.isFileExcludedFromSorting(filePath, fileSource);
         if (isFileExcluded) {
             return {
                 isSortRequired: false,
@@ -300,7 +300,11 @@ export class SimpleImportRunner implements ImportRunner {
         return rangesToDelete;
     }
 
-    private isFileExcludedFromSorting(selectedPath: string) {
+    private isFileExcludedFromSorting(selectedPath: string, selectedSource: string) {
+        return this.isFileExcludedByPath(selectedPath) || this.isFileExcludedByMarker(selectedSource);
+    }
+
+    private isFileExcludedByPath(selectedPath: string) {
         const excludedFiles = this.configurationProvider.getConfiguration().generalConfiguration.exclude || [];
         if (!excludedFiles.length) {
             return false;
@@ -308,5 +312,13 @@ export class SimpleImportRunner implements ImportRunner {
         const filePath = selectedPath.replace(new RegExp('\\' + sep, 'g'), '/');
         const isExcluded = excludedFiles.some(fileToExclude => filePath.match(fileToExclude) !== null);
         return isExcluded;
+    }
+
+    private isFileExcludedByMarker(selectedSource: string) {
+        const excludedMarker = this.configurationProvider.getConfiguration().generalConfiguration.excludeMarker;
+        if (excludedMarker == null) { return false; }
+
+        const regexp = new RegExp(excludedMarker, 'g');
+        return regexp.test(selectedSource);
     }
 }
