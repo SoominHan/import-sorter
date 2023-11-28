@@ -316,7 +316,7 @@ export class SimpleImportRunner implements ImportRunner {
 
     private isFileExcludedByMarker(selectedSource: string) {
         const excludedMarker = this.configurationProvider.getConfiguration().generalConfiguration.excludeMarker;
-        if (excludedMarker == null) { return false; }
+        if (excludedMarker == null || excludedMarker.trim() === '') { return false; }
 
         const regexp = new RegExp(excludedMarker, 'g');
         return regexp.test(selectedSource);
