@@ -44,6 +44,9 @@ an example of default configuration is provided bellow. For available options ha
   // Excludes sorting for files which match given regex expression. Regex considers the whole file path. The file path separator is normalized to /
   "importSorter.generalConfiguration.exclude": [],
 
+  // Excludes sorting for files which *content* match given regex expression. Regex considers the whole file.
+  "importSorter.generalConfiguration.excludeMarker": null,
+
   // Enables sort before each save of the document
   "importSorter.generalConfiguration.sortOnBeforeSave": false,
 
