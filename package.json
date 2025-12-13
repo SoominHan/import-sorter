@@ -50,9 +50,11 @@
     "@types/lodash": "4.14.117",
     "@types/mocha": "^2.2.42",
     "@types/node": "^8.10.25",
+    "@vscode/vsce": "^3.7.1",
     "expect.js": "^0.3.1",
     "mocha": "^2.3.3",
     "tslint": "^5.8.0",
+    "typescript": "^4.9.5",
     "vscode": "^1.1.21",
     "vscode-nls": "^2.0.2"
   },
