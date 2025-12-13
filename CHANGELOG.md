@@ -1,3 +1,6 @@
+# [3.4.0]
+* Added `generalConfiguration.excludeMarker` option.
+
 # [3.3.0]
 ### New features
 * Added option to remove unused non side effect imports. Resolves issue #22.
